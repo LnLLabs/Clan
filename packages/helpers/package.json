@@ -1,0 +1,31 @@
+{
+  "name": "@broclan/framework-helpers",
+  "version": "1.0.0",
+  "description": "Utility functions and helpers for BroClan Framework",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "test": "echo \"No tests specified\""
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "utilities",
+    "helpers",
+    "blockchain",
+    "formatting",
+    "validation"
+  ],
+  "author": "BroClan Team",
+  "license": "MPL-2.0",
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "react": "^17.0.0 || ^18.0.0"
+  }
+}

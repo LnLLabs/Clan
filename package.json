@@ -1,0 +1,33 @@
+{
+  "name": "@broclan/framework",
+  "version": "1.0.0",
+  "description": "BroClan Framework - A modular framework for building blockchain wallet applications",
+  "main": "index.js",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "clean": "npm run clean --workspaces"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leo42/BroClanWallet.git"
+  },
+  "keywords": [
+    "blockchain",
+    "wallet",
+    "framework",
+    "react",
+    "typescript"
+  ],
+  "author": "BroClan Team",
+  "license": "MPL-2.0",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

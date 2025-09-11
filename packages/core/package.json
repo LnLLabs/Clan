@@ -1,0 +1,28 @@
+{
+  "name": "@broclan/framework-core",
+  "version": "1.0.0",
+  "description": "Core types and interfaces for BroClan Framework",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "test": "echo \"No tests specified\""
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "blockchain",
+    "wallet",
+    "types",
+    "interfaces",
+    "typescript"
+  ],
+  "author": "BroClan Team",
+  "license": "MPL-2.0",
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

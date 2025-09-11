@@ -1,0 +1,39 @@
+{
+  "name": "@broclan/framework-providers",
+  "version": "1.0.0",
+  "description": "React context providers for BroClan Framework",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "test": "echo \"No tests specified\""
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "react",
+    "context",
+    "providers",
+    "state-management"
+  ],
+  "author": "BroClan Team",
+  "license": "MPL-2.0",
+  "peerDependencies": {
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0"
+  },
+  "dependencies": {
+    "@broclan/framework-core": "^1.0.0",
+    "@broclan/framework-helpers": "^1.0.0",
+    "react": "^17.0.0",
+    "react-dom": "^17.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "typescript": "^5.0.0"
+  }
+}
