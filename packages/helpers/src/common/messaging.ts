@@ -52,7 +52,7 @@ export class MessageManager {
     this.notifyListeners();
 
     // Auto-remove non-persistent messages
-    if (!msg.persistent && msg.duration > 0) {
+    if (!msg.persistent && typeof msg.duration === 'number' && msg.duration > 0) {
       setTimeout(() => {
         this.removeMessage(id);
       }, msg.duration);
@@ -217,3 +217,4 @@ export async function retryWithBackoff<T>(
 
   throw new Error('Max retries exceeded');
 }
+

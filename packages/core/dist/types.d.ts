@@ -66,4 +66,13 @@ export declare class TransactionError extends Error {
     code?: string | undefined;
     constructor(message: string, code?: string | undefined);
 }
+export type ProviderType = 'Blockfrost' | 'Kupmios' | 'MWallet' | 'Maestro' | 'Custom';
+export interface ProviderConfig {
+    url?: string;
+    projectId?: string;
+    kupoUrl?: string;
+    ogmiosUrl?: string;
+    apiKey?: string;
+    network?: string;
+}
 //# sourceMappingURL=types.d.ts.map

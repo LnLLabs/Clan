@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Assets } from '@broclan/framework-core';
+import { Assets } from '@clan/framework-core';
 import { TokenElement } from '../token/TokenElement';
 
 export interface TokenDropdownListProps {
@@ -94,3 +94,4 @@ export const TokenDropdownList: React.FC<TokenDropdownListProps> = ({
 };
 
 export default TokenDropdownList;
+

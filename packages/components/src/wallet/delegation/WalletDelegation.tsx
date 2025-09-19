@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { searchPools, getPoolInfo, formatPoolInfo } from '@broclan/framework-helpers';
+import { searchPools, getPoolInfo, formatPoolInfo } from '@clan/framework-helpers';
 import { Button } from '../../ui/buttons/Button';
 import { Modal } from '../../ui/modals/Modal';
 
@@ -79,11 +79,8 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
           const info = await getPoolInfo(poolId);
           if (info) {
             return {
-              id: poolId,
               ...formatPoolInfo(info),
               saturation: Math.random() * 100, // Mock saturation data
-              isRetiring: info.retiring_epoch !== undefined,
-              retiringEpoch: info.retiring_epoch
             } as PoolOption;
           }
           return null;
@@ -111,11 +108,8 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
             const info = await getPoolInfo(poolId);
             if (info) {
               return {
-                id: poolId,
                 ...formatPoolInfo(info),
                 saturation: Math.random() * 100, // Mock saturation data
-                isRetiring: info.retiring_epoch !== undefined,
-                retiringEpoch: info.retiring_epoch
               } as PoolOption;
             }
             return null;
@@ -239,7 +233,7 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
               variant="secondary"
               onClick={handleWithdrawRewards}
               disabled={isWithdrawing || delegationInfo.rewards <= 0n}
-              size="small"
+              size="sm"
             >
               {isWithdrawing ? 'Withdrawing...' : 'Withdraw Rewards'}
             </Button>
@@ -263,7 +257,7 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
         isOpen={showPoolSelector}
         onClose={() => setShowPoolSelector(false)}
         title="Select Stake Pool"
-        size="large"
+        size="xl"
       >
         <div className="pool-selector">
           {/* Search Input */}
@@ -396,3 +390,4 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
 };
 
 export default WalletDelegation;
+

@@ -1,5 +1,5 @@
 {
-  "name": "@broclan/framework",
+  "name": "@clan/framework",
   "version": "1.0.0",
   "description": "BroClan Framework - A modular framework for building blockchain wallet applications",
   "main": "index.js",
@@ -31,3 +31,4 @@
     "typescript": "^5.0.0"
   }
 }
+

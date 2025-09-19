@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { WalletInterface } from '@broclan/framework-core';
-import { copyToClipboard, showInfo } from '@broclan/framework-helpers';
+import { WalletInterface } from '@clan/framework-core';
+import { copyToClipboard, showInfo } from '@clan/framework-helpers';
 
 export interface ReceiveProps {
   wallet: WalletInterface;
@@ -15,9 +15,8 @@ export const Receive: React.FC<ReceiveProps> = ({
   onAddressCopy,
   className = ''
 }) => {
-  const [address, setAddress] = React.useState(
-    wallet.getDefaultAddress() === '' ? wallet.getAddress() : wallet.getDefaultAddress()
-  );
+  const [address, setAddress] = React.useState(wallet.getAddress());
+  const [defaultAddress, setDefaultAddress] = React.useState('');
   const [newStake, setNewStake] = React.useState(false);
   const [options, setOptions] = React.useState<string[]>([]);
   const [optionsNames, setOptionsNames] = React.useState<{ [key: string]: string }>({});
@@ -28,17 +27,47 @@ export const Receive: React.FC<ReceiveProps> = ({
   const [QRCode, setQRCode] = React.useState<any>(null);
 
   useEffect(() => {
+    const loadWalletData = async () => {
+      try {
+        let selectedAddress = wallet.getAddress();
+
+        if (wallet.getDefaultAddress) {
+          const defaultAddr = await wallet.getDefaultAddress();
+          setDefaultAddress(defaultAddr);
+          if (defaultAddr && defaultAddr !== '') {
+            selectedAddress = defaultAddr;
+          }
+        }
+
+        setAddress(selectedAddress);
+
+        if (wallet.getFundedAddress) {
+          const fundedAddresses = await wallet.getFundedAddress();
+          setOptions(fundedAddresses);
+
+          if (wallet.getAddressNames) {
+            const addressNames = await wallet.getAddressNames();
+            setOptionsNames(addressNames);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load wallet data:', error);
+      }
+    };
+
+    loadWalletData();
+
     import('qrcode').then((module) => {
       setQRCode(module.default);
     }).catch((error) => {
       console.warn('QRCode library not available:', error);
     });
-  }, []);
+  }, [wallet]);
 
   const handleClick = async (value: string) => {
     if (isValidAddress) {
       const success = await copyToClipboard(value);
-      if (success) {
+      if (success !== undefined) {
         showInfo('Address copied to clipboard!');
         onAddressCopy?.(value);
       }
@@ -68,7 +97,7 @@ export const Receive: React.FC<ReceiveProps> = ({
       setNewStake(false);
       setIsValidAddress(true);
       try {
-        setAddress(wallet.getAddress(value));
+        setAddress(value);
       } catch (error) {
         setAddress('Invalid address');
         setIsValidAddress(false);
@@ -86,7 +115,7 @@ export const Receive: React.FC<ReceiveProps> = ({
     }
 
     try {
-      setAddress(wallet.getAddress(value));
+      setAddress(value);
       setIsValidAddress(true);
     } catch {
       setAddress('Invalid Stake Address');
@@ -95,43 +124,51 @@ export const Receive: React.FC<ReceiveProps> = ({
   };
 
   useEffect(() => {
-    const fundedAddresses = wallet.getFundedAddress();
-    const addressNames: { [key: string]: string } = {};
+    const loadAddressOptions = async () => {
+      if (!wallet.getFundedAddress) return;
 
-    fundedAddresses.forEach((address: string) => {
-      addressNames[address] = wallet.getAddressName(address);
-    });
+      const fundedAddresses = await wallet.getFundedAddress();
+      const addressNames: { [key: string]: string } = {};
 
-    // Add the unstaked address only if it is not already in the list
-    const walletAddress = wallet.getAddress();
-    if (!fundedAddresses.includes(walletAddress)) {
-      fundedAddresses.push(walletAddress);
-      addressNames[walletAddress] = 'Regular Address';
-    }
-
-    // Add donation address
-    const donationAddr = wallet.getAddress(donationAddress);
-    if (!fundedAddresses.includes(donationAddr)) {
-      fundedAddresses.push(donationAddr);
-      if (!(donationAddr in addressNames) || addressNames[donationAddr] === donationAddr) {
-        addressNames[donationAddr] = 'Donate rewards';
+      // Add address names
+      if (wallet.getAddressNames) {
+        const names = await wallet.getAddressNames();
+        Object.assign(addressNames, names);
       }
-    }
 
-    // Add new stake option
-    fundedAddresses.push('new');
-    addressNames['new'] = 'New Externaly Staked Address';
+      // Add the unstaked address only if it is not already in the list
+      const walletAddress = address;
+      if (!fundedAddresses.includes(walletAddress)) {
+        fundedAddresses.push(walletAddress);
+        addressNames[walletAddress] = 'Regular Address';
+      }
 
-    setOptions(fundedAddresses);
-    setOptionsNames(addressNames);
-  }, [wallet, donationAddress]);
+      // Add donation address
+      const donationAddr = donationAddress;
+      if (!fundedAddresses.includes(donationAddr)) {
+        fundedAddresses.push(donationAddr);
+        if (!(donationAddr in addressNames) || addressNames[donationAddr] === donationAddr) {
+          addressNames[donationAddr] = 'Donate rewards';
+        }
+      }
+
+      // Add new stake option
+      fundedAddresses.push('new');
+      addressNames['new'] = 'New Externaly Staked Address';
+
+      setOptions(fundedAddresses);
+      setOptionsNames(addressNames);
+    };
+
+    loadAddressOptions();
+  }, [wallet, donationAddress, address]);
 
   return (
     <div className={`receive-tab ${className}`}>
       <select
         onChange={handleStakingChange}
         className="address-select"
-        defaultValue={wallet.getAddress()}
+        defaultValue={address}
       >
         {options.map((item, index) => (
           <option key={index} value={item}>
@@ -151,7 +188,7 @@ export const Receive: React.FC<ReceiveProps> = ({
         />
       )}
 
-      {wallet.getAddress(donationAddress) === address && (
+      {donationAddress === address && (
         <div className="donation-message">
           By using this address your Staking rewards will support the development of this software!
         </div>
@@ -176,3 +213,4 @@ export const Receive: React.FC<ReceiveProps> = ({
 };
 
 export default Receive;
+

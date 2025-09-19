@@ -245,3 +245,4 @@ function getSettings(): any {
 
 // Import React for the hook
 import React from 'react';
+

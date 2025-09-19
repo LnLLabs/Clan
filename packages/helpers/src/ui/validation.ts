@@ -192,3 +192,34 @@ export function combineValidations(
 
   return combined;
 }
+
+// Clipboard utilities
+export async function copyToClipboard(text: string): Promise<void> {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (error) {
+    // Fallback for older browsers
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+  }
+}
+
+// Address formatting
+export function formatAddress(address: string, length: number = 8): string {
+  if (address.length <= length * 2) return address;
+  return `${address.slice(0, length)}...${address.slice(-length)}`;
+}
+
+// Asset formatting
+export function formatAssetQuantity(quantity: string | number, decimals: number = 6): string {
+  const num = typeof quantity === 'string' ? parseFloat(quantity) : quantity;
+  if (isNaN(num)) return '0';
+  return num.toFixed(decimals);
+}
+
+// Notification helpers are exported from common/messaging
+

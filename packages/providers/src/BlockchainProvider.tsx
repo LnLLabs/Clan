@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
-import { NetworkConfig, NETWORKS } from '@broclan/framework-core';
+import { NetworkConfig, NETWORKS } from '@clan/framework-core';
 
 // Provider types (based on original BroClanWallet implementation)
 export type ProviderType = 'Blockfrost' | 'Kupmios' | 'MWallet' | 'Maestro';

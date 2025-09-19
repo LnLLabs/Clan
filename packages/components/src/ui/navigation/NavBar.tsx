@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ReactComponent as SettingsIcon } from '../../../html/assets/menu.svg';
-import { ReactComponent as SunIcon } from '../../../html/assets/sun.svg';
-import { ReactComponent as MoonIcon } from '../../../html/assets/moon.svg';
+import { MenuIcon, SunIcon, MoonIcon } from '../../assets';
 
 export interface NavBarProps {
   theme: 'light' | 'dark';
@@ -76,7 +74,7 @@ export const NavBar: React.FC<NavBarProps> = ({
         onClick={() => setNavOpen(true)}
         className={`settingsButton menuIcon ${navOpen ? 'menuIconOpen' : ''}`}
       >
-        <SettingsIcon />
+        <MenuIcon />
         {(hovering === 'settings' || isMobile) && (
           <label className="iconLabel"></label>
         )}
@@ -119,3 +117,4 @@ export const NavBar: React.FC<NavBarProps> = ({
 };
 
 export default NavBar;
+

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Transaction, UTxO, Assets } from '@broclan/framework-core';
+import { Transaction, UTxO, Assets } from '@clan/framework-core';
 import { TokenElement } from '../token/TokenElement';
-import { formatAddress, copyToClipboard, showInfo } from '@broclan/framework-helpers';
+import { formatAddress, copyToClipboard, showInfo } from '@clan/framework-helpers';
 
 export interface TransactionDetailsProps {
   transaction: Transaction;
@@ -306,3 +306,4 @@ export const TransactionDetails: React.FC<TransactionDetailsProps> = ({
 };
 
 export default TransactionDetails;
+

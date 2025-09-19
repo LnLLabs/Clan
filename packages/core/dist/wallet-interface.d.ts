@@ -3,6 +3,10 @@ export interface WalletInterface {
     getName(): string;
     getAddress(): Address;
     getNetwork(): NetworkConfig;
+    getFundedAddress?(): Promise<Address[]>;
+    getDefaultAddress?(): Promise<Address>;
+    getAddressNames?(): Promise<Record<Address, string>>;
+    getAddressName?(address: Address): string;
     connect(): Promise<void>;
     disconnect(): Promise<void>;
     isConnected(): boolean;
@@ -12,6 +16,7 @@ export interface WalletInterface {
         address: Address;
         assets: Assets;
     }[], options?: TransactionOptions): Promise<TransactionDraft>;
+    buildTransaction(options: TransactionBuildOptions): Promise<TransactionDraft>;
     signTransaction(draft: TransactionDraft): Promise<SignedTransaction>;
     submitTransaction(signedTx: SignedTransaction): Promise<Hash>;
     getTransactionStatus(txHash: Hash): Promise<TransactionStatus>;
@@ -26,6 +31,13 @@ export interface TransactionOptions {
     metadata?: any;
     collateral?: UTxO[];
     scriptInputs?: UTxO[];
+}
+export interface TransactionBuildOptions {
+    outputs: {
+        address: Address;
+        assets: Assets;
+    }[];
+    options?: TransactionOptions;
 }
 export interface TransactionDraft {
     inputs: UTxO[];

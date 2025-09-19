@@ -1,5 +1,5 @@
 {
-  "name": "@broclan/framework-core",
+  "name": "@clan/framework-core",
   "version": "1.0.0",
   "description": "Core types and interfaces for BroClan Framework",
   "main": "dist/index.js",
@@ -26,3 +26,4 @@
     "typescript": "^5.0.0"
   }
 }
+

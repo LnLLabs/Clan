@@ -1,5 +1,5 @@
 {
-  "name": "@broclan/framework-providers",
+  "name": "@clan/framework-providers",
   "version": "1.0.0",
   "description": "React context providers for BroClan Framework",
   "main": "dist/index.js",
@@ -26,8 +26,8 @@
     "react-dom": "^17.0.0 || ^18.0.0"
   },
   "dependencies": {
-    "@broclan/framework-core": "^1.0.0",
-    "@broclan/framework-helpers": "^1.0.0",
+    "@clan/framework-core": "^1.0.0",
+    "@clan/framework-helpers": "^1.0.0",
     "react": "^17.0.0",
     "react-dom": "^17.0.0"
   },
@@ -37,3 +37,4 @@
     "typescript": "^5.0.0"
   }
 }
+

@@ -36,12 +36,12 @@ export const WalletPicker: React.FC<WalletPickerProps> = ({
   // Get available wallet extensions
   useEffect(() => {
     const getAvailableWallets = async () => {
-      if (!isOpen || !window.cardano) return;
+      if (!isOpen || !(window as any).cardano) return;
 
       try {
         const wallets: WalletExtension[] = [];
 
-        for (const [walletName, walletApi] of Object.entries(window.cardano)) {
+        for (const [walletName, walletApi] of Object.entries((window as any).cardano)) {
           // Skip excluded wallets
           if (excludeWallets.includes(walletName)) continue;
 
@@ -49,13 +49,13 @@ export const WalletPicker: React.FC<WalletPickerProps> = ({
           if (supportedWallets && !supportedWallets.includes(walletName)) continue;
 
           // Check if wallet has required properties
-          if (walletApi && typeof walletApi === 'object' && walletApi.icon) {
+          if (walletApi && typeof walletApi === 'object' && 'icon' in walletApi && walletApi.icon) {
             wallets.push({
               name: walletName,
-              icon: walletApi.icon,
-              apiVersion: walletApi.apiVersion || '1.0.0',
-              enable: walletApi.enable,
-              isEnabled: walletApi.isEnabled
+              icon: String(walletApi.icon),
+              apiVersion: (walletApi as any).apiVersion || '1.0.0',
+              enable: (walletApi as any).enable,
+              isEnabled: (walletApi as any).isEnabled
             });
           }
         }
@@ -193,3 +193,4 @@ export const WalletPicker: React.FC<WalletPickerProps> = ({
 };
 
 export default WalletPicker;
+

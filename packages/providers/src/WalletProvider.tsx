@@ -8,8 +8,8 @@ import {
   WalletEvent,
   WalletEventType,
   NetworkConfig
-} from '@broclan/framework-core';
-import { setStorageItem, getStorageItem } from '@broclan/framework-helpers';
+} from '@clan/framework-core';
+import { setStorageItem, getStorageItem } from '@clan/framework-helpers';
 
 // Wallet state
 interface WalletState {
@@ -239,3 +239,4 @@ export const useWallet = (): WalletContextValue => {
 };
 
 export default WalletProvider;
+

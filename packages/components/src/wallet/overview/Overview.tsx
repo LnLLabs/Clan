@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { WalletInterface, Assets } from '@broclan/framework-core';
+import { WalletInterface, Assets } from '@clan/framework-core';
 import { TokenElement } from '../token/TokenElement';
 import { AddressSelect } from '../AddressSelect';
 
@@ -22,14 +22,33 @@ export const Overview: React.FC<OverviewProps> = ({
   onChangeAddressName,
   className = ''
 }) => {
-  const [selectedAddress, setSelectedAddress] = useState(
-    initialSelectedAddress || wallet.getDefaultAddress()
-  );
+  const [selectedAddress, setSelectedAddress] = useState(initialSelectedAddress || '');
+  const [defaultAddress, setDefaultAddress] = useState('');
+  const [fundedAddresses, setFundedAddresses] = useState<string[]>([]);
   const [filter, setFilter] = useState<'FTs' | 'NFTs' | undefined>(undefined);
   const [search, setSearch] = useState('');
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    const loadWalletData = async () => {
+      try {
+        if (wallet.getDefaultAddress && !initialSelectedAddress) {
+          const defaultAddr = await wallet.getDefaultAddress();
+          setDefaultAddress(defaultAddr);
+          setSelectedAddress(defaultAddr);
+        }
+
+        if (wallet.getFundedAddress) {
+          const addresses = await wallet.getFundedAddress();
+          setFundedAddresses(addresses);
+        }
+      } catch (error) {
+        console.error('Failed to load wallet data:', error);
+      }
+    };
+
+    loadWalletData();
+
     const updateWindowDimensions = () => {
       const newIsMobile = window.innerWidth <= 768;
       if (isMobile !== newIsMobile) {
@@ -41,7 +60,7 @@ export const Overview: React.FC<OverviewProps> = ({
     updateWindowDimensions();
 
     return () => window.removeEventListener('resize', updateWindowDimensions);
-  }, [isMobile]);
+  }, [wallet, isMobile, initialSelectedAddress]);
 
   const handleAddressChange = (address: string) => {
     setSelectedAddress(address);
@@ -52,11 +71,12 @@ export const Overview: React.FC<OverviewProps> = ({
     onTokenClick?.(tokenId);
   };
 
-  const getBalance = (): Assets => {
-    return wallet.getBalanceFull(selectedAddress);
+  const getBalance = async (): Promise<Assets> => {
+    return await wallet.getBalance();
   };
 
-  const filterTokens = (tokenId: string, balance: Assets): boolean => {
+  const filterTokens = async (tokenId: string): Promise<boolean> => {
+    const balance = await getBalance();
     const amount = Number(balance[tokenId]);
 
     // Search filter
@@ -80,48 +100,61 @@ export const Overview: React.FC<OverviewProps> = ({
     return true;
   };
 
-  const renderTokens = () => {
-    const balance = getBalance();
-    const tokenIds = Object.keys(balance);
+  const [tokensRender, setTokensRender] = useState<JSX.Element | null>(null);
 
-    if (tokenIds.length === 0) {
-      return (
-        <div className="no-tokens-message">
-          No tokens found
+  useEffect(() => {
+    const renderTokensAsync = async () => {
+      const balance = await getBalance();
+      const tokenIds = Object.keys(balance);
+
+      if (tokenIds.length === 0) {
+        setTokensRender(
+          <div className="no-tokens-message">
+            No tokens found
+          </div>
+        );
+        return;
+      }
+
+      const filteredTokens = [];
+      for (const tokenId of tokenIds) {
+        if (await filterTokens(tokenId)) {
+          filteredTokens.push(tokenId);
+        }
+      }
+
+      if (filteredTokens.length === 0) {
+        setTokensRender(
+          <div className="no-tokens-message">
+            {filter === 'FTs' ? 'No fungible tokens found' :
+             filter === 'NFTs' ? 'No NFTs found' :
+             'No tokens found'}
+          </div>
+        );
+        return;
+      }
+
+      setTokensRender(
+        <div className="overview-tokens-container">
+          {filteredTokens.map((tokenId, index) => (
+            <TokenElement
+              key={`${tokenId}-${selectedAddress}-${index}`}
+              tokenId={tokenId}
+              amount={Number(balance[tokenId])}
+              filter={filter}
+              search={search}
+              className="overview-token-container"
+              onClick={() => handleTokenClick(tokenId)}
+            />
+          ))}
         </div>
       );
-    }
+    };
 
-    const filteredTokens = tokenIds.filter(tokenId => filterTokens(tokenId, balance));
+    renderTokensAsync();
+  }, [selectedAddress, filter, search]);
 
-    if (filteredTokens.length === 0) {
-      return (
-        <div className="no-tokens-message">
-          {filter === 'FTs' ? 'No fungible tokens found' :
-           filter === 'NFTs' ? 'No NFTs found' :
-           'No tokens found'}
-        </div>
-      );
-    }
-
-    return (
-      <div className="overview-tokens-container">
-        {filteredTokens.map((tokenId, index) => (
-          <TokenElement
-            key={`${tokenId}-${selectedAddress}-${index}`}
-            tokenId={tokenId}
-            amount={Number(balance[tokenId])}
-            filter={filter}
-            search={search}
-            className="overview-token-container"
-            onClick={() => handleTokenClick(tokenId)}
-          />
-        ))}
-      </div>
-    );
-  };
-
-  const fundedAddresses = wallet.getFundedAddress();
+  const renderTokens = () => tokensRender;
 
   return (
     <div className={`overview-container ${className}`}>
@@ -175,3 +208,4 @@ export const Overview: React.FC<OverviewProps> = ({
 };
 
 export default Overview;
+

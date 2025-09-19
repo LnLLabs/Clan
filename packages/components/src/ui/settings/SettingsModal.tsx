@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
 import { Modal } from '../modals/Modal';
 import { Button } from '../buttons/Button';
-import { useSettings, useBlockchain } from '@broclan/framework-providers';
-import { NETWORKS } from '@broclan/framework-core';
-import { showSuccess, showError } from '@broclan/framework-helpers';
+import { 
+  useSettings, 
+  useBlockchain
+} from '@clan/framework-providers';
+import type { 
+  EnhancedProviderConfig as ProviderConfig, 
+  EnhancedProviderType as ProviderType
+} from '@clan/framework-providers';
+import { NETWORKS } from '@clan/framework-core';
+import { showSuccess, showError } from '@clan/framework-helpers';
 
 export interface SettingsModalProps {
   isOpen: boolean;
@@ -16,14 +23,23 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onClose,
   onSettingsChange
 }) => {
-  const { settings, updateSettings, resetToDefaults } = useSettings();
+  const { 
+    settings, 
+    updateSettings, 
+    resetToDefaults, 
+    updateProvider, 
+    updateMetadataProvider,
+    validateProvider,
+    getAvailableProviders,
+    createProviderConfig,
+    switchNetwork: switchSettingsNetwork
+  } = useSettings();
   const { switchNetwork } = useBlockchain();
 
   // Local state for form
   const [network, setNetwork] = useState(settings.network.name);
-  const [provider, setProvider] = useState(settings.provider || 'Blockfrost');
-  const [providerConnection, setProviderConnection] = useState(settings.api || {});
-  const [metadataProvider, setMetadataProvider] = useState(settings.metadataProvider || 'Blockfrost');
+  const [provider, setProvider] = useState<ProviderConfig>(settings.provider);
+  const [metadataProvider, setMetadataProvider] = useState<ProviderConfig>(settings.metadataProvider);
   const [isLoading, setIsLoading] = useState(false);
 
   const MwalletPassthrough = 'https://passthrough.broclan.io';
@@ -32,128 +48,126 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   React.useEffect(() => {
     if (isOpen) {
       setNetwork(settings.network.name);
-      setProvider(settings.provider || 'Blockfrost');
-      setProviderConnection(settings.api || {});
-      setMetadataProvider(settings.metadataProvider || 'Blockfrost');
+      setProvider(settings.provider);
+      setMetadataProvider(settings.metadataProvider);
     }
   }, [isOpen, settings]);
 
   const networkChange = (newNetwork: string) => {
     setNetwork(newNetwork);
-    setDefaultValues(newNetwork, provider, metadataProvider);
+    const networkConfig = Object.values(NETWORKS).find(n => n.name === newNetwork);
+    if (networkConfig) {
+      // Update provider configs for the new network
+      const newProvider = createProviderConfig(provider.type);
+      const newMetadataProvider = createProviderConfig(metadataProvider.type);
+      setProvider(newProvider);
+      setMetadataProvider(newMetadataProvider);
+    }
   };
 
-  const changeProvider = (newProvider: string) => {
+  const changeProvider = (newProviderType: ProviderType) => {
+    const newProvider = createProviderConfig(newProviderType);
     setProvider(newProvider);
-    if (newProvider === 'Blockfrost') {
-      setProviderConnection({
-        url: '',
-        projectId: ''
-      });
-    } else if (newProvider === 'MWallet') {
-      setProviderConnection({});
-    }
-    setDefaultValues(network, newProvider, metadataProvider);
   };
 
-  const setDefaultValues = (net: string, prov: string, metaProv: string) => {
-    if (prov === 'Blockfrost') {
-      setProviderConnection({
-        url: '',
-        projectId: ''
-      });
-    } else if (prov === 'MWallet') {
-      setProviderConnection({});
-    } else if (prov === 'Kupmios') {
-      if (net === 'Mainnet') {
-        setProviderConnection({
-          kupoUrl: 'https://kupo-mainnet-wmalletmainnet-c8be04.us1.demeter.run',
-          ogmiosUrl: 'wss://ogmios-wmalletmainnet-c8be04.us1.demeter.run'
-        });
-      } else if (net === 'Preprod') {
-        setProviderConnection({
-          kupoUrl: 'https://kupo-preprod-mwallet-e048ec.us1.demeter.run',
-          ogmiosUrl: 'wss://ogmios-mwallet-e048ec.us1.demeter.run'
-        });
-      } else {
-        setProviderConnection({
-          kupoUrl: '',
-          ogmiosUrl: ''
-        });
-      }
-    }
+  const changeMetadataProvider = (newProviderType: ProviderType) => {
+    const newMetadataProvider = createProviderConfig(newProviderType);
+    setMetadataProvider(newMetadataProvider);
+  };
 
-    if (metaProv === 'Blockfrost') {
-      const newConnection = { ...providerConnection };
-      newConnection.projectId = '';
-      setProviderConnection(newConnection);
-    }
+  const updateProviderConfig = (field: string, value: string) => {
+    setProvider(prev => {
+      const newConfig = { ...prev.config, [field]: value };
+      return {
+        ...prev,
+        config: newConfig
+      } as ProviderConfig;
+    });
+  };
+
+  const updateMetadataProviderConfig = (field: string, value: string) => {
+    setMetadataProvider(prev => {
+      const newConfig = { ...prev.config, [field]: value };
+      return {
+        ...prev,
+        config: newConfig
+      } as ProviderConfig;
+    });
   };
 
   const handleApplySettings = async () => {
     setIsLoading(true);
 
     try {
-      let localProviderConnection = providerConnection;
+      // Validate provider configuration
+      const providerValidation = validateProvider(provider);
+      if (!providerValidation.isValid) {
+        showError(`Invalid provider configuration: ${providerValidation.errors.join(', ')}`);
+        return;
+      }
 
-      if (provider === 'Blockfrost') {
-        if (!providerConnection.url || !providerConnection.projectId) {
-          showError('Please fill all Blockfrost fields');
-          return;
-        }
+      // Validate metadata provider configuration
+      const metadataValidation = validateProvider(metadataProvider);
+      if (!metadataValidation.isValid) {
+        showError(`Invalid metadata provider configuration: ${metadataValidation.errors.join(', ')}`);
+        return;
+      }
 
-        const networkConfig = Object.values(NETWORKS).find(n => n.name === network);
-        if (networkConfig) {
-          switch (network) {
-            case 'Mainnet':
-              localProviderConnection.url = networkConfig.apiUrl || '';
-              break;
-            case 'Preview':
-              localProviderConnection.url = 'https://cardano-preview.blockfrost.io/api/v0';
-              break;
-            case 'Preprod':
-              localProviderConnection.url = 'https://cardano-preprod.blockfrost.io/api/v0';
-              break;
-            default:
-              localProviderConnection.url = providerConnection.url;
+      // Get network configuration
+      const networkConfig = Object.values(NETWORKS).find(n => n.name === network);
+      if (!networkConfig) {
+        showError('Invalid network selected');
+        return;
+      }
+
+      // Update provider configurations with network-specific URLs
+      let updatedProvider = { ...provider };
+      let updatedMetadataProvider = { ...metadataProvider };
+
+      // Update URLs based on network for Blockfrost
+      if (provider.type === 'Blockfrost') {
+        updatedProvider = {
+          ...provider,
+          config: {
+            ...provider.config,
+            url: networkConfig.apiUrl || provider.config.url
           }
-        }
-      } else if (provider === 'Kupmios') {
-        if (!providerConnection.kupoUrl || !providerConnection.ogmiosUrl) {
-          showError('Please fill all Kupmios fields');
-          return;
-        }
-      } else if (provider === 'MWallet') {
-        localProviderConnection.url = MwalletPassthrough;
+        };
+      }
 
-        switch (network) {
-          case 'Mainnet':
-            localProviderConnection.projectId = 'mainnet';
-            break;
-          case 'Preview':
-            localProviderConnection.projectId = 'preview';
-            break;
-          case 'Preprod':
-            localProviderConnection.projectId = 'preprod';
-            break;
-          default:
-            localProviderConnection.projectId = 'custom';
-        }
+      if (metadataProvider.type === 'Blockfrost') {
+        updatedMetadataProvider = {
+          ...metadataProvider,
+          config: {
+            ...metadataProvider.config,
+            url: networkConfig.apiUrl || metadataProvider.config.url
+          }
+        };
+      }
+
+      // Update MWallet configuration
+      if (provider.type === 'MWallet') {
+        updatedProvider = {
+          ...provider,
+          config: {
+            url: MwalletPassthrough,
+            projectId: network.toLowerCase()
+          }
+        };
       }
 
       // Update settings
       await updateSettings({
-        network: NETWORKS[network.toLowerCase()] || settings.network,
-        provider,
-        api: providerConnection,
-        metadataProvider,
+        network: networkConfig,
+        provider: updatedProvider,
+        metadataProvider: updatedMetadataProvider,
         sendAll: settings.sendAll,
         explorer: settings.explorer,
         disableSync: settings.disableSync
       });
 
       // Switch network if needed
-      await switchNetwork(NETWORKS[network.toLowerCase()] || settings.network);
+      await switchNetwork(networkConfig);
 
       showSuccess('Settings applied successfully');
       onSettingsChange?.();
@@ -179,60 +193,119 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   const providerSettings = () => {
-    if ((provider === 'Blockfrost' || metadataProvider === 'Blockfrost') && provider !== 'MWallet') {
+    // Provider configuration
+    if (provider.type === 'Blockfrost') {
       return (
         <div>
           {network === 'Custom' && (
             <input
               type="text"
               placeholder="API URL"
-              value={providerConnection.url || ''}
-              onChange={(e) => setProviderConnection({ ...providerConnection, url: e.target.value })}
+              value={provider.config.url || ''}
+              onChange={(e) => updateProviderConfig('url', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md mb-2"
             />
           )}
           <input
             type="text"
             placeholder="Project ID"
-            value={providerConnection.projectId || ''}
-            onChange={(e) => setProviderConnection({ ...providerConnection, projectId: e.target.value })}
+            value={provider.config.projectId || ''}
+            onChange={(e) => updateProviderConfig('projectId', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           />
         </div>
       );
     }
 
-    if (provider === 'Kupmios') {
+    if (provider.type === 'Kupmios') {
       return (
         <div>
           <input
             type="text"
             placeholder="Kupo URL"
-            value={providerConnection.kupoUrl || ''}
-            onChange={(e) => setProviderConnection({ ...providerConnection, kupoUrl: e.target.value })}
+            value={provider.config.kupoUrl || ''}
+            onChange={(e) => updateProviderConfig('kupoUrl', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md mb-2"
           />
           <input
             type="text"
             placeholder="Ogmios URL"
-            value={providerConnection.ogmiosUrl || ''}
-            onChange={(e) => setProviderConnection({ ...providerConnection, ogmiosUrl: e.target.value })}
+            value={provider.config.ogmiosUrl || ''}
+            onChange={(e) => updateProviderConfig('ogmiosUrl', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           />
         </div>
       );
     }
 
-    if ((provider === 'Maestro' || metadataProvider === 'Maestro')) {
+    if (provider.type === 'Maestro') {
       return (
         <div>
           <input
             type="text"
             placeholder="API Key"
-            value={providerConnection.apiKey || ''}
-            onChange={(e) => setProviderConnection({ ...providerConnection, apiKey: e.target.value })}
+            value={provider.config.apiKey || ''}
+            onChange={(e) => updateProviderConfig('apiKey', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           />
+        </div>
+      );
+    }
+
+    if (provider.type === 'MWallet') {
+      return (
+        <div className="text-sm text-gray-600">
+          MWallet configuration is automatically set based on the selected network.
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  const metadataProviderSettings = () => {
+    // Metadata provider configuration
+    if (metadataProvider.type === 'Blockfrost') {
+      return (
+        <div>
+          {network === 'Custom' && (
+            <input
+              type="text"
+              placeholder="API URL"
+              value={metadataProvider.config.url || ''}
+              onChange={(e) => updateMetadataProviderConfig('url', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md mb-2"
+            />
+          )}
+          <input
+            type="text"
+            placeholder="Project ID"
+            value={metadataProvider.config.projectId || ''}
+            onChange={(e) => updateMetadataProviderConfig('projectId', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          />
+        </div>
+      );
+    }
+
+    if (metadataProvider.type === 'Maestro') {
+      return (
+        <div>
+          <input
+            type="text"
+            placeholder="API Key"
+            value={metadataProvider.config.apiKey || ''}
+            onChange={(e) => updateMetadataProviderConfig('apiKey', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          />
+        </div>
+      );
+    }
+
+    if (metadataProvider.type === 'None') {
+      return (
+        <div className="text-sm text-gray-600">
+          No metadata provider configuration needed.
         </div>
       );
     }
@@ -262,7 +335,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <option value="Preprod">Preprod</option>
               <option value="Preview">Preview</option>
               <option value="Mainnet">Mainnet</option>
-              {provider !== 'MWallet' && <option value="Custom">Custom</option>}
+              {provider.type !== 'MWallet' && <option value="Custom">Custom</option>}
             </select>
             {network === 'Mainnet' && ['alpha.broclan.io', 'beta.broclan.io', 'testnet.broclan.io'].includes(window.location.hostname) && (
               <p className="text-red-600 text-sm mt-1">
@@ -277,15 +350,24 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               Provider
             </label>
             <select
-              value={provider}
-              onChange={(e) => changeProvider(e.target.value)}
+              value={provider.type}
+              onChange={(e) => changeProvider(e.target.value as ProviderType)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             >
-              <option value="Blockfrost">Blockfrost</option>
-              <option value="MWallet">KeyPact</option>
-              <option value="Kupmios">Kupmios</option>
-              <option value="Maestro">Maestro</option>
+              {getAvailableProviders(false).map((providerType: ProviderType) => (
+                <option key={providerType} value={providerType}>
+                  {providerType === 'MWallet' ? 'KeyPact' : providerType}
+                </option>
+              ))}
             </select>
+          </div>
+
+          {/* Provider Settings */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Provider Configuration
+            </label>
+            {providerSettings()}
           </div>
 
           {/* Metadata Provider */}
@@ -294,18 +376,25 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               Metadata Provider
             </label>
             <select
-              value={metadataProvider}
-              onChange={(e) => setMetadataProvider(e.target.value)}
+              value={metadataProvider.type}
+              onChange={(e) => changeMetadataProvider(e.target.value as ProviderType)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             >
-              <option value="None">None</option>
-              <option value="Maestro">Maestro</option>
-              {provider && <option value="Blockfrost">Blockfrost</option>}
+              {getAvailableProviders(true).map((providerType: ProviderType) => (
+                <option key={providerType} value={providerType}>
+                  {providerType}
+                </option>
+              ))}
             </select>
           </div>
 
-          {/* Provider Settings */}
-          {providerSettings()}
+          {/* Metadata Provider Settings */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Metadata Provider Configuration
+            </label>
+            {metadataProviderSettings()}
+          </div>
 
           {/* Additional Settings */}
           <div className="space-y-3">

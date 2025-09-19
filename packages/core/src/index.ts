@@ -13,7 +13,9 @@ export type {
   Assets,
   UTxO,
   Transaction,
-  NetworkConfig
+  NetworkConfig,
+  ProviderType,
+  ProviderConfig
 } from './types';
 
 export type {

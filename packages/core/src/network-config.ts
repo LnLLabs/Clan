@@ -112,3 +112,4 @@ export class DefaultNetworkValidator implements NetworkConfigValidator {
     return ['name', 'networkId', 'protocolMagic', 'explorerUrl'];
   }
 }
+

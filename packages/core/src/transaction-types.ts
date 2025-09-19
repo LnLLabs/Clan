@@ -62,8 +62,8 @@ export interface SignedTransaction {
 export interface TransactionBuildOptions {
   inputs?: TransactionInput[];
   outputs?: TransactionOutput[];
+  recipients?: { address: Address; assets: Assets }[];
   changeAddress?: Address;
-  fee?: bigint;
   ttl?: number;
   metadata?: TransactionMetadata;
   collateral?: UTxO[];
@@ -108,3 +108,4 @@ export interface FeeEstimator {
     options?: TransactionBuildOptions
   ): Promise<bigint>;
 }
+

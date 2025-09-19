@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PoolInfo } from '@broclan/framework-helpers';
+import { PoolInfo } from '@clan/framework-helpers';
 import { Button } from '../../ui/buttons/Button';
 
 export interface PoolElementProps {
@@ -103,7 +103,7 @@ export const PoolElement: React.FC<PoolElementProps> = ({
           {showDelegateButton && (
             <Button
               variant="primary"
-              size="small"
+              size="sm"
               onClick={() => onDelegate?.(pool.pool_id_bech32)}
             >
               Delegate
@@ -113,7 +113,7 @@ export const PoolElement: React.FC<PoolElementProps> = ({
           {showDetailsButton && (
             <Button
               variant="secondary"
-              size="small"
+              size="sm"
               onClick={() => onViewDetails?.(pool.pool_id_bech32)}
             >
               Details
@@ -316,3 +316,4 @@ export const PoolElement: React.FC<PoolElementProps> = ({
 };
 
 export default PoolElement;
+

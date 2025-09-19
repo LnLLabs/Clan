@@ -1,5 +1,5 @@
 import React from 'react';
-import { Assets, Asset } from '@broclan/framework-core';
+import { Assets, Asset } from '@clan/framework-core';
 
 export interface BalanceDisplayProps {
   balance: Assets;
@@ -94,3 +94,4 @@ export const BalanceDisplay: React.FC<BalanceDisplayProps> = ({
 };
 
 export default BalanceDisplay;
+

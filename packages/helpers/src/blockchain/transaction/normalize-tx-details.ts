@@ -12,7 +12,7 @@ export interface NormalizedTransaction {
   mint?: any;
   script_data_hash?: string;
   network_id?: number;
-  fee?: string;
+  fee?: number;
   ttl?: number;
   validity_start_interval?: number;
   metadata?: any;
@@ -220,7 +220,7 @@ export function createTxSummary(tx: NormalizedTransaction): {
   outputCount: number;
   totalInputValue: any;
   totalOutputValue: any;
-  fee: string | null;
+  fee: number | null;
   hasMetadata: boolean;
   hasScripts: boolean;
 } {
@@ -301,3 +301,4 @@ export function formatNormalizedTx(tx: NormalizedTransaction): any {
     }
   };
 }
+

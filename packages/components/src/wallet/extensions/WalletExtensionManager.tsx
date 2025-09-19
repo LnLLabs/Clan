@@ -356,3 +356,4 @@ export const requestWalletAccess = async (walletId: string): Promise<any> => {
 };
 
 export default WalletExtensionManager;
+

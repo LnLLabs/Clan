@@ -1,4 +1,4 @@
-import { ProviderType, ProviderConfig, NetworkConfig } from '@broclan/framework-core';
+import { ProviderType, ProviderConfig, NetworkConfig } from '@clan/framework-core';
 
 /**
  * Lucid blockchain utilities based on original BroClanWallet implementation
@@ -237,3 +237,4 @@ export function validateProviderConfig(
     errors
   };
 }
+

@@ -1,4 +1,4 @@
-# BroClan Framework
+# Clan Framework
 
 A modular, extensible framework for building blockchain wallet applications. This framework provides the core components, utilities, and patterns needed to create feature-rich wallet experiences across different blockchain networks.
 
@@ -13,11 +13,11 @@ A modular, extensible framework for building blockchain wallet applications. Thi
 
 ## 📦 Packages
 
-### Core (`@broclan/framework-core`)
+### Core (`@clan/framework-core`)
 The foundation package containing types, interfaces, and abstractions.
 
 ```typescript
-import { WalletInterface, Assets, Transaction } from '@broclan/framework-core';
+import { WalletInterface, Assets, Transaction } from '@clan/framework-core';
 ```
 
 **Features:**
@@ -26,11 +26,11 @@ import { WalletInterface, Assets, Transaction } from '@broclan/framework-core';
 - Network configurations
 - Transaction types and utilities
 
-### Components (`@broclan/framework-components`)
+### Components (`@clan/framework-components`)
 React UI components for wallet applications.
 
 ```typescript
-import { WalletConnector, BalanceDisplay, TransactionHistory } from '@broclan/framework-components';
+import { WalletConnector, BalanceDisplay, TransactionHistory } from '@clan/framework-components';
 ```
 
 **Features:**
@@ -40,11 +40,11 @@ import { WalletConnector, BalanceDisplay, TransactionHistory } from '@broclan/fr
 - Form components
 - Layout utilities
 
-### Helpers (`@broclan/framework-helpers`)
+### Helpers (`@clan/framework-helpers`)
 Utility functions for common operations.
 
 ```typescript
-import { formatAddress, formatAssetQuantity, copyToClipboard } from '@broclan/framework-helpers';
+import { formatAddress, formatAssetQuantity, copyToClipboard } from '@clan/framework-helpers';
 ```
 
 **Features:**
@@ -54,11 +54,11 @@ import { formatAddress, formatAssetQuantity, copyToClipboard } from '@broclan/fr
 - Storage utilities
 - Validation helpers
 
-### Providers (`@broclan/framework-providers`)
+### Providers (`@clan/framework-providers`)
 React context providers for state management.
 
 ```typescript
-import { WalletProvider, SettingsProvider, BlockchainProvider } from '@broclan/framework-providers';
+import { WalletProvider, SettingsProvider, BlockchainProvider } from '@clan/framework-providers';
 ```
 
 **Features:**
@@ -92,7 +92,7 @@ The framework follows a layered architecture:
 ### 1. Install Dependencies
 
 ```bash
-npm install @broclan/framework-core @broclan/framework-components @broclan/framework-helpers @broclan/framework-providers
+npm install @clan/framework-core @clan/framework-components @clan/framework-helpers @clan/framework-providers
 ```
 
 ### 2. Basic Setup
@@ -103,8 +103,8 @@ import {
   WalletProvider,
   SettingsProvider,
   BlockchainProvider
-} from '@broclan/framework-providers';
-import { WalletConnector } from '@broclan/framework-components';
+} from '@clan/framework-providers';
+import { WalletConnector } from '@clan/framework-components';
 
 function App() {
   return (
@@ -128,9 +128,9 @@ export default App;
 
 ```tsx
 import React from 'react';
-import { useWallet } from '@broclan/framework-providers';
-import { BalanceDisplay, TransactionHistory } from '@broclan/framework-components';
-import { formatAddress } from '@broclan/framework-helpers';
+import { useWallet } from '@clan/framework-providers';
+import { BalanceDisplay, TransactionHistory } from '@clan/framework-components';
+import { formatAddress } from '@clan/framework-helpers';
 
 function WalletDashboard() {
   const { address, balance, transactions } = useWallet();
@@ -197,7 +197,7 @@ interface BalanceDisplayProps {
 ### Network Configuration
 
 ```typescript
-import { NETWORKS } from '@broclan/framework-core';
+import { NETWORKS } from '@clan/framework-core';
 
 const customNetwork = {
   name: 'Custom Network',
@@ -229,11 +229,11 @@ The framework components support CSS custom properties for theming:
 
 ```css
 :root {
-  --broclan-primary-color: #3b82f6;
-  --broclan-secondary-color: #64748b;
-  --broclan-background-color: #ffffff;
-  --broclan-text-color: #1f2937;
-  --broclan-border-radius: 0.375rem;
+  --clan-primary-color: #3b82f6;
+  --clan-secondary-color: #64748b;
+  --clan-background-color: #ffffff;
+  --clan-text-color: #1f2937;
+  --clan-border-radius: 0.375rem;
 }
 ```
 
@@ -242,7 +242,7 @@ The framework components support CSS custom properties for theming:
 ### Custom Wallet Implementation
 
 ```typescript
-import { WalletInterface } from '@broclan/framework-core';
+import { WalletInterface } from '@clan/framework-core';
 
 class MyCustomWallet implements WalletInterface {
   // Implement the WalletInterface methods
@@ -263,7 +263,7 @@ class MyCustomWallet implements WalletInterface {
 
 ```tsx
 import React from 'react';
-import { Button } from '@broclan/framework-components';
+import { Button } from '@clan/framework-components';
 
 interface CustomButtonProps {
   variant?: 'success' | 'danger';
@@ -293,11 +293,11 @@ import React from 'react';
 import {
   WalletProvider,
   useWallet
-} from '@broclan/framework-providers';
+} from '@clan/framework-providers';
 import {
   WalletConnector,
   BalanceDisplay
-} from '@broclan/framework-components';
+} from '@clan/framework-components';
 
 function WalletApp() {
   return (
@@ -341,7 +341,7 @@ This project is licensed under the Mozilla Public License 2.0 - see the [LICENSE
 
 ## 🙏 Acknowledgments
 
-- Built upon the foundation of the BroClanWallet project
+- Built upon the foundation of the ClanWallet project
 - Inspired by modern React patterns and blockchain best practices
 - Thanks to the Cardano and blockchain communities for their contributions
 

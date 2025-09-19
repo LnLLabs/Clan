@@ -69,3 +69,4 @@ export const TermsBanner: React.FC<TermsBannerProps> = ({
 };
 
 export default TermsBanner;
+

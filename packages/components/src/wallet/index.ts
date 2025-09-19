@@ -1,11 +1,5 @@
-export { WalletConnector } from './WalletConnector';
-export type { WalletConnectorProps } from './WalletConnector';
-
 export { BalanceDisplay } from './BalanceDisplay';
 export type { BalanceDisplayProps } from './BalanceDisplay';
-
-export { TransactionHistory } from './TransactionHistory';
-export type { TransactionHistoryProps } from './TransactionHistory';
 
 export { AddressSelect } from './AddressSelect';
 export type { AddressSelectProps } from './AddressSelect';
@@ -23,7 +17,8 @@ export * from './overview';
 export * from './token-dropdown';
 
 // Wallet picker components
-export * from './wallet-picker';
+export { WalletPicker } from './wallet-picker';
+export type { WalletPickerProps, WalletExtension as WalletPickerExtension } from './wallet-picker';
 
 // Pending transaction components
 export * from './pending-transactions';
@@ -41,4 +36,6 @@ export * from './delegation';
 export * from './import-modal';
 
 // Extension components
-export * from './extensions';
+export { WalletExtensionManager } from './extensions';
+export type { WalletExtensionManagerProps, WalletExtension as WalletManagerExtension } from './extensions';
+export { isWalletExtensionAvailable, getInstalledWallets, requestWalletAccess } from './extensions';

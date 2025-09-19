@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Assets, UTxO, Transaction, TransactionBuildOptions } from '@broclan/framework-core';
-import { coinSelect } from '@broclan/framework-core/src/coin-select/coin-select';
+import { Assets, UTxO, Transaction, TransactionBuildOptions } from '@clan/framework-core';
+import { coinSelect } from '@clan/framework-core';
 import { TokenElement } from '../token/TokenElement';
 import { AddressSelect } from '../AddressSelect';
 import { Button } from '../../ui/buttons/Button';
@@ -175,10 +175,8 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
     try {
       const totalAssets = calculateTotalAssets();
       const options: TransactionBuildOptions = {
-        recipients,
-        selectedUtxos,
-        totalAssets,
-        estimatedFee
+        recipients: recipients.map(r => ({ address: r.address, assets: r.assets })),
+        inputs: selectedUtxos
       };
 
       const transaction = await wallet.buildTransaction(options);
@@ -237,9 +235,9 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
               <div className="address-input">
                 <label>Address</label>
                 <AddressSelect
-                  value={recipient.address}
-                  onChange={(address) => updateRecipient(index, 'address', address)}
-                  placeholder="Enter recipient address"
+                  wallet={wallet}
+                  selectedAddress={recipient.address}
+                  onAddressChange={(address) => updateRecipient(index, 'address', address)}
                 />
               </div>
 
@@ -402,3 +400,4 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
 };
 
 export default TransactionCreator;
+

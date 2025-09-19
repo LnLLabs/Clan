@@ -1,6 +1,83 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
-import { NetworkConfig, NETWORKS } from '@broclan/framework-core';
-import { setStorageItem, getStorageItem } from '@broclan/framework-helpers';
+import { NetworkConfig, NETWORKS } from '@clan/framework-core';
+import { setStorageItem, getStorageItem } from '@clan/framework-helpers';
+
+// Provider types
+export type ProviderType = 'Blockfrost' | 'Kupmios' | 'MWallet' | 'Maestro' | 'None';
+
+// Provider configuration interfaces
+export interface BlockfrostConfig {
+  url: string;
+  projectId: string;
+}
+
+export interface KupmiosConfig {
+  kupoUrl: string;
+  ogmiosUrl: string;
+}
+
+export interface MWalletConfig {
+  url: string;
+  projectId: string;
+}
+
+export interface MaestroConfig {
+  apiKey: string;
+}
+
+export interface NoneConfig {
+  // No configuration needed
+}
+
+// Union type for all provider configurations
+export type ProviderConfig = 
+  | { type: 'Blockfrost'; config: BlockfrostConfig }
+  | { type: 'Kupmios'; config: KupmiosConfig }
+  | { type: 'MWallet'; config: MWalletConfig }
+  | { type: 'Maestro'; config: MaestroConfig }
+  | { type: 'None'; config: NoneConfig };
+
+// Provider capabilities
+export interface ProviderCapabilities {
+  canBeProvider: boolean;
+  canBeMetadataProvider: boolean;
+  requiredFields: string[];
+  optionalFields?: string[];
+}
+
+// Provider definitions with their capabilities and requirements
+export const PROVIDER_DEFINITIONS: Record<ProviderType, ProviderCapabilities> = {
+  Blockfrost: {
+    canBeProvider: true,
+    canBeMetadataProvider: true,
+    requiredFields: ['url', 'projectId'],
+    optionalFields: []
+  },
+  Kupmios: {
+    canBeProvider: true,
+    canBeMetadataProvider: false,
+    requiredFields: ['kupoUrl', 'ogmiosUrl'],
+    optionalFields: []
+  },
+  MWallet: {
+    canBeProvider: true,
+    canBeMetadataProvider: false,
+    requiredFields: ['url', 'projectId'],
+    optionalFields: []
+  },
+  Maestro: {
+    canBeProvider: true,
+    canBeMetadataProvider: true,
+    requiredFields: ['apiKey'],
+    optionalFields: []
+  },
+  None: {
+    canBeProvider: false,
+    canBeMetadataProvider: true,
+    requiredFields: [],
+    optionalFields: []
+  }
+};
 
 // Settings interface
 export interface AppSettings {
@@ -9,12 +86,89 @@ export interface AppSettings {
   currency: string;
   network: NetworkConfig;
   explorer: string;
-  apiUrl: string;
   enableNotifications: boolean;
   autoRefresh: boolean;
   refreshInterval: number;
   customSettings: Record<string, any>;
+  sendAll: boolean;
+  disableSync: boolean;
+  // Enhanced provider settings
+  provider: ProviderConfig;
+  metadataProvider: ProviderConfig;
 }
+
+// Validation functions
+export const validateProviderConfig = (providerConfig: ProviderConfig): { isValid: boolean; errors: string[] } => {
+  const definition = PROVIDER_DEFINITIONS[providerConfig.type];
+  const errors: string[] = [];
+
+  // Check required fields
+  for (const field of definition.requiredFields) {
+    if (!providerConfig.config[field as keyof typeof providerConfig.config]) {
+      errors.push(`Missing required field: ${field}`);
+    }
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+};
+
+export const getAvailableProviders = (forMetadataProvider: boolean = false): ProviderType[] => {
+  return Object.entries(PROVIDER_DEFINITIONS)
+    .filter(([_, capabilities]) => forMetadataProvider ? capabilities.canBeMetadataProvider : capabilities.canBeProvider)
+    .map(([type, _]) => type as ProviderType);
+};
+
+export const createDefaultProviderConfig = (type: ProviderType, network: NetworkConfig): ProviderConfig => {
+  switch (type) {
+    case 'Blockfrost':
+      return {
+        type: 'Blockfrost',
+        config: {
+          url: network.name === 'mainnet' 
+            ? 'https://cardano-mainnet.blockfrost.io/api/v0'
+            : 'https://cardano-testnet.blockfrost.io/api/v0',
+          projectId: ''
+        }
+      };
+    case 'Kupmios':
+      return {
+        type: 'Kupmios',
+        config: {
+          kupoUrl: network.name === 'mainnet'
+            ? 'https://kupo-mainnet.blockfrost.io'
+            : 'https://kupo-testnet.blockfrost.io',
+          ogmiosUrl: network.name === 'mainnet'
+            ? 'wss://ogmios-mainnet.blockfrost.io'
+            : 'wss://ogmios-testnet.blockfrost.io'
+        }
+      };
+    case 'MWallet':
+      return {
+        type: 'MWallet',
+        config: {
+          url: 'https://passthrough.broclan.io',
+          projectId: ''
+        }
+      };
+    case 'Maestro':
+      return {
+        type: 'Maestro',
+        config: {
+          apiKey: ''
+        }
+      };
+    case 'None':
+      return {
+        type: 'None',
+        config: {}
+      };
+    default:
+      throw new Error(`Unknown provider type: ${type}`);
+  }
+};
 
 // Settings state
 interface SettingsState {
@@ -29,7 +183,10 @@ type SettingsAction =
   | { type: 'UPDATE_SETTING'; payload: Partial<AppSettings> }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
-  | { type: 'RESET_TO_DEFAULTS' };
+  | { type: 'RESET_TO_DEFAULTS' }
+  | { type: 'UPDATE_PROVIDER'; payload: ProviderConfig }
+  | { type: 'UPDATE_METADATA_PROVIDER'; payload: ProviderConfig }
+  | { type: 'SWITCH_NETWORK'; payload: NetworkConfig };
 
 // Default settings
 const defaultSettings: AppSettings = {
@@ -38,11 +195,14 @@ const defaultSettings: AppSettings = {
   currency: 'USD',
   network: NETWORKS.cardano_mainnet,
   explorer: 'https://cardanoscan.io/',
-  apiUrl: 'https://cardano-mainnet.blockfrost.io/api/v0',
   enableNotifications: true,
   autoRefresh: true,
   refreshInterval: 30000, // 30 seconds
-  customSettings: {}
+  customSettings: {},
+  sendAll: false,
+  disableSync: false,
+  provider: createDefaultProviderConfig('Blockfrost', NETWORKS.cardano_mainnet),
+  metadataProvider: createDefaultProviderConfig('Blockfrost', NETWORKS.cardano_mainnet)
 };
 
 // Initial state
@@ -66,6 +226,34 @@ function settingsReducer(state: SettingsState, action: SettingsAction): Settings
       return { ...state, error: action.payload };
     case 'RESET_TO_DEFAULTS':
       return { ...state, settings: defaultSettings };
+    case 'UPDATE_PROVIDER':
+      return {
+        ...state,
+        settings: {
+          ...state.settings,
+          provider: action.payload
+        }
+      };
+    case 'UPDATE_METADATA_PROVIDER':
+      return {
+        ...state,
+        settings: {
+          ...state.settings,
+          metadataProvider: action.payload
+        }
+      };
+    case 'SWITCH_NETWORK':
+      const newNetwork = action.payload;
+      return {
+        ...state,
+        settings: {
+          ...state.settings,
+          network: newNetwork,
+          // Update provider configs for the new network
+          provider: createDefaultProviderConfig(state.settings.provider.type, newNetwork),
+          metadataProvider: createDefaultProviderConfig(state.settings.metadataProvider.type, newNetwork)
+        }
+      };
     default:
       return state;
   }
@@ -77,6 +265,13 @@ interface SettingsContextValue extends SettingsState {
   resetToDefaults: () => Promise<void>;
   getSetting: <T>(key: keyof AppSettings) => T;
   setSetting: <T>(key: keyof AppSettings, value: T) => Promise<void>;
+  // Provider management methods
+  updateProvider: (provider: ProviderConfig) => Promise<void>;
+  updateMetadataProvider: (provider: ProviderConfig) => Promise<void>;
+  switchNetwork: (network: NetworkConfig) => Promise<void>;
+  validateProvider: (provider: ProviderConfig) => { isValid: boolean; errors: string[] };
+  getAvailableProviders: (forMetadataProvider?: boolean) => ProviderType[];
+  createProviderConfig: (type: ProviderType) => ProviderConfig;
 }
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
@@ -177,12 +372,66 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     await updateSettings({ [key]: value } as Partial<AppSettings>);
   };
 
+  // Update provider
+  const updateProvider = async (provider: ProviderConfig) => {
+    try {
+      dispatch({ type: 'UPDATE_PROVIDER', payload: provider });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update provider';
+      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      onError?.(errorMessage);
+    }
+  };
+
+  // Update metadata provider
+  const updateMetadataProvider = async (provider: ProviderConfig) => {
+    try {
+      dispatch({ type: 'UPDATE_METADATA_PROVIDER', payload: provider });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update metadata provider';
+      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      onError?.(errorMessage);
+    }
+  };
+
+  // Switch network
+  const switchNetwork = async (network: NetworkConfig) => {
+    try {
+      dispatch({ type: 'SWITCH_NETWORK', payload: network });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to switch network';
+      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      onError?.(errorMessage);
+    }
+  };
+
+  // Validate provider
+  const validateProvider = (provider: ProviderConfig) => {
+    return validateProviderConfig(provider);
+  };
+
+  // Get available providers
+  const getAvailableProviders = (forMetadataProvider: boolean = false) => {
+    return getAvailableProviders(forMetadataProvider);
+  };
+
+  // Create provider config
+  const createProviderConfig = (type: ProviderType) => {
+    return createDefaultProviderConfig(type, state.settings.network);
+  };
+
   const contextValue: SettingsContextValue = {
     ...state,
     updateSettings,
     resetToDefaults,
     getSetting,
-    setSetting
+    setSetting,
+    updateProvider,
+    updateMetadataProvider,
+    switchNetwork,
+    validateProvider,
+    getAvailableProviders,
+    createProviderConfig
   };
 
   return (
@@ -202,3 +451,4 @@ export const useSettings = (): SettingsContextValue => {
 };
 
 export default SettingsProvider;
+

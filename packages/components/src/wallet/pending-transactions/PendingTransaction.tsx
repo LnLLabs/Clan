@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Transaction, Assets } from '@broclan/framework-core';
-import { copyToClipboard, showInfo, showError } from '@broclan/framework-helpers';
+import { Transaction, Assets } from '@clan/framework-core';
+import { copyToClipboard, showInfo, showError } from '@clan/framework-helpers';
 import { TokenElement } from '../token/TokenElement';
 
 export interface PendingTransactionData {
@@ -237,3 +237,4 @@ export const PendingTransaction: React.FC<PendingTransactionProps> = ({
 };
 
 export default PendingTransaction;
+

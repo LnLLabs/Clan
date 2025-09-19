@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTokenInfo } from '@broclan/framework-helpers';
+import { useTokenInfo } from '@clan/framework-helpers';
 
 export interface TokenElementProps {
   tokenId: string;
@@ -129,3 +129,4 @@ export const TokenElement: React.FC<TokenElementProps> = ({
 };
 
 export default TokenElement;
+

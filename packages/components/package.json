@@ -1,5 +1,5 @@
 {
-  "name": "@broclan/framework-components",
+  "name": "@clan/framework-components",
   "version": "1.0.0",
   "description": "React components library for BroClan Framework",
   "main": "dist/index.js",
@@ -28,14 +28,17 @@
     "react-dom": "^17.0.0 || ^18.0.0"
   },
   "dependencies": {
-    "@broclan/framework-core": "^1.0.0",
+    "@clan/framework-core": "^1.0.0",
+    "@clan/framework-providers": "^1.0.0",
     "clsx": "^2.0.0",
-    "react": "^17.0.0",
-    "react-dom": "^17.0.0"
+    "qrcode": "^1.5.3",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0"
   },
   "devDependencies": {
+    "@types/qrcode": "^1.5.0",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.9.2"
   }
 }

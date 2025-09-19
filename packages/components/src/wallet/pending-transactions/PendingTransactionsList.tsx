@@ -102,3 +102,4 @@ export const PendingTransactionsList: React.FC<PendingTransactionsListProps> = (
 };
 
 export default PendingTransactionsList;
+

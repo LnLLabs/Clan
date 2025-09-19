@@ -20,6 +20,7 @@ __exportStar(require("./types"), exports);
 __exportStar(require("./wallet-interface"), exports);
 __exportStar(require("./transaction-types"), exports);
 __exportStar(require("./network-config"), exports);
+__exportStar(require("./coin-select"), exports);
 var network_config_1 = require("./network-config");
 Object.defineProperty(exports, "NETWORKS", { enumerable: true, get: function () { return network_config_1.NETWORKS; } });
 Object.defineProperty(exports, "NetworkUtils", { enumerable: true, get: function () { return network_config_1.NetworkUtils; } });

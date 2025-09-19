@@ -21,6 +21,7 @@ export interface WalletImportData {
     publicKey?: string;
     address?: string;
     derivationPath?: string;
+    passphrase?: string;
   };
 }
 
@@ -327,7 +328,7 @@ export const WalletImportModal: React.FC<WalletImportModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title="Import Wallet"
-      size="large"
+      size="xl"
       className={`wallet-import-modal ${className}`}
     >
       <div className="import-modal-content">
@@ -413,3 +414,4 @@ export const WalletImportModal: React.FC<WalletImportModalProps> = ({
 };
 
 export default WalletImportModal;
+

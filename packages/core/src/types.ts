@@ -86,3 +86,16 @@ export class TransactionError extends Error {
     this.name = 'TransactionError';
   }
 }
+
+// Provider types for blockchain connections
+export type ProviderType = 'Blockfrost' | 'Kupmios' | 'MWallet' | 'Maestro' | 'Custom';
+
+export interface ProviderConfig {
+  url?: string;
+  projectId?: string;
+  kupoUrl?: string;
+  ogmiosUrl?: string;
+  apiKey?: string;
+  network?: string;
+}
+

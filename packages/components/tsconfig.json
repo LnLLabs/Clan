@@ -12,8 +12,15 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@clan/framework-core": ["../core/dist/index"],
+      "@clan/framework-providers": ["../providers/dist/index"],
+      "@clan/framework-helpers": ["../helpers/dist/index"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
+

@@ -1,5 +1,5 @@
 import React from 'react';
-import { WalletInterface } from '@broclan/framework-core';
+import { WalletInterface } from '@clan/framework-core';
 
 export interface AddressSelectProps {
   wallet: WalletInterface;
@@ -22,9 +22,34 @@ export const AddressSelect: React.FC<AddressSelectProps> = ({
   onChangeAddressName,
   className = ''
 }) => {
-  const fundedAddresses = wallet.getFundedAddress();
-  const defaultAddress = wallet.getDefaultAddress();
-  const addressNames = wallet.getAddressNames();
+  const [fundedAddresses, setFundedAddresses] = React.useState<string[]>([]);
+  const [defaultAddress, setDefaultAddress] = React.useState<string>('');
+  const [addressNames, setAddressNames] = React.useState<Record<string, string>>({});
+
+  React.useEffect(() => {
+    const loadWalletData = async () => {
+      try {
+        if (wallet.getFundedAddress) {
+          const addresses = await wallet.getFundedAddress();
+          setFundedAddresses(addresses);
+        }
+
+        if (wallet.getDefaultAddress) {
+          const defaultAddr = await wallet.getDefaultAddress();
+          setDefaultAddress(defaultAddr);
+        }
+
+        if (wallet.getAddressNames) {
+          const names = await wallet.getAddressNames();
+          setAddressNames(names);
+        }
+      } catch (error) {
+        console.error('Failed to load wallet data:', error);
+      }
+    };
+
+    loadWalletData();
+  }, [wallet]);
 
   const getAddressDisplayName = (address: string): string => {
     const name = addressNames[address];
@@ -73,3 +98,4 @@ export const AddressSelect: React.FC<AddressSelectProps> = ({
 };
 
 export default AddressSelect;
+
