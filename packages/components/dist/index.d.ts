@@ -7,4 +7,5 @@ export * from './ui/legal';
 export * from './wallet';
 export * from './blockchain';
 export * from './styles';
+export * from './assets';
 //# sourceMappingURL=index.d.ts.map

@@ -27,4 +27,6 @@ __exportStar(require("./wallet"), exports);
 __exportStar(require("./blockchain"), exports);
 // Styles
 __exportStar(require("./styles"), exports);
+// Assets
+__exportStar(require("./assets"), exports);
 //# sourceMappingURL=index.js.map

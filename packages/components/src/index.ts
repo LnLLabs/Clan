@@ -14,3 +14,6 @@ export * from './blockchain';
 
 // Styles
 export * from './styles';
+
+// Assets
+export * from './assets';

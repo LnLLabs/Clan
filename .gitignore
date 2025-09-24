@@ -1,1 +1,5 @@
 /node_modules
+/packages/components/dist
+/packages/helpers/dist
+/packages/providers/dist
+/packages/core/dist

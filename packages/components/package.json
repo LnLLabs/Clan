@@ -5,9 +5,13 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run generate-svg-modules && npm run copy-assets && npm run fix-svg-imports",
+    "generate-svg-modules": "node scripts/generate-svg-modules.js",
+    "copy-assets": "copyfiles -u 1 \"src/assets/*.svg\" dist/assets/ && node scripts/copy-css.js",
+    "fix-svg-imports": "node scripts/fix-svg-imports.js",
+    "build:types": "tsc --declaration --emitDeclarationOnly --outDir dist",
     "dev": "tsc --watch",
-    "clean": "rm -rf dist",
+    "clean": "rimraf dist",
     "test": "echo \"No tests specified\""
   },
   "files": [
@@ -36,9 +40,16 @@
     "react-dom": "^17.0.0 || ^18.0.0"
   },
   "devDependencies": {
+    "@svgr/webpack": "^8.1.0",
     "@types/qrcode": "^1.5.0",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
-    "typescript": "^5.9.2"
+    "copyfiles": "^2.4.1",
+    "rimraf": "^6.0.1",
+    "svg-url-loader": "^8.0.0",
+    "ts-loader": "^9.5.4",
+    "typescript": "^5.9.2",
+    "webpack": "^5.101.3",
+    "webpack-cli": "^6.0.1"
   }
 }
