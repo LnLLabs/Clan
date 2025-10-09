@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, Component, ReactNode } from 'react';
 import { NetworkConfig, NETWORKS } from '@clan/framework-core';
 import { setStorageItem, getStorageItem } from '@clan/framework-helpers';
 
@@ -177,7 +177,7 @@ interface SettingsState {
   error: string | null;
 }
 
-// Settings actions
+// Settings actions (keeping for reference but not used with useState)
 type SettingsAction =
   | { type: 'SET_SETTINGS'; payload: AppSettings }
   | { type: 'UPDATE_SETTING'; payload: Partial<AppSettings> }
@@ -212,52 +212,34 @@ const initialState: SettingsState = {
   error: null
 };
 
-// Reducer
-function settingsReducer(state: SettingsState, action: SettingsAction): SettingsState {
-  switch (action.type) {
-    case 'SET_SETTINGS':
-      return { ...state, settings: action.payload };
-    case 'UPDATE_SETTING':
-      const updatedSettings = { ...state.settings, ...action.payload };
-      return { ...state, settings: updatedSettings };
-    case 'SET_LOADING':
-      return { ...state, isLoading: action.payload };
-    case 'SET_ERROR':
-      return { ...state, error: action.payload };
-    case 'RESET_TO_DEFAULTS':
-      return { ...state, settings: defaultSettings };
-    case 'UPDATE_PROVIDER':
-      return {
-        ...state,
-        settings: {
-          ...state.settings,
-          provider: action.payload
-        }
-      };
-    case 'UPDATE_METADATA_PROVIDER':
-      return {
-        ...state,
-        settings: {
-          ...state.settings,
-          metadataProvider: action.payload
-        }
-      };
-    case 'SWITCH_NETWORK':
-      const newNetwork = action.payload;
-      return {
-        ...state,
-        settings: {
-          ...state.settings,
-          network: newNetwork,
-          // Update provider configs for the new network
-          provider: createDefaultProviderConfig(state.settings.provider.type, newNetwork),
-          metadataProvider: createDefaultProviderConfig(state.settings.metadataProvider.type, newNetwork)
-        }
-      };
-    default:
-      return state;
-  }
-}
+// State helper functions
+const updateSettingsState = (currentSettings: AppSettings, updates: Partial<AppSettings>): AppSettings => {
+  return { ...currentSettings, ...updates };
+};
+
+const updateProviderInSettings = (currentSettings: AppSettings, provider: ProviderConfig): AppSettings => {
+  return {
+    ...currentSettings,
+    provider
+  };
+};
+
+const updateMetadataProviderInSettings = (currentSettings: AppSettings, metadataProvider: ProviderConfig): AppSettings => {
+  return {
+    ...currentSettings,
+    metadataProvider
+  };
+};
+
+const switchNetworkInSettings = (currentSettings: AppSettings, network: NetworkConfig): AppSettings => {
+  return {
+    ...currentSettings,
+    network,
+    // Update provider configs for the new network
+    provider: createDefaultProviderConfig(currentSettings.provider.type, network),
+    metadataProvider: createDefaultProviderConfig(currentSettings.metadataProvider.type, network)
+  };
+};
 
 // Context
 interface SettingsContextValue extends SettingsState {
@@ -285,161 +267,177 @@ interface SettingsProviderProps {
   onError?: (error: string) => void;
 }
 
+  // Start of Selection
 // Provider component
-export const SettingsProvider: React.FC<SettingsProviderProps> = ({
-  children,
-  defaultSettings: customDefaults,
-  storageKey = 'broclan_settings',
-  onSettingsChange,
-  onError
-}) => {
-  const [state, dispatch] = useReducer(settingsReducer, {
-    ...initialState,
-    settings: { ...defaultSettings, ...customDefaults }
-  });
-
-  // Load settings from storage on mount
-  useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        dispatch({ type: 'SET_LOADING', payload: true });
-        const storedSettings = getStorageItem<AppSettings>(storageKey);
-
-        if (storedSettings) {
-          const mergedSettings = { ...defaultSettings, ...customDefaults, ...storedSettings };
-          dispatch({ type: 'SET_SETTINGS', payload: mergedSettings });
-        }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to load settings';
-        dispatch({ type: 'SET_ERROR', payload: errorMessage });
-        onError?.(errorMessage);
-      } finally {
-        dispatch({ type: 'SET_LOADING', payload: false });
-      }
+export class SettingsProvider extends Component<SettingsProviderProps, SettingsState> {
+  constructor(props: SettingsProviderProps) {
+    super(props);
+    
+    this.state = {
+      settings: {
+        ...defaultSettings,
+        ...props.defaultSettings
+      },
+      isLoading: false,
+      error: null
     };
+  }
 
-    loadSettings();
-  }, [storageKey, customDefaults, onError]);
+  async componentDidMount() {
+    await this.loadSettings();
+  }
 
-  // Save settings to storage whenever they change
-  useEffect(() => {
-    const saveSettings = async () => {
-      try {
-        await setStorageItem(storageKey, state.settings);
-        onSettingsChange?.(state.settings);
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to save settings';
-        dispatch({ type: 'SET_ERROR', payload: errorMessage });
-        onError?.(errorMessage);
-      }
-    };
-
-    if (!state.isLoading) {
-      saveSettings();
+  async componentDidUpdate(prevProps: SettingsProviderProps, prevState: SettingsState) {
+    // Save settings when they change
+    if (prevState.settings !== this.state.settings && !this.state.isLoading) {
+      await this.saveSettings();
     }
-  }, [state.settings, storageKey, onSettingsChange, onError, state.isLoading]);
+  }
+
+  private async loadSettings() {
+    try {
+      this.setState({ isLoading: true });
+      const { storageKey = 'broclan_settings', defaultSettings: customDefaults, onError } = this.props;
+      const storedSettings = getStorageItem<AppSettings>(storageKey);
+
+      if (storedSettings) {
+        const mergedSettings = { ...defaultSettings, ...customDefaults, ...storedSettings };
+        this.setState({ settings: mergedSettings });
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load settings';
+      this.setState({ error: errorMessage });
+      this.props.onError?.(errorMessage);
+    } finally {
+      this.setState({ isLoading: false });
+    }
+  }
+
+  private async saveSettings() {
+    try {
+      const { storageKey = 'broclan_settings', onSettingsChange } = this.props;
+      await setStorageItem(storageKey, this.state.settings);
+      onSettingsChange?.(this.state.settings);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save settings';
+      this.setState({ error: errorMessage });
+      this.props.onError?.(errorMessage);
+    }
+  }
 
   // Update settings
-  const updateSettings = async (newSettings: Partial<AppSettings>) => {
+  private updateSettings = async (newSettings: Partial<AppSettings>) => {
     try {
-      dispatch({ type: 'UPDATE_SETTING', payload: newSettings });
+      this.setState(prevState => ({
+        settings: updateSettingsState(prevState.settings, newSettings)
+      }));
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to update settings';
-      dispatch({ type: 'SET_ERROR', payload: errorMessage });
-      onError?.(errorMessage);
+      this.setState({ error: errorMessage });
+      this.props.onError?.(errorMessage);
     }
   };
 
   // Reset to defaults
-  const resetToDefaults = async () => {
+  private resetToDefaults = async () => {
     try {
-      const resetSettings = { ...defaultSettings, ...customDefaults };
-      dispatch({ type: 'SET_SETTINGS', payload: resetSettings });
+      const resetSettings = { ...defaultSettings, ...this.props.defaultSettings };
+      this.setState({ settings: resetSettings });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to reset settings';
-      dispatch({ type: 'SET_ERROR', payload: errorMessage });
-      onError?.(errorMessage);
+      this.setState({ error: errorMessage });
+      this.props.onError?.(errorMessage);
     }
   };
 
   // Get a specific setting
-  const getSetting = <T,>(key: keyof AppSettings): T => {
-    return state.settings[key] as T;
+  private getSetting = <T,>(key: keyof AppSettings): T => {
+    return this.state.settings[key] as T;
   };
 
   // Set a specific setting
-  const setSetting = async <T,>(key: keyof AppSettings, value: T) => {
-    await updateSettings({ [key]: value } as Partial<AppSettings>);
+  private setSetting = async <T,>(key: keyof AppSettings, value: T) => {
+    await this.updateSettings({ [key]: value } as Partial<AppSettings>);
   };
 
   // Update provider
-  const updateProvider = async (provider: ProviderConfig) => {
+  private updateProvider = async (provider: ProviderConfig) => {
     try {
-      dispatch({ type: 'UPDATE_PROVIDER', payload: provider });
+      this.setState(prevState => ({
+        settings: updateProviderInSettings(prevState.settings, provider)
+      }));
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to update provider';
-      dispatch({ type: 'SET_ERROR', payload: errorMessage });
-      onError?.(errorMessage);
+      this.setState({ error: errorMessage });
+      this.props.onError?.(errorMessage);
     }
   };
 
   // Update metadata provider
-  const updateMetadataProvider = async (provider: ProviderConfig) => {
+  private updateMetadataProvider = async (provider: ProviderConfig) => {
     try {
-      dispatch({ type: 'UPDATE_METADATA_PROVIDER', payload: provider });
+      this.setState(prevState => ({
+        settings: updateMetadataProviderInSettings(prevState.settings, provider)
+      }));
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to update metadata provider';
-      dispatch({ type: 'SET_ERROR', payload: errorMessage });
-      onError?.(errorMessage);
+      this.setState({ error: errorMessage });
+      this.props.onError?.(errorMessage);
     }
   };
 
   // Switch network
-  const switchNetwork = async (network: NetworkConfig) => {
+  private switchNetwork = async (network: NetworkConfig) => {
     try {
-      dispatch({ type: 'SWITCH_NETWORK', payload: network });
+      this.setState(prevState => ({
+        settings: switchNetworkInSettings(prevState.settings, network)
+      }));
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to switch network';
-      dispatch({ type: 'SET_ERROR', payload: errorMessage });
-      onError?.(errorMessage);
+      this.setState({ error: errorMessage });
+      this.props.onError?.(errorMessage);
     }
   };
 
   // Validate provider
-  const validateProvider = (provider: ProviderConfig) => {
+  private validateProvider = (provider: ProviderConfig) => {
     return validateProviderConfig(provider);
   };
 
   // Get available providers
-  const getAvailableProviders = (forMetadataProvider: boolean = false) => {
+  private getAvailableProvidersList = (forMetadataProvider: boolean = false) => {
     return getAvailableProviders(forMetadataProvider);
   };
 
   // Create provider config
-  const createProviderConfig = (type: ProviderType) => {
-    return createDefaultProviderConfig(type, state.settings.network);
+  private createProviderConfig = (type: ProviderType) => {
+    return createDefaultProviderConfig(type, this.state.settings.network);
   };
 
-  const contextValue: SettingsContextValue = {
-    ...state,
-    updateSettings,
-    resetToDefaults,
-    getSetting,
-    setSetting,
-    updateProvider,
-    updateMetadataProvider,
-    switchNetwork,
-    validateProvider,
-    getAvailableProviders,
-    createProviderConfig
-  };
+  render() {
+    const contextValue: SettingsContextValue = {
+      settings: this.state.settings,
+      isLoading: this.state.isLoading,
+      error: this.state.error,
+      updateSettings: this.updateSettings,
+      resetToDefaults: this.resetToDefaults,
+      getSetting: this.getSetting,
+      setSetting: this.setSetting,
+      updateProvider: this.updateProvider,
+      updateMetadataProvider: this.updateMetadataProvider,
+      switchNetwork: this.switchNetwork,
+      validateProvider: this.validateProvider,
+      getAvailableProviders: this.getAvailableProvidersList,
+      createProviderConfig: this.createProviderConfig
+    };
 
-  return (
-    <SettingsContext.Provider value={contextValue}>
-      {children}
-    </SettingsContext.Provider>
-  );
-};
+    return (
+      <SettingsContext.Provider value={contextValue}>
+        {this.props.children}
+      </SettingsContext.Provider>
+    );
+  }
+}
 
 // Hook to use settings context
 export const useSettings = (): SettingsContextValue => {

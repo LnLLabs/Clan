@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useCallback, ReactNode } from 'react';
 import { NetworkConfig, NETWORKS } from '@clan/framework-core';
 
 // Provider types (based on original BroClanWallet implementation)
@@ -12,7 +12,7 @@ export interface ProviderConfig {
   apiKey?: string;
 }
 
-export interface BlockchainProvider {
+export interface BlockchainProviderConfig {
   name: string;
   url?: string;
   projectId?: string;
@@ -104,16 +104,13 @@ function blockchainReducer(state: BlockchainState, action: BlockchainAction): Bl
   }
 }
 
-// Context
+
 interface BlockchainContextValue extends BlockchainState {
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
-  refreshData: () => Promise<void>;
   switchNetwork: (network: NetworkConfig) => Promise<void>;
   switchProvider: (type: ProviderType, config: ProviderConfig) => Promise<void>;
   getLucidInstance: () => any;
-  getBlockData: () => Promise<void>;
-  getProtocolParameters: () => Promise<void>;
 }
 
 const BlockchainContext = createContext<BlockchainContextValue | null>(null);
@@ -196,7 +193,7 @@ export const BlockchainProvider: React.FC<BlockchainProviderProps> = ({
     providerType,
     providerConfig
   });
-
+  
   // Auto-connect on mount
   useEffect(() => {
     if (autoConnect) {
@@ -210,19 +207,10 @@ export const BlockchainProvider: React.FC<BlockchainProviderProps> = ({
     onNetworkChange?.(network);
   }, [network, onNetworkChange]);
 
-  // Refresh data periodically
-  useEffect(() => {
-    if (!state.isConnected || !refreshInterval) return;
 
-    const interval = setInterval(() => {
-      refreshData();
-    }, refreshInterval);
-
-    return () => clearInterval(interval);
-  }, [state.isConnected, refreshInterval]);
 
   // Connect to blockchain
-  const connect = async () => {
+  const connect = useCallback(async () => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
       dispatch({ type: 'SET_ERROR', payload: null });
@@ -238,7 +226,6 @@ export const BlockchainProvider: React.FC<BlockchainProviderProps> = ({
       onConnectionChange?.(true);
 
       // Load initial data
-      await refreshData();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to connect to blockchain';
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
@@ -246,7 +233,7 @@ export const BlockchainProvider: React.FC<BlockchainProviderProps> = ({
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
-  };
+  }, [state.providerType, state.providerConfig, state.network, onConnectionChange, onError]);
 
   // Disconnect from blockchain
   const disconnect = async () => {
@@ -268,20 +255,6 @@ export const BlockchainProvider: React.FC<BlockchainProviderProps> = ({
   };
 
   // Refresh blockchain data
-  const refreshData = async () => {
-    if (!state.isConnected) return;
-
-    try {
-      await Promise.all([
-        getBlockData(),
-        getProtocolParameters()
-      ]);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to refresh blockchain data';
-      dispatch({ type: 'SET_ERROR', payload: errorMessage });
-      onError?.(errorMessage);
-    }
-  };
 
   // Switch network
   const switchNetwork = async (newNetwork: NetworkConfig) => {
@@ -311,45 +284,7 @@ export const BlockchainProvider: React.FC<BlockchainProviderProps> = ({
     }
   };
 
-  // Get block data
-  const getBlockData = async () => {
-    try {
-      // Here you would implement actual block data fetching
-      // For now, we'll simulate some data
-      const mockData = {
-        blockHeight: 8500000 + Math.floor(Math.random() * 1000),
-        slot: 95000000 + Math.floor(Math.random() * 10000),
-        epoch: 425 + Math.floor(Math.random() * 5)
-      };
 
-      dispatch({ type: 'SET_BLOCK_DATA', payload: mockData });
-    } catch (error) {
-      throw new Error('Failed to fetch block data');
-    }
-  };
-
-  // Get protocol parameters
-  const getProtocolParameters = async () => {
-    try {
-      // Here you would implement actual protocol parameters fetching
-      // For now, we'll simulate some data
-      const mockParams = {
-        minFeeA: 44,
-        minFeeB: 155381,
-        keyDeposit: 2000000,
-        poolDeposit: 500000000,
-        maxTxSize: 16384,
-        maxValSize: 5000,
-        priceMem: 0.0577,
-        priceStep: 0.0000721,
-        utxoCostPerWord: 4310
-      };
-
-      dispatch({ type: 'SET_PROTOCOL_PARAMETERS', payload: mockParams });
-    } catch (error) {
-      throw new Error('Failed to fetch protocol parameters');
-    }
-  };
 
   // Switch provider
   const switchProvider = async (type: ProviderType, config: ProviderConfig) => {
@@ -389,12 +324,9 @@ export const BlockchainProvider: React.FC<BlockchainProviderProps> = ({
     ...state,
     connect,
     disconnect,
-    refreshData,
     switchNetwork,
     switchProvider,
     getLucidInstance,
-    getBlockData,
-    getProtocolParameters
   };
 
   return (

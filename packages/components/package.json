@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc && npm run generate-svg-modules && npm run copy-assets && npm run fix-svg-imports",
     "generate-svg-modules": "node scripts/generate-svg-modules.js",
-    "copy-assets": "copyfiles -u 1 \"src/assets/*.svg\" dist/assets/ && node scripts/copy-css.js",
+    "copy-assets": "node scripts/copy-assets.js",
     "fix-svg-imports": "node scripts/fix-svg-imports.js",
     "build:types": "tsc --declaration --emitDeclarationOnly --outDir dist",
     "dev": "tsc --watch",
@@ -28,22 +28,20 @@
   "author": "BroClan Team",
   "license": "MPL-2.0",
   "peerDependencies": {
-    "react": "^17.0.0 || ^18.0.0",
-    "react-dom": "^17.0.0 || ^18.0.0"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "dependencies": {
     "@clan/framework-core": "^1.0.0",
     "@clan/framework-providers": "^1.0.0",
     "clsx": "^2.0.0",
-    "qrcode": "^1.5.3",
-    "react": "^17.0.0 || ^18.0.0",
-    "react-dom": "^17.0.0 || ^18.0.0"
+    "qrcode": "^1.5.3"
   },
   "devDependencies": {
     "@svgr/webpack": "^8.1.0",
     "@types/qrcode": "^1.5.0",
-    "@types/react": "^17.0.0",
-    "@types/react-dom": "^17.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
     "copyfiles": "^2.4.1",
     "rimraf": "^6.0.1",
     "svg-url-loader": "^8.0.0",
