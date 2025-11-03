@@ -50,42 +50,6 @@ const initialState: WalletState = {
   isLoading: false
 };
 
-// Reducer
-function walletReducer(state: WalletState, action: WalletAction): WalletState {
-  switch (action.type) {
-    case 'SET_WALLETS':
-      return { ...state, wallets: action.payload };
-    case 'SELECT_WALLET':
-      return { ...state, selectedWallet: action.payload };
-    case 'SET_CONNECTING':
-      return { ...state, isConnecting: action.payload };
-    case 'SET_CONNECTED':
-      return { ...state, isConnected: action.payload };
-    case 'SET_ADDRESS':
-      return { ...state, address: action.payload };
-    case 'SET_BALANCE':
-      return { ...state, balance: action.payload };
-    case 'SET_NETWORK':
-      return { ...state, network: action.payload };
-    case 'SET_TRANSACTIONS':
-      return { ...state, transactions: action.payload };
-    case 'ADD_TRANSACTION':
-      return {
-        ...state,
-        transactions: [action.payload, ...state.transactions]
-      };
-    case 'SET_ERROR':
-      return { ...state, error: action.payload };
-    case 'SET_LOADING':
-      return { ...state, isLoading: action.payload };
-    case 'RESET':
-      return initialState;
-    default:
-      return state;
-  }
-}
-
-// Context
 interface WalletContextValue extends WalletState {
   connectWallet: (wallet: WalletInterface) => Promise<void>;
   disconnectWallet: () => Promise<void>;
@@ -108,7 +72,7 @@ interface WalletProviderProps {
 const MwalletPassthrough = "https://passthrough.broclan.io" 
 
 // Provider component
-export const WalletProvider = (props: {settings : any, setOpenModal: (modal: string) => void}) => {
+export const SettingsModule = (props: {settings : any, setOpenModal: (modal: string) => void}) => {
   const [network, setNetwork] = useState(props.settings.network);
   const [provider, setProvider] = useState(props.settings.api.url === MwalletPassthrough ? "MWallet" :  props.settings.provider);
   const [providerConnection, setProviderConnection] = useState(props.settings.api);
@@ -357,5 +321,5 @@ export const useWallet = (): WalletContextValue => {
   return context;
 };
 
-export default WalletProvider;
+export default SettingsModule;
 

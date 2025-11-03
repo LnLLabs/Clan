@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { Modal } from '../modals/Modal';
 import { Button } from '../buttons/Button';
 import { 
-  useSettings, 
-  useBlockchain
+  useSettings 
 } from '@clan/framework-providers';
 import type { 
   EnhancedProviderConfig as ProviderConfig, 
@@ -34,7 +33,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     createProviderConfig,
     switchNetwork: switchSettingsNetwork
   } = useSettings();
-  const { switchNetwork } = useBlockchain();
 
   // Local state for form
   const [network, setNetwork] = useState(settings.network.name);
@@ -167,7 +165,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       });
 
       // Switch network if needed
-      await switchNetwork(networkConfig);
 
       showSuccess('Settings applied successfully');
       onSettingsChange?.();

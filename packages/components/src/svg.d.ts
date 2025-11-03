@@ -1,11 +1,17 @@
 declare module '*.svg' {
   import React from 'react';
-  const ReactComponent: React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
+  export const ReactComponent: React.FunctionComponent<React.SVGProps<SVGSVGElement> & { title?: string }>;
+  const src: string;
+  export default src;
+}
+
+declare module '*.svg?react' {
+  import React from 'react';
+  const ReactComponent: React.FunctionComponent<React.SVGProps<SVGSVGElement> & { title?: string }>;
   export default ReactComponent;
-  export { ReactComponent };
 }
 
 declare module '*.css' {
-  const content: string;
+  const content: Record<string, string>;
   export default content;
 }

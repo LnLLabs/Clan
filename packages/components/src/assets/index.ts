@@ -2,29 +2,29 @@
 // Note: Add any common icons, images, or other assets here
 // Individual components can have their own asset imports
 
-// SVG Icons - React Components
-export { ReactComponent as MenuIcon } from './menu.svg';
-export { ReactComponent as SunIcon } from './sun.svg';
-export { ReactComponent as MoonIcon } from './moon.svg';
-export { ReactComponent as SettingsIcon } from './settings.svg';
-export { ReactComponent as ConnectIcon } from './connect.svg';
-export { ReactComponent as DisconnectIcon } from './disconnect.svg';
-export { ReactComponent as LoadingIcon } from './loading.svg';
-export { ReactComponent as CorrectIcon } from './correct.svg';
-export { ReactComponent as IncorrectIcon } from './incorrect.svg';
-export { ReactComponent as TokenIcon } from './token.svg';
-export { ReactComponent as WalletIcon } from './walletsFound.svg';
-export { ReactComponent as ImportIcon } from './import.svg';
-export { ReactComponent as DownloadIcon } from './download.svg';
-export { ReactComponent as ExpandIcon } from './expand.svg';
-export { ReactComponent as DetailsIcon } from './details.svg';
-export { ReactComponent as ChangeIcon } from './change.svg';
-export { ReactComponent as NewWalletIcon } from './newWallet.svg';
-export { ReactComponent as RecipientIcon } from './recipient.svg';
-export { ReactComponent as SignIcon } from './sign.svg';
-export { ReactComponent as CExplorerIcon } from './cexplorer.svg';
-export { ReactComponent as ImportSigIcon } from './importSig.svg';
-export { ReactComponent as DeleteIcon } from './delete.svg';
+// SVG Icons - React Components (default export from vite-plugin-svgr)
+export { default as MenuIcon } from './menu.svg?react';
+export { default as SunIcon } from './sun.svg?react';
+export { default as MoonIcon } from './moon.svg?react';
+export { default as SettingsIcon } from './settings.svg?react';
+export { default as ConnectIcon } from './connect.svg?react';
+export { default as DisconnectIcon } from './disconnect.svg?react';
+export { default as LoadingIcon } from './loading.svg?react';
+export { default as CorrectIcon } from './correct.svg?react';
+export { default as IncorrectIcon } from './incorrect.svg?react';
+export { default as TokenIcon } from './token.svg?react';
+export { default as WalletIcon } from './walletsFound.svg?react';
+export { default as ImportIcon } from './import.svg?react';
+export { default as DownloadIcon } from './download.svg?react';
+export { default as ExpandIcon } from './expand.svg?react';
+export { default as DetailsIcon } from './details.svg?react';
+export { default as ChangeIcon } from './change.svg?react';
+export { default as NewWalletIcon } from './newWallet.svg?react';
+export { default as RecipientIcon } from './recipient.svg?react';
+export { default as SignIcon } from './sign.svg?react';
+export { default as CExplorerIcon } from './cexplorer.svg?react';
+export { default as ImportSigIcon } from './importSig.svg?react';
+export { default as DeleteIcon } from './delete.svg?react';
 
 // SVG Icons - URL strings (for use as src in img tags)
 export { default as MenuIconUrl } from './menu.svg';
