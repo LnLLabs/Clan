@@ -84,6 +84,7 @@ export const ContactsMenu = ({
   const [expandedActionsId, setExpandedActionsId] = useState<string | null>(null);
   const [deletingContactId, setDeletingContactId] = useState<string | null>(null);
   const [deleteProgress, setDeleteProgress] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Save to localStorage whenever contacts change
   useEffect(() => {
@@ -203,6 +204,13 @@ export const ContactsMenu = ({
     setExpandedActionsId(expandedActionsId === id ? null : id);
   };
 
+  // Filter contacts based on search term
+  const filteredContacts = contacts.filter(contact =>
+    contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    contact.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (contact.email && contact.email.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
   return (
     <div className="contacts-menu">
       <div className="contacts-header">
@@ -210,8 +218,19 @@ export const ContactsMenu = ({
       </div>
 
       <div className="contacts-container">
+        {/* Search bar */}
+        <div className="contacts-search">
+          <input
+            type="text"
+            placeholder="Search contacts..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="contacts-search-input"
+          />
+        </div>
         <div className="contacts-list">
-    {contacts.map((contact) => (
+          {filteredContacts.length > 0 ? (
+            filteredContacts.map((contact) => (
             <div key={contact.id}>
               <div className="contact-row">
                 <div className="contact-info">
@@ -304,8 +323,13 @@ export const ContactsMenu = ({
                   </div>
                 </div>
               )}
-      </div>
-    ))}
+            </div>
+            ))
+          ) : (
+            <div className="contacts-empty">
+              {searchTerm ? 'No contacts match your search' : 'No contacts available'}
+            </div>
+          )}
         </div>
 
         {/* Add contact form at bottom */}

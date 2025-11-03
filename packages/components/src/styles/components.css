@@ -941,6 +941,38 @@
   overflow-y: auto;
 }
 
+.contacts-search {
+  margin-bottom: 1.5rem;
+}
+
+.contacts-search-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: #363650;
+  border: 1px solid #4a4a5e;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 0.875rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.contacts-search-input::placeholder {
+  color: #7a7a8e;
+}
+
+.contacts-search-input:focus {
+  border-color: #7c3aed;
+  background: #2a2a3e;
+}
+
+.contacts-empty {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: #7a7a8e;
+  font-size: 0.875rem;
+}
+
 .contacts-list {
   display: flex;
   flex-direction: column;
