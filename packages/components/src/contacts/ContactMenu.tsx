@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { loadContactsFromStorage, saveContactsToStorage } from './contactStorage';
 
 export interface Contact {
   id: string;
@@ -7,12 +8,19 @@ export interface Contact {
   email?: string;
 }
 
+export interface ContactAction {
+  id: string;
+  label: string;
+  icon: string;
+  onClick: (contact: Contact) => void;
+}
+
 export interface ContactsMenuProps {
   initialContacts?: Contact[];
   onContactsChange?: (contacts: Contact[]) => void;
-  onSendAssets?: (contact: Contact) => void;
-  onAddToWill?: (contact: Contact) => void;
-  onAddExecutor?: (contact: Contact) => void;
+  actions?: ContactAction[];
+  storageKey?: string;
+  enableLocalStorage?: boolean;
 }
 
 const defaultContacts: Contact[] = [
@@ -54,17 +62,34 @@ const defaultContacts: Contact[] = [
   }
 ];
 
+const defaultActions: ContactAction[] = [];
+
 export const ContactsMenu = ({ 
   initialContacts = defaultContacts,
   onContactsChange,
-  onSendAssets,
-  onAddToWill,
-  onAddExecutor
+  actions = defaultActions,
+  storageKey = 'clan-contacts',
+  enableLocalStorage = true
 }: ContactsMenuProps) => {
-  const [contacts, setContacts] = useState<Contact[]>(initialContacts);
+  // Initialize contacts from localStorage or fallback to initial contacts
+  const [contacts, setContacts] = useState<Contact[]>(() => {
+    if (enableLocalStorage) {
+      return loadContactsFromStorage(storageKey, initialContacts);
+    }
+    return initialContacts;
+  });
+  
   const [isAddingContact, setIsAddingContact] = useState(false);
   const [editingContactId, setEditingContactId] = useState<string | null>(null);
   const [expandedActionsId, setExpandedActionsId] = useState<string | null>(null);
+
+  // Save to localStorage whenever contacts change
+  useEffect(() => {
+    if (enableLocalStorage) {
+      saveContactsToStorage(storageKey, contacts);
+    }
+    onContactsChange?.(contacts);
+  }, [contacts, enableLocalStorage, storageKey, onContactsChange]);
 
   const [formData, setFormData] = useState<Partial<Contact>>({
     name: '',
@@ -82,9 +107,7 @@ export const ContactsMenu = ({
       email: formData.email || ''
     };
 
-    const updatedContacts = [...contacts, newContact];
-    setContacts(updatedContacts);
-    onContactsChange?.(updatedContacts);
+    setContacts([...contacts, newContact]);
     setFormData({ name: '', address: '', email: '' });
     setIsAddingContact(false);
   };
@@ -92,22 +115,17 @@ export const ContactsMenu = ({
   const handleEditContact = () => {
     if (!editingContactId || !formData.name || !formData.address) return;
 
-    const updatedContacts = contacts.map(contact =>
+    setContacts(contacts.map(contact =>
       contact.id === editingContactId
         ? { ...contact, name: formData.name!, address: formData.address!, email: formData.email || '' }
         : contact
-    );
-
-    setContacts(updatedContacts);
-    onContactsChange?.(updatedContacts);
+    ));
     setFormData({ name: '', address: '', email: '' });
     setEditingContactId(null);
   };
 
   const handleDeleteContact = (id: string) => {
-    const updatedContacts = contacts.filter(contact => contact.id !== id);
-    setContacts(updatedContacts);
-    onContactsChange?.(updatedContacts);
+    setContacts(contacts.filter(contact => contact.id !== id));
   };
 
   const startEditing = (contact: Contact) => {
@@ -161,36 +179,19 @@ export const ContactsMenu = ({
                   </button>
                   {expandedActionsId === contact.id && (
                     <div className="actions-menu">
-                      <button 
-                        className="action-item"
-                        onClick={() => {
-                          onSendAssets?.(contact);
-                          setExpandedActionsId(null);
-                        }}
-                      >
-                        <span className="action-icon">📤</span>
-                        Send Assets
-                      </button>
-                      <button 
-                        className="action-item"
-                        onClick={() => {
-                          onAddToWill?.(contact);
-                          setExpandedActionsId(null);
-                        }}
-                      >
-                        <span className="action-icon">📝</span>
-                        Add to Will
-                      </button>
-                      <button 
-                        className="action-item"
-                        onClick={() => {
-                          onAddExecutor?.(contact);
-                          setExpandedActionsId(null);
-                        }}
-                      >
-                        <span className="action-icon">👥</span>
-                        Add Executor
-                      </button>
+                      {actions.map((action) => (
+                        <button 
+                          key={action.id}
+                          className="action-item"
+                          onClick={() => {
+                            action.onClick(contact);
+                            setExpandedActionsId(null);
+                          }}
+                        >
+                          <span className="action-icon">{action.icon}</span>
+                          {action.label}
+                        </button>
+                      ))}
                     </div>
                   )}
                 </div>
