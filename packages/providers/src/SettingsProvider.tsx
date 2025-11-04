@@ -92,7 +92,6 @@ export interface AppSettings {
   customSettings: Record<string, any>;
   sendAll: boolean;
   disableSync: boolean;
-  // Enhanced provider settings
   provider: ProviderConfig;
   metadataProvider: ProviderConfig;
 }
