@@ -241,6 +241,9 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
             const assetName = getAssetName(asset);
             const isNFT = isAssetNFT(asset);
 
+            const isEditing = editingAmounts[asset.id] !== undefined;
+            const showInput = !isSelected || isEditing;
+
             return (
               <div key={asset.id} className={`asset-card ${isSelected ? 'selected' : ''}`}>
                 {/* Asset Icon */}
@@ -257,57 +260,66 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
               {/* Asset Info */}
               <div className="asset-info">
                 <div className="asset-balance">
-                  {isSelected && (
-                    <span className="selected-indicator">
-                      {displayAmount}/{maxAmount.toString()}
-                      <button
-                        className="remove-selection"
-                        onClick={() => updateAssetAmount(asset.id, 0n)}
-                      >
-                        ✕
-                      </button>
-                    </span>
-                  )}
-                  {!isSelected && (
-                    <span className="total-balance">{maxAmount.toString()}</span>
-                  )}
+                  <span className="total-balance">{maxAmount.toString()}</span>
                 </div>
                 <div className="asset-name" title={asset.id}>{assetName}</div>
               </div>
 
-                {/* Amount Input */}
-                <div className="asset-input-section">
-                  <input
-                    type="number"
-                    min="0"
-                    max={maxAmount}
-                    step={isNFT ? "1" : "0.000001"}
-                    value={displayAmount}
-                    onChange={(e) => handleAmountChange(asset.id, e.target.value, asset)}
-                    placeholder="0"
-                  />
-                  <button
-                    className="max-button"
-                    onClick={() => setMaxAmount(asset.id, asset)}
-                  >
-                    Max
-                  </button>
+                {/* Show either selected indicator or input, never both */}
+                <div className="asset-amount-controls">
+                  {isSelected && !showInput ? (
+                    <>
+                      <div className="selected-indicator">
+                        <span>{displayAmount}/{maxAmount.toString()}</span>
+                        <button
+                          className="remove-selection"
+                          onClick={() => updateAssetAmount(asset.id, 0n)}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                      <button 
+                        className="edit-amount-button"
+                        onClick={() => {
+                          const decimals = getAssetDecimals(asset);
+                          const amount = Number(getSelectedAmount(asset.id)) / Math.pow(10, decimals);
+                          setEditingAmounts({ ...editingAmounts, [asset.id]: amount.toString() });
+                        }}
+                      >
+                        Edit Amount
+                      </button>
+                    </>
+                  ) : (
+                    <div className="asset-input-section">
+                      <input
+                        type="number"
+                        min="0"
+                        max={maxAmount}
+                        step={isNFT ? "1" : "0.000001"}
+                        value={displayAmount}
+                        onChange={(e) => handleAmountChange(asset.id, e.target.value, asset)}
+                        placeholder="0"
+                      />
+                      <button
+                        className="max-button"
+                        onClick={() => setMaxAmount(asset.id, asset)}
+                      >
+                        Max
+                      </button>
+                    </div>
+                  )}
                 </div>
-
-                {isSelected && (
-                  <button className="edit-amount-button">Edit Amount</button>
-                )}
               </div>
             );
           })}
         </div>
 
-        {/* Footer Actions */}
-        <div className="asset-picker-footer">
-          <button className="reset-button" onClick={handleReset}>Reset</button>
-          <button className="add-all-button" onClick={handleAddAll}>Add All</button>
-          <button className="confirm-button" onClick={() => onConfirm(selectedAssets)}>Close</button>
-        </div>
+      {/* Footer Actions */}
+      <div className="asset-picker-footer">
+        <button className="reset-button" onClick={handleReset}>Reset</button>
+        <button className="add-all-button" onClick={handleAddAll}>Add All</button>
+        <button className="confirm-button" onClick={() => onConfirm(selectedAssets)}>Confirm</button>
+      </div>
       </div>
     </div>
   );
