@@ -14,7 +14,6 @@ export interface SendTransactionResult {
 }
 
 export interface UseSendTransactionOptions {
-  walletId: string;
   onSuccess?: (data: SendTransactionResult) => void;
   onError?: (error: Error) => void;
 }
@@ -28,9 +27,10 @@ export interface UseSendTransactionOptions {
  */
 export const useSendTransaction = (
   wallet: WalletInterface,
-  options: UseSendTransactionOptions
+  options: UseSendTransactionOptions = {}
 ): UseMutationResult<SendTransactionResult, Error, SendTransactionParams> => {
-  const { walletId, onSuccess, onError } = options;
+  const { onSuccess, onError } = options;
+  const walletId = wallet.getName(); // Derive from wallet
   const queryClient = useQueryClient();
 
   return useMutation({

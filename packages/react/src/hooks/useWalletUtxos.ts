@@ -1,8 +1,7 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { WalletInterface } from '@clan/framework-core';
+import { WalletInterface, UTxO } from '@clan/framework-core';
 
 export interface UseWalletUtxosOptions {
-  walletId: string;
   refetchInterval?: number;
   enabled?: boolean;
 }
@@ -15,9 +14,10 @@ export interface UseWalletUtxosOptions {
  */
 export const useWalletUtxos = (
   wallet: WalletInterface,
-  options: UseWalletUtxosOptions
-): UseQueryResult<any[], Error> => {
-  const { walletId, refetchInterval = 10000, enabled = true } = options;
+  options: UseWalletUtxosOptions = {}
+): UseQueryResult<UTxO[], Error> => {
+  const { refetchInterval = 10000, enabled = true } = options;
+  const walletId = wallet.getName(); // Derive from wallet
 
   return useQuery({
     queryKey: ['wallet', walletId, 'utxos'],

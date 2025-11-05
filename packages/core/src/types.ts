@@ -46,6 +46,7 @@ export interface WalletConfig {
   name: string;
   version: string;
   network: NetworkConfig;
+  options?: Record<string, any>; // Additional wallet-specific options
 }
 
 export interface TransactionStatus {

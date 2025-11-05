@@ -1,8 +1,7 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { WalletInterface } from '@clan/framework-core';
+import { WalletInterface, Assets } from '@clan/framework-core';
 
 export interface UseWalletBalanceOptions {
-  walletId: string;
   refetchInterval?: number;
   enabled?: boolean;
 }
@@ -15,9 +14,10 @@ export interface UseWalletBalanceOptions {
  */
 export const useWalletBalance = (
   wallet: WalletInterface,
-  options: UseWalletBalanceOptions
-): UseQueryResult<Record<string, bigint>, Error> => {
-  const { walletId, refetchInterval = 10000, enabled = true } = options;
+  options: UseWalletBalanceOptions = {}
+): UseQueryResult<Assets, Error> => {
+  const { refetchInterval = 10000, enabled = true } = options;
+  const walletId = wallet.getName(); // Derive from wallet
 
   return useQuery({
     queryKey: ['wallet', walletId, 'balance'],

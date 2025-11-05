@@ -58,19 +58,6 @@ export interface SignedTransaction {
   witnesses: TransactionWitnessSet;
 }
 
-// Transaction creation options
-export interface TransactionBuildOptions {
-  inputs?: TransactionInput[];
-  outputs?: TransactionOutput[];
-  recipients?: { address: Address; assets: Assets }[];
-  changeAddress?: Address;
-  ttl?: number;
-  metadata?: TransactionMetadata;
-  collateral?: UTxO[];
-  mint?: Assets;
-  scriptUtxos?: UTxO[];
-  requiredSigners?: string[];
-}
 
 // Transaction submission result
 export interface TransactionSubmission {
@@ -100,12 +87,5 @@ export interface UtxoSelectionStrategy {
   }>;
 }
 
-// Fee estimation interface
-export interface FeeEstimator {
-  estimateFee(
-    inputs: TransactionInput[],
-    outputs: TransactionOutput[],
-    options?: TransactionBuildOptions
-  ): Promise<bigint>;
-}
+
 

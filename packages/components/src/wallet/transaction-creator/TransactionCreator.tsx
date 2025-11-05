@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Assets, UTxO, Transaction, TransactionBuildOptions } from '@clan/framework-core';
+import { Assets, UTxO, WalletInterface, TransactionBuildOptions } from '@clan/framework-core';
 import { coinSelect } from '@clan/framework-core';
-import { TokenElement } from '../token/TokenElement';
-import { AddressSelect } from '../AddressSelect';
 import { Button } from '../../ui/buttons/Button';
 import { Modal } from '../../ui/modals/Modal';
+import { ContactPicker } from '../../contacts/ContactPicker';
+import { AssetPicker, UIAsset, SelectedAsset } from '../asset-picker/AssetPicker';
 
 export interface TransactionRecipient {
   address: string;
@@ -14,9 +14,10 @@ export interface TransactionRecipient {
 }
 
 export interface TransactionCreatorProps {
-  wallet: any; // WalletInterface
+  wallet: WalletInterface;
   availableUtxos: UTxO[];
-  onTransactionCreated?: (transaction: Transaction, options: TransactionBuildOptions) => void;
+  availableAssets?: UIAsset[];
+  onTransactionCreated?: (options: TransactionBuildOptions) => void;
   onCancel?: () => void;
   className?: string;
 }
@@ -24,6 +25,7 @@ export interface TransactionCreatorProps {
 export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
   wallet,
   availableUtxos,
+  availableAssets = [],
   onTransactionCreated,
   onCancel,
   className = ''
@@ -36,7 +38,111 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
   const [isCalculating, setIsCalculating] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [previewTransaction, setPreviewTransaction] = useState<Transaction | null>(null);
+  const [previewOptions, setPreviewOptions] = useState<TransactionBuildOptions | null>(null);
+  const [showContactPicker, setShowContactPicker] = useState<number | null>(null);
+  const [addressErrors, setAddressErrors] = useState<{ [key: number]: string }>({});
+  const [showAssetPicker, setShowAssetPicker] = useState<number | null>(null);
+
+  // Decode hex-encoded asset name from assetId
+  const decodeAssetName = (assetId: string): string => {
+    try {
+      // AssetId format: policyId (56 chars) + hex-encoded asset name
+      if (assetId.length <= 56) {
+        return assetId.slice(0, 8) + '...';
+      }
+      
+      const hexAssetName = assetId.slice(56);
+      if (!hexAssetName) {
+        return assetId.slice(0, 8) + '...';
+      }
+      
+      // Decode hex to UTF-8
+      const decoded = hexAssetName.match(/.{1,2}/g)
+        ?.map(byte => String.fromCharCode(parseInt(byte, 16)))
+        .join('');
+      
+      return decoded || assetId.slice(0, 8) + '...';
+    } catch (error) {
+      return assetId.slice(0, 8) + '...';
+    }
+  };
+
+  // Validate Cardano address
+  const validateCardanoAddress = (address: string): boolean => {
+    if (!address) return false;
+    // Basic Cardano address validation
+    // Mainnet addresses start with 'addr1' and testnets with 'addr_test1'
+    // Addresses are typically 103-108 characters long (bech32 format)
+    const cardanoAddressRegex = /^(addr1|addr_test1)[a-z0-9]{98,104}$/;
+    return cardanoAddressRegex.test(address);
+  };
+
+  // Update recipient address with validation
+  const updateRecipientAddress = (index: number, address: string) => {
+    const newRecipients = [...recipients];
+    newRecipients[index] = { ...newRecipients[index], address };
+    setRecipients(newRecipients);
+
+    // Validate address
+    if (address && !validateCardanoAddress(address)) {
+      setAddressErrors({ ...addressErrors, [index]: 'Invalid Cardano address' });
+    } else {
+      const newErrors = { ...addressErrors };
+      delete newErrors[index];
+      setAddressErrors(newErrors);
+    }
+  };
+
+  // Convert Assets to SelectedAsset[] (excluding lovelace)
+  const assetsToSelectedAssets = (assets: Assets): SelectedAsset[] => {
+    return Object.entries(assets)
+      .filter(([assetId, amount]) => assetId !== 'lovelace' && amount > 0n)
+      .map(([assetId, amount]) => ({ assetId, amount }));
+  };
+
+  // Convert SelectedAsset[] to Assets
+  const selectedAssetsToAssets = (selectedAssets: SelectedAsset[]): Assets => {
+    const assets: Assets = {};
+    selectedAssets.forEach(({ assetId, amount }) => {
+      assets[assetId] = amount;
+    });
+    return assets;
+  };
+
+  // Update recipient assets from asset picker (preserve lovelace)
+  const handleAssetsConfirmed = (index: number, selectedAssets: SelectedAsset[]) => {
+    const newRecipients = [...recipients];
+    const currentLovelace = newRecipients[index].assets['lovelace'] || 0n;
+    newRecipients[index] = {
+      ...newRecipients[index],
+      assets: {
+        'lovelace': currentLovelace, // Preserve lovelace amount
+        ...selectedAssetsToAssets(selectedAssets)
+      }
+    };
+    setRecipients(newRecipients);
+    setShowAssetPicker(null);
+  };
+
+  // Remove a specific asset from recipient
+  const removeAssetFromRecipient = (index: number, assetId: string) => {
+    const newRecipients = [...recipients];
+    const newAssets = { ...newRecipients[index].assets };
+    delete newAssets[assetId];
+    newRecipients[index] = { ...newRecipients[index], assets: newAssets };
+    setRecipients(newRecipients);
+  };
+
+  // Remove all assets from recipient (except lovelace which has its own input)
+  const removeAllAssetsFromRecipient = (index: number) => {
+    const newRecipients = [...recipients];
+    const currentLovelace = newRecipients[index].assets['lovelace'] || 0n;
+    newRecipients[index] = { 
+      ...newRecipients[index], 
+      assets: { 'lovelace': currentLovelace } // Preserve lovelace
+    };
+    setRecipients(newRecipients);
+  };
 
   // Calculate total assets to send
   const calculateTotalAssets = (): Assets => {
@@ -110,57 +216,20 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
   };
 
   // Update recipient data
-  const updateRecipient = (index: number, field: keyof TransactionRecipient, value: any) => {
+  const updateRecipient = (index: number, field: keyof TransactionRecipient, value: string | Assets) => {
     const newRecipients = [...recipients];
     newRecipients[index] = { ...newRecipients[index], [field]: value };
     setRecipients(newRecipients);
   };
 
-  // Update recipient assets
-  const updateRecipientAsset = (index: number, assetId: string, amount: string) => {
-    const newRecipients = [...recipients];
-    const numAmount = parseFloat(amount);
-    if (!isNaN(numAmount) && numAmount >= 0) {
-      newRecipients[index].assets = {
-        ...newRecipients[index].assets,
-        [assetId]: BigInt(Math.floor(numAmount * 1000000)) // Convert ADA to lovelace
-      };
-    }
-    setRecipients(newRecipients);
-  };
-
-  // Add asset to recipient
-  const addAssetToRecipient = (index: number, assetId: string) => {
-    const newRecipients = [...recipients];
-    if (!newRecipients[index].assets[assetId]) {
-      newRecipients[index].assets = {
-        ...newRecipients[index].assets,
-        [assetId]: 0n
-      };
-    }
-    setRecipients(newRecipients);
-  };
-
-  // Remove asset from recipient
-  const removeAssetFromRecipient = (index: number, assetId: string) => {
-    const newRecipients = [...recipients];
-    const newAssets = { ...newRecipients[index].assets };
-    delete newAssets[assetId];
-    newRecipients[index].assets = newAssets;
-    setRecipients(newRecipients);
-  };
 
   // Preview transaction
   const previewTransactionCreation = async () => {
     try {
-      const totalAssets = calculateTotalAssets();
-      const transaction = await wallet.buildTransaction({
-        recipients,
-        selectedUtxos,
-        totalAssets,
-        estimatedFee
-      });
-      setPreviewTransaction(transaction);
+      const options: TransactionBuildOptions = {
+        outputs: recipients.map(r => ({ address: r.address, assets: r.assets }))
+      };
+      setPreviewOptions(options);
       setShowPreview(true);
     } catch (error) {
       console.error('Error previewing transaction:', error);
@@ -173,14 +242,11 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
 
     setIsCreating(true);
     try {
-      const totalAssets = calculateTotalAssets();
       const options: TransactionBuildOptions = {
-        recipients: recipients.map(r => ({ address: r.address, assets: r.assets })),
-        inputs: selectedUtxos
+        outputs: recipients.map(r => ({ address: r.address, assets: r.assets }))
       };
 
-      const transaction = await wallet.buildTransaction(options);
-      onTransactionCreated?.(transaction, options);
+      onTransactionCreated?.(options);
     } catch (error) {
       console.error('Error creating transaction:', error);
     } finally {
@@ -211,100 +277,167 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
       <div className="recipients-section">
         <div className="section-header">
           <h3>Recipients</h3>
-          <button className="add-recipient-button" onClick={addRecipient}>
-            + Add Recipient
-          </button>
         </div>
 
         <div className="recipients-list">
           {recipients.map((recipient, index) => (
             <div key={index} className="recipient-item">
-              <div className="recipient-header">
-                <span className="recipient-label">Recipient {index + 1}</span>
-                {recipients.length > 1 && (
+              {index > 0 && (
                   <button
-                    className="remove-recipient"
+                  className="remove-recipient-x"
                     onClick={() => removeRecipient(index)}
+                  title="Remove recipient"
                   >
-                    Remove
+                  ✕
                   </button>
                 )}
-              </div>
 
-              {/* Address Input */}
+              {/* Address Input with ADA Amount */}
               <div className="address-input">
-                <label>Address</label>
-                <AddressSelect
-                  wallet={wallet}
-                  selectedAddress={recipient.address}
-                  onAddressChange={(address) => updateRecipient(index, 'address', address)}
-                />
+                <label>Recipient Address</label>
+                <div className="address-input-wrapper">
+                  <input
+                    type="text"
+                    value={recipient.address}
+                    onChange={(e) => updateRecipientAddress(index, e.target.value)}
+                    placeholder="addr1..."
+                    className={addressErrors[index] ? 'error' : ''}
+                  />
+                  <button
+                    type="button"
+                    className="contact-picker-button"
+                    onClick={() => setShowContactPicker(index)}
+                    title="Select from contacts"
+                  >
+                    <svg 
+                      width="20" 
+                      height="20" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                  </button>
+                  <input
+                    type="number"
+                    className="ada-amount-input"
+                    value={Number(recipient.assets['lovelace'] || 0n) / 1000000}
+                    onChange={(e) => {
+                      const numAmount = parseFloat(e.target.value);
+                      if (!isNaN(numAmount) && numAmount >= 0) {
+                        const newRecipients = [...recipients];
+                        newRecipients[index] = {
+                          ...newRecipients[index],
+                          assets: {
+                            ...newRecipients[index].assets,
+                            'lovelace': BigInt(Math.floor(numAmount * 1000000))
+                          }
+                        };
+                        setRecipients(newRecipients);
+                      }
+                    }}
+                    placeholder="0"
+                    step="0.001"
+                    min="0"
+                  />
+                  <button
+                    type="button"
+                    className="max-ada-button"
+                    onClick={() => {
+                      // Get total available ADA from wallet
+                      const totalLovelace = availableUtxos.reduce((sum, utxo) => 
+                        sum + (utxo.assets['lovelace'] || 0n), 0n
+                      );
+                      const newRecipients = [...recipients];
+                      newRecipients[index] = {
+                        ...newRecipients[index],
+                        assets: {
+                          ...newRecipients[index].assets,
+                          'lovelace': totalLovelace
+                        }
+                      };
+                      setRecipients(newRecipients);
+                    }}
+                    title="Send maximum ADA"
+                  >
+                    Max
+                  </button>
+                </div>
+                {addressErrors[index] && (
+                  <span className="address-error">{addressErrors[index]}</span>
+                )}
               </div>
 
               {/* Assets Section */}
               <div className="assets-section">
                 <label>Assets</label>
 
-                {/* ADA Amount */}
-                <div className="asset-input">
-                  <span className="asset-label">ADA</span>
-                  <input
-                    type="number"
-                    step="0.001"
-                    min="0"
-                    value={Number(recipient.assets['lovelace'] || 0n) / 1000000}
-                    onChange={(e) => updateRecipientAsset(index, 'lovelace', e.target.value)}
-                    placeholder="0.000000"
-                  />
+                {/* Selected Assets Chips (excluding ADA/lovelace) */}
+                <div className="selected-assets-chips">
+                  {Object.entries(recipient.assets)
+                    .filter(([assetId, amount]) => assetId !== 'lovelace' && amount > 0n)
+                    .map(([assetId, amount]) => {
+                      const asset = availableAssets.find(a => a.id === assetId);
+                      
+                      // Fallback for decimals if asset metadata not available
+                      const decimals = asset?.decimals !== undefined 
+                        ? asset.decimals 
+                        : (asset?.isNFT || amount === 1n ? 0 : 6);
+                      
+                      const displayAmount = (Number(amount) / Math.pow(10, decimals)).toString();
+                      
+                      // Fallback for asset name - decode from hex if metadata not available
+                      const assetName = asset?.name 
+                        || asset?.ticker 
+                        || decodeAssetName(assetId);
+
+                      return (
+                        <div key={assetId} className="asset-chip" title={assetId}>
+                          <span className="asset-chip-text">
+                            {assetName} {displayAmount}
+                          </span>
+                          <button
+                            className="asset-chip-remove"
+                            onClick={() => removeAssetFromRecipient(index, assetId)}
+                            title="Remove asset"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      );
+                    })}
                 </div>
 
-                {/* Other Assets */}
-                {Object.entries(recipient.assets)
-                  .filter(([assetId]) => assetId !== 'lovelace')
-                  .map(([assetId, amount]) => (
-                    <div key={assetId} className="asset-input">
-                      <TokenElement
-                        tokenId={assetId}
-                        amount={Number(amount)}
-                        className="asset-token"
-                      />
-                      <input
-                        type="number"
-                        min="0"
-                        value={Number(amount)}
-                        onChange={(e) => updateRecipientAsset(index, assetId, e.target.value)}
-                        placeholder="0"
-                      />
-                      <button
-                        className="remove-asset"
-                        onClick={() => removeAssetFromRecipient(index, assetId)}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ))}
-
-                {/* Add Asset Button */}
-                <button
-                  className="add-asset-button"
-                  onClick={() => addAssetToRecipient(index, 'asset_' + Date.now())}
-                >
-                  + Add Asset
-                </button>
-              </div>
-
-              {/* Datum Input (Optional) */}
-              <div className="datum-input">
-                <label>Datum (Optional)</label>
-                <textarea
-                  value={recipient.datum || ''}
-                  onChange={(e) => updateRecipient(index, 'datum', e.target.value)}
-                  placeholder="JSON datum or CBOR hex"
-                  rows={3}
-                />
+                {/* Action Buttons */}
+                <div className="asset-actions">
+                  <button
+                    className="add-assets-button"
+                    onClick={() => setShowAssetPicker(index)}
+                  >
+                    Add Assets
+                  </button>
+                  {Object.keys(recipient.assets).filter(k => k !== 'lovelace').length > 0 && (
+                    <button
+                      className="remove-all-button"
+                      onClick={() => removeAllAssetsFromRecipient(index)}
+                    >
+                      Remove All
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ))}
+
+          {/* Add Recipient Button */}
+          <button className="add-recipient-button" onClick={addRecipient}>
+            + Add Recipient
+          </button>
         </div>
       </div>
 
@@ -361,7 +494,7 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
       </div>
 
       {/* Transaction Preview Modal */}
-      {showPreview && previewTransaction && (
+      {showPreview && previewOptions && (
         <Modal
           isOpen={showPreview}
           onClose={() => setShowPreview(false)}
@@ -370,9 +503,26 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
           <div className="transaction-preview">
             <div className="preview-details">
               <h4>Transaction Details</h4>
-              <pre className="transaction-json">
-                {JSON.stringify(previewTransaction, null, 2)}
-              </pre>
+              <div className="preview-recipients">
+                {recipients.map((recipient, idx) => (
+                  <div key={idx} className="preview-recipient">
+                    <div><strong>Recipient {idx + 1}:</strong></div>
+                    <div className="preview-address">{recipient.address}</div>
+                    <div className="preview-assets">
+                      {Object.entries(recipient.assets).map(([assetId, amount]) => (
+                        <div key={assetId}>
+                          {assetId === 'lovelace' ? 'ADA' : assetId.slice(0, 12)}:{' '}
+                          {amount.toString()}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="preview-summary">
+                <div>Selected UTXOs: {selectedUtxos.length}</div>
+                <div>Estimated Fee: {Number(estimatedFee) / 1000000} ₳</div>
+              </div>
             </div>
 
             <div className="preview-actions">
@@ -394,6 +544,32 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
             </div>
           </div>
         </Modal>
+      )}
+
+      {/* Contact Picker Modal */}
+      {showContactPicker !== null && (
+        <ContactPicker
+          isModal={true}
+          onSelect={(contact) => {
+            if (showContactPicker !== null) {
+              updateRecipientAddress(showContactPicker, contact.address);
+              setShowContactPicker(null);
+            }
+          }}
+          onClose={() => setShowContactPicker(null)}
+          title="Select Contact"
+          searchPlaceholder="Search contacts..."
+        />
+      )}
+
+      {/* Asset Picker Modal */}
+      {showAssetPicker !== null && (
+        <AssetPicker
+          availableAssets={availableAssets.filter(a => a.id !== 'lovelace')}
+          selectedAssets={assetsToSelectedAssets(recipients[showAssetPicker].assets)}
+          onConfirm={(selected) => handleAssetsConfirmed(showAssetPicker, selected)}
+          onClose={() => setShowAssetPicker(null)}
+        />
       )}
     </div>
   );

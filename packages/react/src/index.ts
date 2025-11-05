@@ -12,3 +12,5 @@ export type {
   UseSendTransactionOptions 
 } from './hooks/useSendTransaction';
 
+// Export smart components
+export * from './components';

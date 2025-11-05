@@ -29,7 +29,10 @@ export default defineConfig({
         'react-dom',
         'react/jsx-runtime',
         '@tanstack/react-query',
-        '@clan/framework-core'
+        '@clan/framework-core',
+        '@clan/framework-components',
+        '@clan/framework-helpers',
+        '@clan/framework-providers'
       ],
       output: {
         globals: {

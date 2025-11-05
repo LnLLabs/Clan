@@ -13,7 +13,8 @@
   "peerDependencies": {
     "react": "^18.0.0",
     "@tanstack/react-query": "^5.0.0",
-    "@clan/framework-core": "*"
+    "@clan/framework-core": "*",
+    "@clan/framework-components": "*"
   },
   "devDependencies": {
     "@types/react": "^18.0.0",

@@ -21,9 +21,9 @@ export type {
 export type {
   WalletInterface,
   WalletFactory,
-  WalletConfig,
   TransactionDraft,
   TransactionOptions,
+  TransactionBuildOptions,
   WalletEvent,
   WalletEventType
 } from './wallet-interface';
@@ -36,11 +36,9 @@ export type {
   TransactionMetadata,
   TransactionWitnessSet,
   VKeyWitness,
-  TransactionBuildOptions,
   TransactionSubmission,
   TransactionHistoryEntry,
-  UtxoSelectionStrategy,
-  FeeEstimator
+  UtxoSelectionStrategy
 } from './transaction-types';
 
 export {

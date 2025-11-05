@@ -5,8 +5,10 @@ import {
   UTxO,
   Transaction,
   NetworkConfig,
-  TransactionStatus
+  TransactionStatus,
+  WalletConfig
 } from './types';
+import { SignedTransaction } from './transaction-types';
 
 // Generic wallet interface that can be implemented by different wallet types
 export interface WalletInterface {
@@ -75,23 +77,11 @@ export interface TransactionDraft {
   witnesses: any[]; // Implementation specific
 }
 
-// Signed transaction ready for submission
-export interface SignedTransaction {
-  transaction: Transaction;
-  witnesses: any[]; // Implementation specific
-}
-
 // Wallet factory interface
 export interface WalletFactory {
   createWallet(config: WalletConfig): WalletInterface;
   getSupportedNetworks(): NetworkConfig[];
   isAvailable(): boolean;
-}
-
-// Wallet configuration
-export interface WalletConfig {
-  network: NetworkConfig;
-  options?: Record<string, any>;
 }
 
 // Event types for wallet state changes

@@ -29,6 +29,9 @@ export * from './transaction-details';
 // Transaction creator components
 export * from './transaction-creator';
 
+// Asset picker components
+export * from './asset-picker';
+
 // Delegation components
 export * from './delegation';
 
