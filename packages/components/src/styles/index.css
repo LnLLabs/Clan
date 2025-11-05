@@ -1450,9 +1450,10 @@
 .asset-picker-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: 1.5rem;
   border-bottom: 1px solid #4a4a5e;
+  position: relative;
 }
 
 .asset-picker-header h2 {
@@ -1460,9 +1461,12 @@
   font-size: 1.5rem;
   font-weight: 600;
   color: #ffffff;
+  text-align: center;
 }
 
 .asset-picker-header .close-button {
+  position: absolute;
+  right: 1.5rem;
   background: none;
   border: none;
   font-size: 1.5rem;
@@ -1493,11 +1497,12 @@
 
 .asset-picker-tabs {
   display: flex;
-  gap: 0.5rem;
+  gap: 0;
+  margin-left: -0.5rem;
 }
 
 .asset-tab {
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 1.25rem;
   background: #4a4a5e;
   border: none;
   border-radius: 0.5rem;
@@ -1506,35 +1511,55 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease-in-out;
+  position: relative;
+  z-index: 1;
+}
+
+.asset-tab:not(:first-child) {
+  margin-left: -0.5rem;
 }
 
 .asset-tab:hover {
   background: #5a5a6e;
   color: #ffffff;
+  z-index: 2;
 }
 
 .asset-tab.active {
   background: #ec4899;
   color: #ffffff;
+  z-index: 3;
 }
 
 .asset-picker-search input {
   width: 100%;
-  padding: 0.75rem 2.5rem 0.75rem 1rem;
-  background: #363650;
-  border: 1px solid #4a4a5e;
-  border-radius: 2rem;
+  padding: 0.75rem 2.5rem 0.75rem 2.5rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0;
   color: #ffffff;
   font-size: 0.875rem;
 }
 
 .asset-picker-search input::placeholder {
-  color: #7a7a8e;
+  color: #6b7280;
 }
 
 .asset-picker-search input:focus {
   outline: none;
-  border-color: #ec4899;
+  border-bottom-color: rgba(236, 72, 153, 0.3);
+  background: transparent;
+}
+
+.asset-picker-search::before {
+  content: '🔍';
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  opacity: 0.5;
 }
 
 .asset-picker-search .clear-search {
