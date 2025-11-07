@@ -88,17 +88,43 @@ const TokenRow: React.FC<TokenRowProps> = ({ tokenId, amount, totalValue, onClic
     ? amount / Math.pow(10, tokenInfo.decimals)
     : amount;
   
-  // Mock USD value calculation (you'll need real price data)
-  // Use raw amount for portfolio calculation to match totalValue calculation
-  const usdValue = displayAmount * 0.627; // Mock price for display
-  const rawUsdValue = amount * 0.627; // Use raw amount for percentage calculation
-  const portfolioPercentage = (rawUsdValue / totalValue) * 100;
+  // Calculate USD value if price is available
+  const usdValue = 0
+  const rawUsdValue =0 
+  const portfolioPercentage = (rawUsdValue && totalValue > 0) 
+    ? (rawUsdValue / totalValue) * 100 
+    : null;
 
-  // Decode asset name if metadata not available, and clean null bytes
+  // Decode asset name if metadata not available
   const rawName = tokenInfo?.name || decodeAssetName(tokenId);
-  const decodedName = rawName.replace(/\x00+$/g, '').trim();
-  const rawTicker = tokenInfo?.ticker || decodedName;
-  const displayTicker = rawTicker.replace(/\x00+$/g, '').trim();
+  
+  // Decode hex to string if rawName is hex-encoded
+  const decodeHexToString = (hex: string): string => {
+    try {
+      if (!/^[0-9a-fA-F]+$/.test(hex)) return hex;
+      const decoded = hex.match(/.{1,2}/g)
+        ?.map(byte => String.fromCharCode(parseInt(byte, 16)))
+        .join('') || '';
+      return decoded.replace(/\x00+$/g, '').trim() || hex;
+    } catch {
+      return hex;
+    }
+  };
+  
+  const decodedName = decodeHexToString(rawName);
+  
+  // For ticker: prefer metadata ticker, otherwise use decoded name
+  const displayTicker = tokenInfo?.ticker 
+    ? tokenInfo.ticker
+    : decodedName;
+  
+  // For display name: 
+  // - If we have both name and ticker, show the name
+  // - If we only have name (no ticker), show fingerprint or shortened ID to differentiate
+  // - If we have neither, show fingerprint or shortened ID
+  const displayName = (tokenInfo?.name && tokenInfo?.ticker)
+    ? decodedName
+    : tokenInfo?.fingerprint || `${tokenId.slice(0, 8)}...${tokenId.slice(-8)}`;
   
   // Generate placeholder with initials from ticker or decoded name
   const getPlaceholder = () => {
@@ -127,7 +153,7 @@ const TokenRow: React.FC<TokenRowProps> = ({ tokenId, amount, totalValue, onClic
             <img 
               className="overview-token-icon" 
               src={tokenInfo.image} 
-              alt={decodedName}
+              alt={displayTicker}
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
                 const placeholder = e.currentTarget.parentElement?.querySelector('.overview-token-placeholder');
@@ -145,25 +171,32 @@ const TokenRow: React.FC<TokenRowProps> = ({ tokenId, amount, totalValue, onClic
         )}
         <div className="overview-token-info">
           <div className="overview-token-ticker">{displayTicker}</div>
-          <div className="overview-token-name">{decodedName}</div>
+          {displayName !== displayTicker && (
+            <div className="overview-token-name">{displayName}</div>
+          )}
         </div>
       </div>
       <div className="overview-token-quantity">
         {displayAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
       </div>
       <div className="overview-token-value">
-        ${usdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        {usdValue !== null 
+          ? `$${usdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+          : '—'
+        }
       </div>
       <div className="overview-token-portfolio">
         <span className="overview-portfolio-percentage">
-          {portfolioPercentage.toFixed(1)}%
+          {portfolioPercentage !== null ? `${portfolioPercentage.toFixed(1)}%` : '—'}
         </span>
-        <div className="overview-portfolio-bar">
-          <div 
-            className="overview-portfolio-fill" 
-            style={{ width: `${Math.min(portfolioPercentage, 100)}%` }}
-          />
-        </div>
+        {portfolioPercentage !== null && (
+          <div className="overview-portfolio-bar">
+            <div 
+              className="overview-portfolio-fill" 
+              style={{ width: `${Math.min(portfolioPercentage, 100)}%` }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -187,9 +220,23 @@ const NFTItem: React.FC<NFTItemProps> = ({ tokenId, onClick }) => {
     );
   }
 
-  // Decode asset name if metadata not available, and clean null bytes
+  // Decode asset name if metadata not available
   const rawName = !tokenInfo?.name ? decodeAssetName(tokenId) : tokenInfo.name;
-  const decodedName = rawName.replace(/\x00+$/g, '').trim();
+  
+  // Decode hex to string if rawName is hex-encoded
+  const decodeHexToString = (hex: string): string => {
+    try {
+      if (!/^[0-9a-fA-F]+$/.test(hex)) return hex;
+      const decoded = hex.match(/.{1,2}/g)
+        ?.map(byte => String.fromCharCode(parseInt(byte, 16)))
+        .join('') || '';
+      return decoded.replace(/\x00+$/g, '').trim() || hex;
+    } catch {
+      return hex;
+    }
+  };
+  
+  const decodedName = decodeHexToString(rawName);
 
   const getPlaceholderNFT = () => {
     const text = decodedName;
@@ -293,10 +340,12 @@ export const Overview: React.FC<OverviewProps> = ({
     setVisibleCount(prev => prev + 5);
   };
 
-  // Calculate total portfolio value (mock)
-  const totalValue = Object.values(balance).reduce((sum, amount) => sum + Number(amount) * 0.627, 0);
+  // Calculate total portfolio value
+  // V1: totalValue is 0 since we have no prices
+  // Future: Will calculate based on actual token prices
+  const totalValue = 0;
 
-  // Filter and sort tokens based on search and portfolio %
+  // Filter and sort tokens based on search
   const filteredTokens = Object.keys(balance)
     .filter(tokenId => {
       if (search && search.trim() !== '') {
@@ -312,13 +361,9 @@ export const Overview: React.FC<OverviewProps> = ({
       if (a === 'lovelace' || a === 'ADA') return -1;
       if (b === 'lovelace' || b === 'ADA') return 1;
       
-      // Sort by portfolio percentage (descending)
-      const valueA = Number(balance[a]) * 0.627;
-      const valueB = Number(balance[b]) * 0.627;
-      const percentA = (valueA / totalValue) * 100;
-      const percentB = (valueB / totalValue) * 100;
-      
-      return percentB - percentA;
+      // V1: Sort by amount since we don't have prices yet
+      // Future: Sort by portfolio percentage when prices are available
+      return Number(balance[b]) - Number(balance[a]);
     });
 
   const visibleTokens = filteredTokens.slice(0, visibleCount);

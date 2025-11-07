@@ -36,7 +36,7 @@ export function useTokenInfo(tokenId: string): {
 
     try {
       const info = await getTokenInfo(tokenId);
-      setTokenInfo(info);
+      setTokenInfo(info || null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch token info');
     } finally {
@@ -59,7 +59,7 @@ export function useTokenInfo(tokenId: string): {
 /**
  * Get token information
  */
-export async function getTokenInfo(tokenId: string): Promise<TokenInfo> {
+export async function getTokenInfo(tokenId: string): Promise<TokenInfo | undefined> {
   // Handle ADA/lovelace
   if (tokenId === 'lovelace' || tokenId === '') {
     return {
@@ -84,7 +84,8 @@ export async function getTokenInfo(tokenId: string): Promise<TokenInfo> {
   const tokenInfo = await fetchTokenData(tokenId);
 
   // Cache the result
-  setCachedTokenInfo(tokenId, tokenInfo);
+  if (tokenInfo)
+    setCachedTokenInfo(tokenId, tokenInfo );
 
   return tokenInfo;
 }
@@ -124,12 +125,12 @@ function setCachedTokenInfo(tokenId: string, tokenInfo: TokenInfo): void {
 /**
  * Fetch token data from APIs
  */
-async function fetchTokenData(tokenId: string): Promise<TokenInfo> {
+async function fetchTokenData(tokenId: string): Promise<TokenInfo | undefined> {
   const settings = getSettings();
 
   try {
     if (settings.metadataProvider === 'None') {
-      return createBasicTokenInfo(tokenId);
+      return undefined;
     }
 
     // Try Blockfrost first (most reliable)
@@ -138,10 +139,10 @@ async function fetchTokenData(tokenId: string): Promise<TokenInfo> {
     }
 
     // Fallback to basic info
-    return createBasicTokenInfo(tokenId);
+    return undefined;
   } catch (error) {
     console.warn('Failed to fetch token info:', error);
-    return createBasicTokenInfo(tokenId);
+    return undefined;
   }
 }
 
@@ -188,32 +189,6 @@ async function fetchFromBlockfrost(tokenId: string, settings: any): Promise<Toke
 /**
  * Create basic token info when API is not available
  */
-function createBasicTokenInfo(tokenId: string): TokenInfo {
-  // Extract hex asset name from tokenId
-  // Format: policyId (56 chars) + hexEncodedName
-  let hexName = '';
-  let decodedName = '';
-  
-  if (tokenId.length > 56) {
-    hexName = tokenId.slice(56);
-    // Try to decode the hex name
-    decodedName = hexToAscii(hexName);
-  } else {
-    // If less than 56 chars, use last 8 chars as fallback
-    decodedName = tokenId.slice(-8);
-  }
-
-  return {
-    name: decodedName || tokenId.slice(-8),
-    image: '',
-    decimals: 0,
-    ticker: decodedName || undefined,
-    isNft: false,
-    provider: 'basic',
-    fingerprint: '',
-    fetchTime: Date.now()
-  };
-}
 
 /**
  * Convert hex to ASCII
