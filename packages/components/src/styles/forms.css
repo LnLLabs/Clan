@@ -1,0 +1,257 @@
+/* BroClan Framework - Form Component Styles */
+
+/* ===== INPUT COMPONENT ===== */
+.input-wrapper {
+  position: relative;
+}
+
+.input-label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.input-adornment-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-start-adornment {
+  position: absolute;
+  left: var(--space-md);
+  z-index: 1;
+  color: var(--color-text-tertiary);
+}
+
+.input-end-adornment {
+  position: absolute;
+  right: var(--space-md);
+  z-index: 1;
+  color: var(--color-text-tertiary);
+}
+
+.input-base {
+  width: 100%;
+  padding: var(--space-sm) var(--space-lg);
+  font-size: var(--font-size-sm);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-primary);
+  transition: all var(--transition-fast);
+  font-family: var(--font-family-base);
+}
+
+.input-base:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.input-with-start-adornment .input-base {
+  padding-left: 2.5rem;
+}
+
+.input-with-end-adornment .input-base {
+  padding-right: 2.5rem;
+}
+
+.input-error {
+  border-color: var(--color-error);
+}
+
+.input-error:focus {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.input-error-text {
+  margin-top: var(--space-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-error);
+}
+
+.input-helper-text {
+  margin-top: var(--space-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* ===== INPUT SIZES ===== */
+.input-sm .input-base {
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--font-size-xs);
+}
+
+.input-lg .input-base {
+  padding: var(--space-md) var(--space-lg);
+  font-size: var(--font-size-base);
+}
+
+/* ===== SEARCH INPUT ===== */
+.search-input {
+  width: 100%;
+  padding: var(--space-sm) var(--space-lg);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* ===== ADDRESS SELECT ===== */
+.address-select {
+  width: 100%;
+  padding: var(--space-sm);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  background-color: var(--color-bg-primary);
+}
+
+.address-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.address-select-container {
+  position: relative;
+}
+
+.address-select-container select {
+  width: 100%;
+  padding: var(--space-sm) 2.5rem var(--space-sm) var(--space-lg);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-primary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.address-select-container select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.address-select-container .defaultButton {
+  position: absolute;
+  right: var(--space-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--color-secondary);
+  color: white;
+  border: none;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+}
+
+.address-select-container .defaultButton:hover {
+  background: var(--color-secondary-hover);
+}
+
+.address-name-input {
+  margin-top: var(--space-sm);
+  width: 100%;
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+}
+
+/* ===== SETTINGS FORM ===== */
+.settings-modal {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.settings-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+.settings-select {
+  width: 100%;
+  padding: var(--space-sm);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  background-color: var(--color-bg-primary);
+}
+
+.settings-input {
+  width: 100%;
+  padding: var(--space-sm);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  background-color: var(--color-bg-primary);
+}
+
+.settings-checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.settings-checkbox {
+  width: var(--space-lg);
+  height: var(--space-lg);
+  accent-color: var(--color-primary);
+}
+
+.settings-warning {
+  background-color: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-warning-text);
+}
+
+/* ===== DARK MODE SUPPORT ===== */
+@media (prefers-color-scheme: dark) {
+  .input-base {
+    background-color: var(--color-bg-dark-secondary);
+    border-color: var(--color-border-dark-secondary);
+    color: var(--color-text-dark-primary);
+  }
+
+  .input-base::placeholder {
+    color: var(--color-text-tertiary);
+  }
+
+  .button-outline {
+    background-color: var(--color-bg-dark-primary);
+    border-color: var(--color-border-dark-secondary);
+    color: var(--color-text-dark-primary);
+  }
+
+  .button-outline:hover:not(:disabled) {
+    background-color: var(--color-bg-dark-secondary);
+    border-color: var(--color-border-dark-tertiary);
+  }
+}
+

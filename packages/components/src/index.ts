@@ -1,6 +1,5 @@
 // Import CSS as side effect (must be first!)
 import './styles/index.css';
-import './styles/components.css';
 
 // UI Components
 export * from './ui/buttons';

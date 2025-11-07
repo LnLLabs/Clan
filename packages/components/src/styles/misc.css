@@ -1,0 +1,44 @@
+/* BroClan Framework - Miscellaneous Component Styles */
+
+/* ===== TERMS BANNER ===== */
+.terms-banner {
+  background-color: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  margin: var(--space-lg) 0;
+}
+
+.terms-banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+}
+
+.terms-banner-text {
+  flex: 1;
+}
+
+.terms-banner-message {
+  color: var(--color-warning-text);
+  margin: 0;
+}
+
+.terms-banner-link {
+  color: var(--color-warning-hover);
+  text-decoration: underline;
+}
+
+.terms-banner-actions {
+  flex-shrink: 0;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 640px) {
+  .terms-banner-content {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
