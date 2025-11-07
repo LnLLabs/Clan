@@ -739,8 +739,452 @@
 /* ===== OVERVIEW ===== */
 .overview-container {
   max-width: 100%;
+  background: #36393F;
+  padding: 1.5rem;
+  border-radius: 0.875rem;
+  min-height: 600px;
 }
 
+/* Search */
+.overview-search-container {
+  margin-bottom: 1rem;
+  display: none; /* Hide search for now to match design */
+}
+
+.overview-search-input {
+  width: 100%;
+  max-width: 300px;
+  padding: 0.5rem 1rem;
+  border: 1px solid #4a4a5e;
+  border-radius: 0.375rem;
+  background: #2a2a3e;
+  color: #ffffff;
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.overview-search-input::placeholder {
+  color: #7a7a8e;
+}
+
+.overview-search-input:focus {
+  border-color: #7c3aed;
+}
+
+/* Tabs */
+.overview-tabs-container {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: -1px;
+  position: relative;
+  z-index: 1;
+}
+
+.overview-tab-button {
+  padding: 0.75rem 1.75rem;
+  background: #666666;
+  border: none;
+  border-radius: 0.625rem 0.625rem 0 0;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.overview-tab-button:hover {
+  background: #555555;
+}
+
+.overview-tab-button.active {
+  background: #4A4A4A;
+  color: #ffffff;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Tokens Card */
+.overview-tokens-card {
+  background: #ECECEC;
+  border-radius: 0 0.875rem 0.875rem 0.875rem;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+/* Table Header */
+.overview-table-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.5fr;
+  gap: 1rem;
+  padding: 0 1rem 1rem 1rem;
+  border-bottom: none;
+  margin-bottom: 1rem;
+}
+
+.overview-header-asset,
+.overview-header-quantity,
+.overview-header-value,
+.overview-header-portfolio {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #999999;
+  text-transform: none;
+  letter-spacing: 0.01em;
+}
+
+/* Table Body */
+.overview-table-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Token Row */
+.overview-token-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.5fr;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 0.625rem;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  background: transparent;
+}
+
+.overview-token-row:hover {
+  background: #d8d8d8;
+}
+
+.overview-token-row.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Asset Column */
+.overview-token-asset {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.overview-token-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #f3f4f6;
+  flex-shrink: 0;
+}
+
+.overview-token-placeholder {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.overview-token-placeholder.hidden {
+  display: none;
+}
+
+.overview-token-icon-skeleton {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.overview-token-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.overview-token-ticker {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #2d2d2d;
+}
+
+.overview-token-name {
+  font-size: 0.8rem;
+  color: #888888;
+}
+
+.overview-token-name-skeleton,
+.overview-token-ticker-skeleton {
+  height: 12px;
+  width: 80px;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 0.25rem;
+}
+
+.overview-token-ticker-skeleton {
+  width: 60px;
+  margin-bottom: 0.25rem;
+}
+
+/* Quantity Column */
+.overview-token-quantity {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #3d3d3d;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Value Column */
+.overview-token-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2d2d2d;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Portfolio Column */
+.overview-token-portfolio {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.overview-portfolio-percentage {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2d2d2d;
+}
+
+.overview-portfolio-bar {
+  width: 100%;
+  height: 8px;
+  background: #c9c9c9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.overview-portfolio-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #a855f7 0%, #7c3aed 100%);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* NFTs Card */
+.overview-nfts-card {
+  background: #36393F;
+  border-radius: 0 0.875rem 0.875rem 0.875rem;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  position: relative;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+/* NFT Grid */
+.overview-nfts-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  padding-bottom: 1rem;
+}
+
+.overview-nft-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.overview-nft-item:hover {
+  transform: translateY(-4px);
+}
+
+.overview-nft-item.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.overview-nft-image {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 0.75rem;
+  object-fit: cover;
+  margin-bottom: 0.75rem;
+  background: #f3f4f6;
+}
+
+.overview-nft-placeholder {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.hidden {
+  display: none;
+}
+
+.overview-nft-image-skeleton {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 0.75rem;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  margin-bottom: 0.75rem;
+}
+
+.overview-nft-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #ffffff;
+  text-align: center;
+  word-break: break-word;
+}
+
+.overview-nft-name-skeleton {
+  height: 14px;
+  width: 80%;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 0.25rem;
+}
+
+/* See More Button */
+.overview-see-more-button {
+  width: auto;
+  padding: 0.75rem 2rem;
+  background: linear-gradient(90deg, #d946ef 0%, #a855f7 100%);
+  border: none;
+  border-radius: 0.5rem;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(139, 92, 246, 0.3);
+  margin: 1.5rem auto 0;
+  display: block;
+}
+
+.overview-see-more-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.5);
+}
+
+.overview-see-more-button:active {
+  transform: translateY(0);
+}
+
+/* Empty State */
+.overview-empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+/* Scrollbar Styling */
+.overview-nfts-card::-webkit-scrollbar {
+  width: 10px;
+}
+
+.overview-nfts-card::-webkit-scrollbar-track {
+  background: #d1d1d1;
+  border-radius: 5px;
+}
+
+.overview-nfts-card::-webkit-scrollbar-thumb {
+  background: #a855f7;
+  border-radius: 5px;
+}
+
+.overview-nfts-card::-webkit-scrollbar-thumb:hover {
+  background: #9333ea;
+}
+
+.overview-tokens-card::-webkit-scrollbar {
+  width: 10px;
+}
+
+.overview-tokens-card::-webkit-scrollbar-track {
+  background: #d8d8d8;
+  border-radius: 5px;
+}
+
+.overview-tokens-card::-webkit-scrollbar-thumb {
+  background: #c9c9c9;
+  border-radius: 5px;
+}
+
+.overview-tokens-card::-webkit-scrollbar-thumb:hover {
+  background: #b8b8b8;
+}
+
+/* Shimmer Animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .overview-nfts-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .overview-table-header,
+  .overview-token-row {
+    grid-template-columns: 1fr;
+  }
+
+  .overview-header-quantity,
+  .overview-header-value,
+  .overview-header-portfolio {
+    display: none;
+  }
+
+  .overview-token-quantity,
+  .overview-token-value,
+  .overview-token-portfolio {
+    display: none;
+  }
+
+  .overview-nfts-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Legacy styles for backward compatibility */
 .overview-tabs {
   display: flex;
   gap: 0.5rem;

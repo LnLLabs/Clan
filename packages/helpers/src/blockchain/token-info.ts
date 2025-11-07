@@ -6,6 +6,7 @@ export interface TokenInfo {
   name: string;
   image: string;
   decimals?: number;
+  ticker?: string;
   isNft: boolean;
   provider: string;
   fingerprint: string;
@@ -65,6 +66,7 @@ export async function getTokenInfo(tokenId: string): Promise<TokenInfo> {
       name: 'ADA',
       image: '/assets/ADA.png',
       decimals: 6,
+      ticker: 'ADA',
       isNft: false,
       provider: 'system',
       fingerprint: '',
@@ -166,6 +168,7 @@ async function fetchFromBlockfrost(tokenId: string, settings: any): Promise<Toke
     name: data.asset_name ? hexToAscii(data.asset_name) : tokenId,
     image: '',
     decimals: data.metadata?.decimals || 0,
+    ticker: data.metadata?.ticker || data.onchain_metadata?.ticker,
     isNft: data.quantity === '1',
     provider: 'Blockfrost',
     fingerprint: data.fingerprint || '',
@@ -186,13 +189,25 @@ async function fetchFromBlockfrost(tokenId: string, settings: any): Promise<Toke
  * Create basic token info when API is not available
  */
 function createBasicTokenInfo(tokenId: string): TokenInfo {
-  const parts = tokenId.split('.');
-  const assetName = parts.length > 1 ? parts[1] : '';
+  // Extract hex asset name from tokenId
+  // Format: policyId (56 chars) + hexEncodedName
+  let hexName = '';
+  let decodedName = '';
+  
+  if (tokenId.length > 56) {
+    hexName = tokenId.slice(56);
+    // Try to decode the hex name
+    decodedName = hexToAscii(hexName);
+  } else {
+    // If less than 56 chars, use last 8 chars as fallback
+    decodedName = tokenId.slice(-8);
+  }
 
   return {
-    name: assetName ? hexToAscii(assetName) : tokenId.slice(-8),
+    name: decodedName || tokenId.slice(-8),
     image: '',
     decimals: 0,
+    ticker: decodedName || undefined,
     isNft: false,
     provider: 'basic',
     fingerprint: '',
@@ -209,7 +224,13 @@ function hexToAscii(hex: string): string {
     for (let i = 0; i < hex.length; i += 2) {
       str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
     }
-    return str;
+    // Remove trailing null bytes and trim
+    str = str.replace(/\x00+$/g, '').trim();
+    // Return decoded if it's printable ASCII, otherwise return the original hex
+    if (str && /^[\x20-\x7E]+$/.test(str)) {
+      return str;
+    }
+    return hex;
   } catch {
     return hex;
   }
