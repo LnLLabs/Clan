@@ -212,6 +212,122 @@ function hexToAscii(hex: string): string {
 }
 
 /**
+ * Decode hex-encoded asset name from token ID
+ */
+export function decodeAssetName(tokenId: string): string {
+  // If it's just "lovelace", return "ADA"
+  if (tokenId === 'lovelace') return 'ADA';
+  
+  // Determine the hex portion to decode
+  let hexName: string;
+  
+  // Check if tokenId has the full format: policyId (56 chars) + hexEncodedName
+  if (tokenId.length > 56) {
+    hexName = tokenId.slice(56);
+  } else {
+    // Otherwise, treat the entire tokenId as the hex name
+    hexName = tokenId;
+  }
+  
+  if (!hexName) return tokenId;
+  
+  return hexToAscii(hexName);
+}
+
+/**
+ * Decode hex string to readable text
+ */
+export function decodeHexToString(hex: string): string {
+  try {
+    if (!/^[0-9a-fA-F]+$/.test(hex)) return hex;
+    const decoded = hex.match(/.{1,2}/g)
+      ?.map(byte => String.fromCharCode(parseInt(byte, 16)))
+      .join('') || '';
+    return decoded.replace(/\x00+$/g, '').trim() || hex;
+  } catch {
+    return hex;
+  }
+}
+
+/**
+ * Token display information
+ */
+export interface TokenDisplayInfo {
+  displayName: string;
+  displayTicker: string;
+  decodedName: string;
+  placeholderColor: string;
+  placeholderInitials: string;
+}
+
+/**
+ * Get token display information for UI rendering
+ */
+export function getTokenDisplayInfo(
+  tokenId: string,
+  tokenInfo: TokenInfo | null | undefined
+): TokenDisplayInfo {
+  // Get the base decoded name
+  const rawName = tokenInfo?.name || decodeAssetName(tokenId);
+  const decodedName = decodeHexToString(rawName);
+  
+  // For ticker: prefer metadata ticker, otherwise use decoded name
+  const displayTicker = tokenInfo?.ticker || decodedName;
+  
+  // For display name: 
+  // - If we have both name and ticker, show the name
+  // - If we only have name (no ticker), show fingerprint or shortened ID to differentiate
+  // - If we have neither, show fingerprint or shortened ID
+  const displayName = (tokenInfo?.name && tokenInfo?.ticker)
+    ? decodedName
+    : tokenInfo?.fingerprint || `${tokenId.slice(0, 8)}...${tokenId.slice(-8)}`;
+  
+  // Generate placeholder color and initials
+  const placeholderColors = ['#8b5cf6', '#ec4899', '#06b6d4', '#10b981', '#f59e0b', '#ef4444'];
+  const colorIndex = tokenId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % placeholderColors.length;
+  const placeholderColor = placeholderColors[colorIndex];
+  const placeholderInitials = displayTicker.slice(0, 4).toUpperCase();
+  
+  return {
+    displayName,
+    displayTicker,
+    decodedName,
+    placeholderColor,
+    placeholderInitials
+  };
+}
+
+/**
+ * Get NFT display information for UI rendering
+ */
+export function getNFTDisplayInfo(
+  tokenId: string,
+  tokenInfo: TokenInfo | null | undefined
+): TokenDisplayInfo {
+  // Get the base decoded name
+  const rawName = !tokenInfo?.name ? decodeAssetName(tokenId) : tokenInfo.name;
+  const decodedName = decodeHexToString(rawName);
+  
+  // For NFTs, use the decoded name as both display name and ticker
+  const displayTicker = decodedName;
+  const displayName = decodedName;
+  
+  // Generate placeholder color and initials
+  const placeholderColors = ['#8b5cf6', '#ec4899', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#a855f7'];
+  const colorIndex = tokenId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % placeholderColors.length;
+  const placeholderColor = placeholderColors[colorIndex];
+  const placeholderInitials = decodedName.slice(0, 3).toUpperCase();
+  
+  return {
+    displayName,
+    displayTicker,
+    decodedName,
+    placeholderColor,
+    placeholderInitials
+  };
+}
+
+/**
  * Process image URL (handle IPFS, etc.)
  */
 function processImageUrl(imageUrl: string): string {
