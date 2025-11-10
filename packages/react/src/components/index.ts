@@ -4,3 +4,8 @@ export type {
   TokenMetadataProvider 
 } from './TransactionCreatorWithData';
 
+export { WalletDelegationWithData } from './WalletDelegationWithData';
+export type {
+  WalletDelegationWithDataProps
+} from './WalletDelegationWithData';
+

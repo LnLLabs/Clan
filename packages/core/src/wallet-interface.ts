@@ -50,6 +50,20 @@ export interface WalletInterface {
   getCollateral?(): Promise<UTxO[]>;
   getRewardAddress?(): Address;
   getStakingAddress?(): Address;
+
+  // Staking / Delegation methods
+  createDelegationTransaction?(poolId: string): Promise<TransactionDraft>;
+  withdrawRewards?(): Promise<TransactionDraft>;
+  getDelegationInfo?(): Promise<DelegationInfo>;
+}
+
+// Delegation information
+export interface DelegationInfo {
+  stakeAddress: string;
+  delegatedPool?: string;
+  rewards: bigint;
+  activeEpoch: number;
+  nextRewardEpoch?: number;
 }
 
 // Transaction creation options
