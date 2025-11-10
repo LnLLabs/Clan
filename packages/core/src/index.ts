@@ -15,7 +15,14 @@ export type {
   Transaction,
   NetworkConfig,
   ProviderType,
-  ProviderConfig
+  ProviderConfig,
+  MetadataProvider,
+  TokenMetadata,
+  TokenSearchResult
+} from './types';
+
+export {
+  NoOpMetadataProvider
 } from './types';
 
 export type {

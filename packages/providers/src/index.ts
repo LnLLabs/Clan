@@ -24,3 +24,19 @@ export {
   PROVIDER_DEFINITIONS
 } from './SettingsProvider';
 
+// Metadata Provider System
+export { 
+  MetadataProviderWrapper, 
+  useMetadataProvider 
+} from './MetadataProviderContext';
+
+export { 
+  BlockfrostMetadataProvider,
+  MaestroMetadataProvider,
+  createMetadataProvider
+} from './reference-metadata-providers';
+
+// Hooks
+export { useTokenInfo } from './hooks/useTokenInfo';
+export type { UseTokenInfoResult } from './hooks/useTokenInfo';
+

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { WalletInterface, Assets } from '@clan/framework-core';
 import { TokenElement } from '../token/TokenElement';
 import { AddressSelect } from '../AddressSelect';
-import { useTokenInfo, getTokenDisplayInfo, getNFTDisplayInfo } from '@clan/framework-helpers';
+import { useTokenInfo } from '@clan/framework-providers';
+import { getTokenDisplayInfo, getNFTDisplayInfo } from '@clan/framework-helpers';
 
 export interface OverviewProps {
   wallet: WalletInterface;

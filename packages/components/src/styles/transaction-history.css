@@ -1,0 +1,516 @@
+/* BroClan Framework - Transaction History Component Styles */
+
+/* ===== TRANSACTION HISTORY CONTAINER ===== */
+.transaction-history {
+  width: 100%;
+  background: var(--color-bg-primary);
+}
+
+.transaction-history-header {
+  padding: var(--space-lg) 0;
+}
+
+.transaction-history-header h2 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* ===== TABLE CONTAINER ===== */
+.transaction-history-table-container {
+  background: white;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.transaction-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+/* ===== TABLE HEADER ===== */
+.transaction-history-table thead {
+  background: white;
+  border-bottom: 1px solid var(--color-border-primary);
+}
+
+.transaction-history-table th {
+  padding: var(--space-md) var(--space-lg);
+  text-align: left;
+  font-weight: var(--font-weight-semibold);
+  color: #6b7280;
+  font-size: var(--font-size-sm);
+}
+
+/* ===== TABLE BODY ===== */
+.transaction-history-table tbody tr {
+  border-bottom: 1px solid var(--color-border-primary);
+  transition: background-color var(--transition-fast);
+}
+
+.transaction-history-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.transaction-history-table tbody tr:hover {
+  background-color: var(--color-bg-secondary);
+}
+
+.transaction-history-table td {
+  padding: var(--space-lg);
+  vertical-align: middle;
+}
+
+/* ===== DATE COLUMN ===== */
+.transaction-date {
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+}
+
+.transaction-sent-date {
+  color: #ef4444; /* Red for sent */
+}
+
+.transaction-received-date {
+  color: #10b981; /* Green for received */
+}
+
+.transaction-withdrawal-date {
+  color: var(--color-text-secondary); /* Gray for withdrawal */
+}
+
+/* ===== TRANSACTION TYPE COLUMN ===== */
+.transaction-type-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.transaction-icon {
+  font-size: var(--font-size-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+}
+
+.transaction-sent-icon {
+  filter: hue-rotate(0deg);
+}
+
+.transaction-received-icon {
+  filter: hue-rotate(0deg);
+}
+
+.transaction-withdrawal-icon {
+  filter: grayscale(0%);
+}
+
+.transaction-label {
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+}
+
+.transaction-sent-label {
+  color: #ef4444; /* Red */
+}
+
+.transaction-received-label {
+  color: #10b981; /* Green */
+}
+
+.transaction-withdrawal-label {
+  color: var(--color-text-secondary); /* Gray */
+}
+
+/* ===== ASSETS COLUMN ===== */
+.assets-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.asset-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.asset-icon-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.asset-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+}
+
+.ada-icon {
+  background: #0033ad;
+  color: white;
+}
+
+.asset-amount {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.token-asset {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.transaction-token {
+  display: inline-flex;
+}
+
+/* Token element in transaction row */
+.transaction-token .token-element {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 0;
+}
+
+.transaction-token .token-thumbnail {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.transaction-token .token-element-text {
+  display: none; /* Hide token name in table, just show icon */
+}
+
+/* ===== TRANSACTION LINK COLUMN ===== */
+.transaction-link-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.link-text {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 150px;
+}
+
+.link-action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #a855f7; /* Purple */
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.link-action-button:hover {
+  background: #9333ea;
+  transform: scale(1.05);
+}
+
+.plus-icon {
+  color: white;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+
+/* ===== FOOTER WITH SEE MORE BUTTON ===== */
+.transaction-history-footer {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-lg) 0;
+}
+
+.see-more-button {
+  padding: var(--space-md) var(--space-2xl);
+  background: linear-gradient(135deg, #ec4899 0%, #d946ef 100%); /* Pink/Magenta gradient */
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: 0 2px 4px rgba(236, 72, 153, 0.2);
+}
+
+.see-more-button:hover {
+  background: linear-gradient(135deg, #db2777 0%, #c026d3 100%);
+  box-shadow: 0 4px 8px rgba(236, 72, 153, 0.3);
+  transform: translateY(-1px);
+}
+
+.see-more-button:active {
+  transform: translateY(0);
+}
+
+/* ===== LOADING STATE ===== */
+.transaction-history-loading {
+  width: 100%;
+  padding: var(--space-2xl);
+}
+
+.transaction-history-loading .loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xl);
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.transaction-history-loading .loading-spinner {
+  font-size: 48px;
+  margin-bottom: var(--space-md);
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.transaction-history-loading h3 {
+  margin: 0 0 var(--space-sm) 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.transaction-history-loading p {
+  margin: 0;
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+}
+
+/* ===== ERROR STATE ===== */
+.transaction-history-error {
+  width: 100%;
+  padding: var(--space-2xl);
+}
+
+.transaction-history-error .error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xl);
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #fee2e2;
+}
+
+.transaction-history-error .error-icon {
+  font-size: 48px;
+  margin-bottom: var(--space-md);
+}
+
+.transaction-history-error h3 {
+  margin: 0 0 var(--space-sm) 0;
+  color: #dc2626;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.transaction-history-error p {
+  margin: 0;
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+/* ===== EMPTY STATE ===== */
+.transaction-history-empty {
+  width: 100%;
+  padding: var(--space-2xl);
+}
+
+.transaction-history-empty .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xl);
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.transaction-history-empty .empty-icon {
+  font-size: 48px;
+  margin-bottom: var(--space-md);
+  opacity: 0.5;
+}
+
+.transaction-history-empty h3 {
+  margin: 0 0 var(--space-sm) 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.transaction-history-empty p {
+  margin: 0;
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+  .transaction-history-table {
+    font-size: var(--font-size-xs);
+  }
+
+  .transaction-history-table th,
+  .transaction-history-table td {
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .transaction-type-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xs);
+  }
+
+  .assets-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xs);
+  }
+
+  .link-text {
+    max-width: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Stack table for mobile */
+  .transaction-history-table thead {
+    display: none;
+  }
+
+  .transaction-history-table,
+  .transaction-history-table tbody,
+  .transaction-history-table tr,
+  .transaction-history-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .transaction-history-table tr {
+    margin-bottom: var(--space-lg);
+    border: 1px solid var(--color-border-primary);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+  }
+
+  .transaction-history-table td {
+    padding: var(--space-xs) 0;
+    border: none;
+  }
+
+  .transaction-history-table td::before {
+    content: attr(data-label);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-tertiary);
+    display: block;
+    margin-bottom: var(--space-xs);
+  }
+}
+
+/* ===== DARK MODE SUPPORT ===== */
+@media (prefers-color-scheme: dark) {
+  .transaction-history {
+    background: var(--color-bg-dark-primary);
+  }
+
+  .transaction-history-header h2 {
+    color: var(--color-text-dark-primary);
+  }
+
+  .transaction-history-table-container {
+    background: #1f2937;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  .transaction-history-table thead {
+    background: #1f2937;
+    border-bottom-color: #374151;
+  }
+
+  .transaction-history-table th {
+    color: #9ca3af;
+  }
+
+  .transaction-history-table tbody tr {
+    border-bottom-color: #374151;
+  }
+
+  .transaction-history-table tbody tr:hover {
+    background-color: #374151;
+  }
+
+  .transaction-history-loading .loading-state,
+  .transaction-history-error .error-state,
+  .transaction-history-empty .empty-state {
+    background: #1f2937;
+  }
+
+  .transaction-history-loading h3,
+  .transaction-history-empty h3 {
+    color: var(--color-text-dark-primary);
+  }
+
+  .transaction-history-error h3 {
+    color: #f87171;
+  }
+
+  .transaction-history-loading p,
+  .transaction-history-error p,
+  .transaction-history-empty p {
+    color: var(--color-text-dark-tertiary);
+  }
+
+  .transaction-history-error .error-state {
+    border-color: #7f1d1d;
+  }
+
+  .asset-amount,
+  .link-text,
+  .transaction-withdrawal-label,
+  .transaction-withdrawal-date {
+    color: var(--color-text-dark-secondary);
+  }
+}
+

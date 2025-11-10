@@ -100,3 +100,82 @@ export interface ProviderConfig {
   network?: string;
 }
 
+// Metadata Provider Types
+export interface TokenMetadata {
+  policyId: PolicyId;
+  assetName: AssetName;
+  name?: string;
+  ticker?: string;
+  description?: string;
+  decimals?: number;
+  logo?: string;
+  url?: string;
+  [key: string]: any;
+}
+
+export interface TokenSearchResult {
+  policyId: PolicyId;
+  assetName: AssetName;
+  name: string;
+  ticker?: string;
+  logo?: string;
+}
+
+/**
+ * MetadataProvider interface for fetching token metadata and other non-critical data
+ * Consuming apps should implement this interface for their specific metadata sources
+ */
+export interface MetadataProvider {
+  /**
+   * Get metadata for a specific token
+   * @param policyId - The policy ID of the token
+   * @param assetName - The asset name (hex encoded)
+   * @returns Token metadata or undefined if not found
+   */
+  getTokenMetadata(policyId: string, assetName: string): Promise<TokenMetadata | undefined>;
+
+  /**
+   * Search for tokens by name or ticker
+   * @param query - Search query string
+   * @param limit - Maximum number of results to return
+   * @returns Array of matching tokens
+   */
+  searchTokens?(query: string, limit?: number): Promise<TokenSearchResult[]>;
+
+  /**
+   * Get transaction history metadata (labels, notes, enriched data)
+   * @param txHash - Transaction hash
+   * @returns Transaction metadata
+   */
+  getTransactionMetadata?(txHash: string): Promise<Record<string, any> | undefined>;
+
+  /**
+   * Batch get metadata for multiple tokens
+   * @param tokens - Array of {policyId, assetName} pairs
+   * @returns Array of token metadata
+   */
+  batchGetTokenMetadata?(tokens: Array<{ policyId: string; assetName: string }>): Promise<(TokenMetadata | undefined)[]>;
+}
+
+/**
+ * NoOpMetadataProvider - Returns undefined for all queries
+ * Use when no metadata provider is configured
+ */
+export class NoOpMetadataProvider implements MetadataProvider {
+  async getTokenMetadata(): Promise<undefined> {
+    return undefined;
+  }
+
+  async searchTokens(): Promise<TokenSearchResult[]> {
+    return [];
+  }
+
+  async getTransactionMetadata(): Promise<undefined> {
+    return undefined;
+  }
+
+  async batchGetTokenMetadata(): Promise<undefined[]> {
+    return [];
+  }
+}
+

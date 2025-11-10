@@ -26,6 +26,9 @@ export * from './pending-transactions';
 // Transaction details components
 export * from './transaction-details';
 
+// Transaction history components
+export * from './transaction-history';
+
 // Transaction creator components
 export * from './transaction-creator';
 

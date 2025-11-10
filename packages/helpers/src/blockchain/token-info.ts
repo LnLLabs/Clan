@@ -1,6 +1,11 @@
 /**
  * Token information utilities
+ * 
+ * This module provides helpers for fetching and managing token metadata.
+ * It uses the MetadataProvider interface for dependency injection.
  */
+
+import { MetadataProvider, TokenMetadata } from '@clan/framework-core';
 
 export interface TokenInfo {
   name: string;
@@ -16,50 +21,13 @@ export interface TokenInfo {
 const IPFS_GATEWAY = 'https://ipfs.blockfrost.dev/ipfs/';
 
 /**
- * Hook for getting token information
+ * Get token information with a provided MetadataProvider
+ * This is the core function that accepts a provider as dependency injection
  */
-export function useTokenInfo(tokenId: string): {
-  tokenInfo: TokenInfo | null;
-  loading: boolean;
-  error: string | null;
-  refetch: () => void;
-} {
-  const [tokenInfo, setTokenInfo] = React.useState<TokenInfo | null>(null);
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
-
-  const fetchTokenInfo = React.useCallback(async () => {
-    if (!tokenId) return;
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const info = await getTokenInfo(tokenId);
-      setTokenInfo(info || null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch token info');
-    } finally {
-      setLoading(false);
-    }
-  }, [tokenId]);
-
-  React.useEffect(() => {
-    fetchTokenInfo();
-  }, [fetchTokenInfo]);
-
-  return {
-    tokenInfo,
-    loading,
-    error,
-    refetch: fetchTokenInfo
-  };
-}
-
-/**
- * Get token information
- */
-export async function getTokenInfo(tokenId: string): Promise<TokenInfo | undefined> {
+export async function getTokenInfo(
+  tokenId: string,
+  metadataProvider?: MetadataProvider
+): Promise<TokenInfo | undefined> {
   // Handle ADA/lovelace
   if (tokenId === 'lovelace' || tokenId === '') {
     return {
@@ -80,12 +48,18 @@ export async function getTokenInfo(tokenId: string): Promise<TokenInfo | undefin
     return cached;
   }
 
-  // Fetch from API
-  const tokenInfo = await fetchTokenData(tokenId);
+  // If no provider, return basic info
+  if (!metadataProvider) {
+    return createBasicTokenInfo(tokenId);
+  }
+
+  // Fetch from metadata provider
+  const tokenInfo = await fetchTokenDataWithProvider(tokenId, metadataProvider);
 
   // Cache the result
-  if (tokenInfo)
-    setCachedTokenInfo(tokenId, tokenInfo );
+  if (tokenInfo) {
+    setCachedTokenInfo(tokenId, tokenInfo);
+  }
 
   return tokenInfo;
 }
@@ -123,72 +97,77 @@ function setCachedTokenInfo(tokenId: string, tokenInfo: TokenInfo): void {
 }
 
 /**
- * Fetch token data from APIs
+ * Fetch token data using the injected MetadataProvider
  */
-async function fetchTokenData(tokenId: string): Promise<TokenInfo | undefined> {
-  const settings = getSettings();
-
+async function fetchTokenDataWithProvider(
+  tokenId: string,
+  metadataProvider: MetadataProvider
+): Promise<TokenInfo | undefined> {
   try {
-    if (settings.metadataProvider === 'None') {
-      return undefined;
+    // Parse token ID into policyId and assetName
+    const { policyId, assetName } = parseTokenId(tokenId);
+    
+    // Fetch metadata from provider
+    const metadata = await metadataProvider.getTokenMetadata(policyId, assetName);
+    
+    if (!metadata) {
+      return createBasicTokenInfo(tokenId);
     }
 
-    // Try Blockfrost first (most reliable)
-    if (settings.api?.url && settings.api?.projectId) {
-      return await fetchFromBlockfrost(tokenId, settings);
-    }
-
-    // Fallback to basic info
-    return undefined;
+    // Convert TokenMetadata to TokenInfo
+    return convertMetadataToTokenInfo(tokenId, metadata);
   } catch (error) {
     console.warn('Failed to fetch token info:', error);
-    return undefined;
+    return createBasicTokenInfo(tokenId);
   }
 }
 
 /**
- * Fetch from Blockfrost API
+ * Parse tokenId into policyId and assetName
  */
-async function fetchFromBlockfrost(tokenId: string, settings: any): Promise<TokenInfo> {
-  const response = await fetch(
-    `${settings.api.url}/assets/${tokenId}`,
-    {
-      headers: {
-        'project_id': settings.api.projectId
-      }
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error('Blockfrost API error');
+function parseTokenId(tokenId: string): { policyId: string; assetName: string } {
+  if (tokenId.length <= 56) {
+    // Assume entire string is policy ID with no asset name
+    return { policyId: tokenId, assetName: '' };
   }
+  
+  return {
+    policyId: tokenId.slice(0, 56),
+    assetName: tokenId.slice(56)
+  };
+}
 
-  const data = await response.json();
-
-  const tokenInfo: TokenInfo = {
-    name: data.asset_name ? hexToAscii(data.asset_name) : tokenId,
-    image: '',
-    decimals: data.metadata?.decimals || 0,
-    ticker: data.metadata?.ticker || data.onchain_metadata?.ticker,
-    isNft: data.quantity === '1',
-    provider: 'Blockfrost',
-    fingerprint: data.fingerprint || '',
+/**
+ * Convert TokenMetadata to TokenInfo
+ */
+function convertMetadataToTokenInfo(tokenId: string, metadata: TokenMetadata): TokenInfo {
+  return {
+    name: metadata.name || decodeAssetName(tokenId),
+    image: processImageUrl(metadata.logo || ''),
+    decimals: metadata.decimals,
+    ticker: metadata.ticker,
+    isNft: false, // This would need quantity info to determine
+    provider: 'metadata-provider',
+    fingerprint: '', // Not provided by metadata
     fetchTime: Date.now()
   };
-
-  // Set image from metadata
-  if (data.metadata?.logo) {
-    tokenInfo.image = `data:image/jpeg;base64,${data.metadata.logo}`;
-  } else if (data.onchain_metadata?.image) {
-    tokenInfo.image = processImageUrl(data.onchain_metadata.image);
-  }
-
-  return tokenInfo;
 }
 
 /**
- * Create basic token info when API is not available
+ * Create basic token info when metadata is not available
  */
+function createBasicTokenInfo(tokenId: string): TokenInfo {
+  return {
+    name: decodeAssetName(tokenId),
+    image: '',
+    decimals: 0,
+    ticker: decodeAssetName(tokenId).slice(0, 6).toUpperCase(),
+    isNft: false,
+    provider: 'basic',
+    fingerprint: tokenId.slice(0, 8),
+    fetchTime: Date.now()
+  };
+}
 
 /**
  * Convert hex to ASCII
@@ -343,18 +322,3 @@ function processImageUrl(imageUrl: string): string {
 
   return imageUrl;
 }
-
-/**
- * Get settings from localStorage
- */
-function getSettings(): any {
-  try {
-    return JSON.parse(localStorage.getItem('settings') || '{}');
-  } catch {
-    return { metadataProvider: 'Blockfrost' };
-  }
-}
-
-// Import React for the hook
-import React from 'react';
-

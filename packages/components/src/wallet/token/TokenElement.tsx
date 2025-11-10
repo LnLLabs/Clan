@@ -1,5 +1,6 @@
 import React from 'react';
-import { useTokenInfo } from '@clan/framework-helpers';
+import { MetadataProvider } from '@clan/framework-core';
+import { getTokenInfo, TokenInfo } from '@clan/framework-helpers';
 
 export interface TokenElementProps {
   tokenId: string;
@@ -11,6 +12,7 @@ export interface TokenElementProps {
   index?: number;
   onClick?: (tokenId: string) => void;
   onImageClick?: (tokenId: string) => void;
+  metadataProvider?: MetadataProvider;
 }
 
 export const TokenElement: React.FC<TokenElementProps> = ({
@@ -22,10 +24,42 @@ export const TokenElement: React.FC<TokenElementProps> = ({
   expanded = false,
   index,
   onClick,
-  onImageClick
+  onImageClick,
+  metadataProvider
 }) => {
   const [showTooltip, setShowTooltip] = React.useState(false);
-  const { tokenInfo, loading, error } = useTokenInfo(tokenId);
+  const [tokenInfo, setTokenInfo] = React.useState<TokenInfo | undefined>(undefined);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<Error | undefined>(undefined);
+
+  React.useEffect(() => {
+    let isMounted = true;
+
+    const fetchTokenInfo = async () => {
+      try {
+        setLoading(true);
+        setError(undefined);
+        
+        const info = await getTokenInfo(tokenId, metadataProvider);
+        
+        if (isMounted) {
+          setTokenInfo(info);
+          setLoading(false);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err instanceof Error ? err : new Error('Failed to fetch token info'));
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchTokenInfo();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [tokenId, metadataProvider]);
 
   const handleThumbnailClick = (e: React.MouseEvent) => {
     e.stopPropagation();

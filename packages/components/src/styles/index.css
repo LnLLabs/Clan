@@ -14,6 +14,7 @@
 @import './transaction-creator.css';
 @import './asset-picker.css';
 @import './transactions.css';
+@import './transaction-history.css';
 
 /* ===== UI COMPONENTS ===== */
 @import './contacts.css';
