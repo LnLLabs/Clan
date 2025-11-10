@@ -1,26 +1,28 @@
 import React, { useEffect, useRef } from 'react';
 import { WalletInterface } from '@clan/framework-core';
 import { copyToClipboard, showInfo } from '@clan/framework-helpers';
+import './Receive.css';
+
+export interface ReceiveAction {
+  label: string;
+  icon: React.ReactNode;
+  onClick: () => void;
+}
 
 export interface ReceiveProps {
   wallet: WalletInterface;
-  donationAddress?: string;
   onAddressCopy?: (address: string) => void;
+  actions?: ReceiveAction[];
   className?: string;
 }
 
 export const Receive: React.FC<ReceiveProps> = ({
   wallet,
-  donationAddress = 'addr1q9jae9tlky2gw97hxqkrdm5lu0qlasrzw5u5ju9acpazk3ev94h8gqswgsgfp59e4v0z2dapyamyctfeyzykr97pajdq0nanuq',
   onAddressCopy,
+  actions = [],
   className = ''
 }) => {
   const [address, setAddress] = React.useState(wallet.getAddress());
-  const [defaultAddress, setDefaultAddress] = React.useState('');
-  const [newStake, setNewStake] = React.useState(false);
-  const [options, setOptions] = React.useState<string[]>([]);
-  const [optionsNames, setOptionsNames] = React.useState<{ [key: string]: string }>({});
-  const [isValidAddress, setIsValidAddress] = React.useState(true);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // Dynamically import QRCode to avoid SSR issues
@@ -33,23 +35,12 @@ export const Receive: React.FC<ReceiveProps> = ({
 
         if (wallet.getDefaultAddress) {
           const defaultAddr = await wallet.getDefaultAddress();
-          setDefaultAddress(defaultAddr);
           if (defaultAddr && defaultAddr !== '') {
             selectedAddress = defaultAddr;
           }
         }
 
         setAddress(selectedAddress);
-
-        if (wallet.getFundedAddress) {
-          const fundedAddresses = await wallet.getFundedAddress();
-          setOptions(fundedAddresses);
-
-          if (wallet.getAddressNames) {
-            const addressNames = await wallet.getAddressNames();
-            setOptionsNames(addressNames);
-          }
-        }
       } catch (error) {
         console.error('Failed to load wallet data:', error);
       }
@@ -64,13 +55,11 @@ export const Receive: React.FC<ReceiveProps> = ({
     });
   }, [wallet]);
 
-  const handleClick = async (value: string) => {
-    if (isValidAddress) {
-      const success = await copyToClipboard(value);
-      if (success !== undefined) {
-        showInfo('Address copied to clipboard!');
-        onAddressCopy?.(value);
-      }
+  const handleCopyAddress = async () => {
+    const success = await copyToClipboard(address);
+    if (success !== undefined) {
+      showInfo('Address copied to clipboard!');
+      onAddressCopy?.(address);
     }
   };
 
@@ -78,135 +67,47 @@ export const Receive: React.FC<ReceiveProps> = ({
     if (QRCode && canvasRef.current) {
       QRCode.toCanvas(
         canvasRef.current,
-        isValidAddress ? address : ' ',
+        address,
         (error: any) => {
           if (error) console.error(error);
         }
       );
     }
-  }, [address, QRCode, isValidAddress]);
+  }, [address, QRCode]);
 
-  const handleStakingChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = event.target.value;
-
-    if (value === 'new') {
-      setNewStake(true);
-      setIsValidAddress(false);
-      setAddress('Enter an address of the wallet that will receive the rewards');
-    } else {
-      setNewStake(false);
-      setIsValidAddress(true);
-      try {
-        setAddress(value);
-      } catch (error) {
-        setAddress('Invalid address');
-        setIsValidAddress(false);
-      }
-    }
+  const formatAddress = (addr: string) => {
+    // Show full address - let CSS handle wrapping if needed
+    return addr;
   };
-
-  const handleNewAddressChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-
-    if (value === '') {
-      setAddress('Enter an address of the wallet that will receive the rewards');
-      setIsValidAddress(false);
-      return;
-    }
-
-    try {
-      setAddress(value);
-      setIsValidAddress(true);
-    } catch {
-      setAddress('Invalid Stake Address');
-      setIsValidAddress(false);
-    }
-  };
-
-  useEffect(() => {
-    const loadAddressOptions = async () => {
-      if (!wallet.getFundedAddress) return;
-
-      const fundedAddresses = await wallet.getFundedAddress();
-      const addressNames: { [key: string]: string } = {};
-
-      // Add address names
-      if (wallet.getAddressNames) {
-        const names = await wallet.getAddressNames();
-        Object.assign(addressNames, names);
-      }
-
-      // Add the unstaked address only if it is not already in the list
-      const walletAddress = address;
-      if (!fundedAddresses.includes(walletAddress)) {
-        fundedAddresses.push(walletAddress);
-        addressNames[walletAddress] = 'Regular Address';
-      }
-
-      // Add donation address
-      const donationAddr = donationAddress;
-      if (!fundedAddresses.includes(donationAddr)) {
-        fundedAddresses.push(donationAddr);
-        if (!(donationAddr in addressNames) || addressNames[donationAddr] === donationAddr) {
-          addressNames[donationAddr] = 'Donate rewards';
-        }
-      }
-
-      // Add new stake option
-      fundedAddresses.push('new');
-      addressNames['new'] = 'New Externaly Staked Address';
-
-      setOptions(fundedAddresses);
-      setOptionsNames(addressNames);
-    };
-
-    loadAddressOptions();
-  }, [wallet, donationAddress, address]);
 
   return (
-    <div className={`receive-tab ${className}`}>
-      <select
-        onChange={handleStakingChange}
-        className="address-select"
-        defaultValue={address}
-      >
-        {options.map((item, index) => (
-          <option key={index} value={item}>
-            {optionsNames[item]}
-          </option>
-        ))}
-      </select>
+    <div className={`receive-container ${className}`}>
+      <p className="receive-instruction">
+        Send funds from one of your other wallets to the address bellow:
+      </p>
 
-      <br />
+      <div className="receive-qr-container">
+        <canvas ref={canvasRef} className="receive-qr-code" />
+      </div>
 
-      {newStake && (
-        <input
-          type="text"
-          onChange={handleNewAddressChange}
-          placeholder="Enter stake address"
-          className="new-address-input"
-        />
-      )}
+      <div className="receive-address">
+        {formatAddress(address)}
+      </div>
 
-      {donationAddress === address && (
-        <div className="donation-message">
-          By using this address your Staking rewards will support the development of this software!
-        </div>
-      )}
-
-      <div
-        className="receive-address"
-        onClick={() => handleClick(address)}
-        style={{ cursor: isValidAddress ? 'pointer' : 'not-allowed' }}
-      >
-        <canvas ref={canvasRef} className="qr-canvas" />
-        <br />
-        <div className="address-text">{address}</div>
-        {isValidAddress && (
-          <svg className="copy-icon" viewBox="0 0 24 24" fill="currentColor">
+      <div className="receive-actions">
+        <button className="receive-button receive-button-copy" onClick={handleCopyAddress}>
+          <svg className="receive-button-icon" viewBox="0 0 24 24" fill="currentColor">
             <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
           </svg>
-        )}
+          Copy Address
+        </button>
+
+        {actions.map((action, index) => (
+          <button key={index} className="receive-button" onClick={action.onClick}>
+            <span className="receive-button-icon">{action.icon}</span>
+            {action.label}
+          </button>
+        ))}
       </div>
     </div>
   );

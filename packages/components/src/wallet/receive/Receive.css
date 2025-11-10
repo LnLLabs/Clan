@@ -1,0 +1,118 @@
+.receive-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  background: #2a2a2a;
+  border-radius: 12px;
+  color: #e0e0e0;
+  width: 100%;
+  margin: 0;
+}
+
+.receive-instruction {
+  text-align: center;
+  font-size: 0.95rem;
+  color: #d0d0d0;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.5;
+}
+
+.receive-qr-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.receive-qr-code {
+  border-radius: 4px;
+  background: white;
+  padding: 0.5rem;
+}
+
+.receive-address {
+  color: #9b59d0;
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 2rem;
+  word-break: break-all;
+  padding: 0 1rem;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  background: none;
+  background-color: transparent;
+  border: none;
+}
+
+.receive-actions {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  max-width: 600px;
+  justify-content: center;
+}
+
+.receive-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #3a3a3a;
+  color: #e0e0e0;
+  border: none;
+  border-radius: 24px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.receive-button:hover {
+  background: #4a4a4a;
+  transform: translateY(-1px);
+}
+
+.receive-button:active {
+  transform: translateY(0);
+}
+
+.receive-button-icon {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.receive-button-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+.receive-button-copy {
+  flex: 1;
+}
+
+.receive-button:not(.receive-button-copy) {
+  flex: 1;
+}
+
+/* Responsive styles */
+@media (max-width: 500px) {
+  .receive-container {
+    padding: 1.5rem;
+  }
+
+  .receive-actions {
+    flex-direction: column;
+  }
+
+  .receive-button {
+    width: 100%;
+  }
+}
+
