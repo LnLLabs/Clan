@@ -1,59 +1,151 @@
 # TransactionHistory Component
 
-A beautifully designed transaction history table component for displaying blockchain transactions with type-specific styling and interactive elements.
+A React component for displaying transaction history with blockchain explorer integration.
 
 ## Features
 
-- ✅ **Multiple Transaction Types**: Sent, Received, and Withdrawal transactions with unique styling
-- ✅ **Color-Coded UI**: Visual differentiation with red (sent), green (received), and gray (withdrawal) colors
-- ✅ **Multi-Asset Support**: Display multiple assets per transaction including ADA and native tokens
-- ✅ **Interactive Links**: Action buttons for viewing transaction details
-- ✅ **Pagination Support**: Built-in "See More" button for loading additional transactions
-- ✅ **Responsive Design**: Mobile-friendly with responsive table layout
-- ✅ **Empty State**: Elegant empty state when no transactions are available
-- ✅ **Dark Mode Support**: Automatic dark mode styling
-- ✅ **Token Integration**: Seamless integration with TokenElement component for displaying asset icons
+- ✅ Automatic transaction fetching from wallet
+- ✅ Support for sent, received, and withdrawal transactions
+- ✅ Token metadata display with MetadataProvider
+- ✅ **Blockchain explorer links** (CExplorer, CardanoScan, ADAStat)
+- ✅ Pagination with "See More" functionality
+- ✅ Loading and error states
+- ✅ Responsive design
 
-## Installation
+## New: Explorer Integration
 
-The component is part of the `@clan/framework-components` package:
+The component now supports blockchain explorer integration through the `explorer` prop. **If no explorer is provided, it automatically defaults to CExplorer with automatic network detection** (mainnet, preprod, or preview based on the wallet's network).
 
-```bash
-npm install @clan/framework-components
-```
+## Usage
 
-## Basic Usage
+### Basic Usage (Auto-Defaults to CExplorer)
 
 ```tsx
-import React from 'react';
-import { TransactionHistory, TransactionHistoryItem } from '@clan/framework-components';
+import { TransactionHistory } from '@clan/framework-components';
 
-function MyWallet() {
-  const transactions: TransactionHistoryItem[] = [
-    {
-      date: '01-07-2025',
-      type: 'sent',
-      assets: {
-        lovelace: BigInt(1500000000) // 1,500 ADA
-      },
-      transactionLink: 'www.transaction...',
-      hash: '8f3a2b1c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1'
-    },
-    {
-      date: '23-06-2025',
-      type: 'received',
-      assets: {
-        lovelace: BigInt(720000000) // 720 ADA
-      },
-      transactionLink: 'www.transaction...',
-      hash: '1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a'
-    }
-  ];
-
+function MyWallet({ wallet }) {
+  // No explorer prop needed! Automatically uses CExplorer with network detection
   return (
-    <TransactionHistory
-      transactions={transactions}
-      onTransactionLinkClick={(tx) => console.log('View details:', tx)}
+    <TransactionHistory 
+      wallet={wallet}
+    />
+  );
+}
+```
+
+### Explicit CExplorer (Optional)
+
+```tsx
+import { TransactionHistory } from '@clan/framework-components';
+import { CExplorerExplorer } from '@clan/framework-providers';
+
+function MyWallet({ wallet }) {
+  const explorer = new CExplorerExplorer('mainnet');
+  
+  return (
+    <TransactionHistory 
+      wallet={wallet}
+      explorer={explorer}
+    />
+  );
+}
+```
+
+### With CardanoScan Explorer
+
+```tsx
+import { TransactionHistory } from '@clan/framework-components';
+import { CardanoScanExplorer } from '@clan/framework-providers';
+
+function MyWallet({ wallet }) {
+  const explorer = new CardanoScanExplorer('mainnet');
+  
+  return (
+    <TransactionHistory 
+      wallet={wallet}
+      explorer={explorer}
+    />
+  );
+}
+```
+
+### With Metadata Provider and Explorer
+
+```tsx
+import { TransactionHistory } from '@clan/framework-components';
+import { 
+  CExplorerExplorer, 
+  BlockfrostMetadataProvider 
+} from '@clan/framework-providers';
+
+function MyWallet({ wallet }) {
+  const explorer = new CExplorerExplorer('mainnet');
+  const metadataProvider = new BlockfrostMetadataProvider(
+    'https://cardano-mainnet.blockfrost.io/api/v0',
+    'your-project-id'
+  );
+  
+  return (
+    <TransactionHistory 
+      wallet={wallet}
+      explorer={explorer}
+      metadataProvider={metadataProvider}
+      maxVisibleTransactions={10}
+      showSeeMore={true}
+    />
+  );
+}
+```
+
+### Dynamic Explorer Selection
+
+```tsx
+import { useState } from 'react';
+import { TransactionHistory } from '@clan/framework-components';
+import { createBlockchainExplorer } from '@clan/framework-providers';
+import type { ExplorerType } from '@clan/framework-core';
+
+function MyWallet({ wallet }) {
+  const [explorerType, setExplorerType] = useState<ExplorerType>('CExplorer');
+  
+  const explorer = createBlockchainExplorer({
+    type: explorerType,
+    network: 'mainnet'
+  });
+  
+  return (
+    <>
+      <select 
+        value={explorerType}
+        onChange={(e) => setExplorerType(e.target.value as ExplorerType)}
+      >
+        <option value="CExplorer">CExplorer</option>
+        <option value="CardanoScan">CardanoScan</option>
+        <option value="ADAStat">ADAStat</option>
+      </select>
+      
+      <TransactionHistory 
+        wallet={wallet}
+        explorer={explorer}
+      />
+    </>
+  );
+}
+```
+
+### For Testnet/Preprod
+
+```tsx
+import { TransactionHistory } from '@clan/framework-components';
+import { CExplorerExplorer } from '@clan/framework-providers';
+
+function MyTestWallet({ wallet }) {
+  const explorer = new CExplorerExplorer('preprod');
+  
+  return (
+    <TransactionHistory 
+      wallet={wallet}
+      explorer={explorer}
     />
   );
 }
@@ -61,120 +153,159 @@ function MyWallet() {
 
 ## Props
 
-### `TransactionHistoryProps`
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `wallet` | `WalletInterface` | Yes | - | Wallet instance to fetch transactions from |
+| `explorer` | `BlockchainExplorer` | No | - | Explorer instance for generating transaction links |
+| `metadataProvider` | `MetadataProvider` | No | - | Provider for fetching token metadata |
+| `onSeeMore` | `() => void` | No | - | Callback when "See More" is clicked |
+| `onTransactionLinkClick` | `(tx) => void` | No | - | Callback when transaction link is clicked |
+| `className` | `string` | No | `''` | Additional CSS classes |
+| `maxVisibleTransactions` | `number` | No | - | Max transactions to display initially |
+| `showSeeMore` | `boolean` | No | `true` | Whether to show "See More" button |
+| `limit` | `number` | No | `50` | Max transactions to fetch from API |
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `transactions` | `TransactionHistoryItem[]` | Required | Array of transaction history items to display |
-| `onSeeMore` | `() => void` | `undefined` | Callback when "See More" button is clicked |
-| `onTransactionLinkClick` | `(transaction: TransactionHistoryItem) => void` | `undefined` | Callback when transaction link action button is clicked |
-| `className` | `string` | `''` | Additional CSS class names |
-| `maxVisibleTransactions` | `number` | `undefined` | Maximum number of transactions to display initially |
-| `showSeeMore` | `boolean` | `true` | Whether to show the "See More" button |
+## Explorer Behavior
 
-### `TransactionHistoryItem`
+### With Explorer Prop
+When an `explorer` prop is provided:
+- Transaction links are generated using `explorer.getTransactionLink(txHash)`
+- Links open in a new tab with proper security attributes
+- Supports all explorer types (CExplorer, CardanoScan, ADAStat, Custom)
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `date` | `string` | Transaction date in DD-MM-YYYY format |
-| `type` | `'sent' \| 'received' \| 'withdrawal'` | Type of transaction |
-| `assets` | `Assets` | Assets involved in the transaction (key: asset ID, value: amount) |
-| `transactionLink` | `string` | Display text for transaction link |
-| `hash` | `string` (optional) | Transaction hash for blockchain explorer links |
+### Without Explorer Prop (Smart Default) ⭐ NEW
+When no `explorer` is provided:
+- **Automatically creates a CExplorer instance** with network auto-detection
+- Detects network type from wallet (mainnet, preprod, or preview)
+- Uses proper CExplorer URLs:
+  - Mainnet: `https://cexplorer.io`
+  - Preprod: `https://preprod.cexplorer.io`
+  - Preview: `https://preview.cexplorer.io`
+- **No more localhost/malformed URLs!**
+- Fully backward compatible
 
-## Advanced Examples
+## Transaction Link Display
 
-### With Pagination
+The transaction link column now displays:
+- **Clickable hash**: First 8 and last 8 characters of transaction hash
+- **Opens in new tab**: Secure external link (`target="_blank" rel="noopener noreferrer"`)
+- **Action button**: Plus icon for additional actions via `onTransactionLinkClick`
+
+Example display: `a1b2c3d4...89012345` → Opens explorer page for that transaction
+
+## Supported Explorers
+
+### CExplorer (cexplorer.io)
+```tsx
+import { CExplorerExplorer } from '@clan/framework-providers';
+
+const explorer = new CExplorerExplorer('mainnet'); // or 'preprod', 'preview'
+```
+
+### CardanoScan (cardanoscan.io)
+```tsx
+import { CardanoScanExplorer } from '@clan/framework-providers';
+
+const explorer = new CardanoScanExplorer('mainnet'); // or 'preprod', 'preview'
+```
+
+### ADAStat (adastat.net)
+```tsx
+import { ADAStatExplorer } from '@clan/framework-providers';
+
+const explorer = new ADAStatExplorer('mainnet'); // or 'preprod', 'preview'
+```
+
+### Factory Pattern
+```tsx
+import { createBlockchainExplorer } from '@clan/framework-providers';
+
+const explorer = createBlockchainExplorer({
+  type: 'CExplorer', // or 'CardanoScan', 'ADAStat'
+  network: 'mainnet' // or 'preprod', 'preview'
+});
+```
+
+## Migration Guide
+
+If you're upgrading from a previous version:
+
+### Before (May have had localhost/malformed links)
+```tsx
+<TransactionHistory 
+  wallet={wallet}
+  metadataProvider={metadataProvider}
+/>
+```
+
+### After (No Changes Needed! ✅)
+```tsx
+<TransactionHistory 
+  wallet={wallet}
+  metadataProvider={metadataProvider}
+/>
+// Now automatically uses CExplorer with network detection
+// Links work properly without any code changes!
+```
+
+### Optional: Explicit Explorer
+```tsx
+import { CardanoScanExplorer } from '@clan/framework-providers';
+
+const explorer = new CardanoScanExplorer('mainnet');
+
+<TransactionHistory 
+  wallet={wallet}
+  metadataProvider={metadataProvider}
+  explorer={explorer}  // Optional prop to use a different explorer
+/>
+```
+
+**Note**: The component is fully backward compatible. Existing code works without changes and now generates proper explorer links automatically!
+
+## Advanced Usage
+
+### Custom Explorer Implementation
+
+You can create custom explorer implementations:
 
 ```tsx
-import React, { useState } from 'react';
-import { TransactionHistory, TransactionHistoryItem } from '@clan/framework-components';
+import { BlockchainExplorer } from '@clan/framework-core';
 
-function PaginatedTransactionHistory() {
-  const [visibleCount, setVisibleCount] = useState(5);
+class MyCustomExplorer implements BlockchainExplorer {
+  readonly name = 'My Explorer';
+  readonly baseUrl = 'https://my-explorer.com';
   
-  const allTransactions: TransactionHistoryItem[] = [
-    // ... your transactions
-  ];
-
-  const handleSeeMore = () => {
-    setVisibleCount(prev => prev + 5);
-  };
-
-  return (
-    <TransactionHistory
-      transactions={allTransactions}
-      maxVisibleTransactions={visibleCount}
-      showSeeMore={visibleCount < allTransactions.length}
-      onSeeMore={handleSeeMore}
-    />
-  );
+  getTransactionLink(txHash: string): string {
+    return `${this.baseUrl}/transactions/${txHash}`;
+  }
+  
+  getTokenLink(policyId: string, assetName?: string): string {
+    return `${this.baseUrl}/tokens/${policyId}${assetName || ''}`;
+  }
 }
+
+// Use it
+const explorer = new MyCustomExplorer();
+<TransactionHistory wallet={wallet} explorer={explorer} />
 ```
 
-### With Multiple Assets
+### With Custom Click Handler
 
 ```tsx
-const transactionWithMultipleAssets: TransactionHistoryItem = {
-  date: '03-06-2025',
-  type: 'received',
-  assets: {
-    lovelace: BigInt(2000000), // 2 ADA
-    'abc123tokenid456def789': BigInt(720), // Fungible token
-    'def456tokenid789abc012': BigInt(1) // NFT
-  },
-  transactionLink: 'www.transaction...',
-  hash: '2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b'
-};
-```
-
-### Opening Blockchain Explorer
-
-```tsx
-function TransactionHistoryWithExplorer() {
-  const handleTransactionClick = (transaction: TransactionHistoryItem) => {
-    if (transaction.hash) {
-      // Open Cardano Explorer
-      window.open(`https://cexplorer.io/tx/${transaction.hash}`, '_blank');
-    }
+function MyWallet({ wallet }) {
+  const explorer = new CExplorerExplorer('mainnet');
+  
+  const handleTransactionClick = (transaction) => {
+    console.log('Transaction clicked:', transaction);
+    // Custom analytics, modal, etc.
   };
-
+  
   return (
-    <TransactionHistory
-      transactions={transactions}
+    <TransactionHistory 
+      wallet={wallet}
+      explorer={explorer}
       onTransactionLinkClick={handleTransactionClick}
-    />
-  );
-}
-```
-
-### Integration with Wallet Provider
-
-```tsx
-import { useWallet } from '@clan/framework-providers';
-import { TransactionHistory, TransactionHistoryItem } from '@clan/framework-components';
-
-function WalletTransactionHistory() {
-  const { transactions, loadMoreTransactions } = useWallet();
-
-  // Convert wallet transactions to TransactionHistoryItem format
-  const historyItems: TransactionHistoryItem[] = transactions.map(tx => ({
-    date: new Date(tx.timestamp).toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    }).replace(/\//g, '-'),
-    type: determineTransactionType(tx),
-    assets: tx.amount,
-    transactionLink: 'www.transaction...',
-    hash: tx.hash
-  }));
-
-  return (
-    <TransactionHistory
-      transactions={historyItems}
-      onSeeMore={loadMoreTransactions}
-      maxVisibleTransactions={10}
     />
   );
 }
@@ -182,101 +313,27 @@ function WalletTransactionHistory() {
 
 ## Styling
 
-The component uses CSS variables for theming. You can customize the appearance by overriding these variables:
+The component maintains all existing CSS classes. Transaction links now use:
+- `.link-text` - Anchor tag for the transaction hash
+- `.link-action-button` - Additional action button
+- `.transaction-link-content` - Container for both elements
 
-```css
-:root {
-  /* Transaction type colors */
-  --transaction-sent-color: #ef4444;
-  --transaction-received-color: #10b981;
-  --transaction-withdrawal-color: #6b7280;
-  
-  /* Action button color */
-  --transaction-action-button-color: #a855f7;
-  
-  /* See More button gradient */
-  --see-more-gradient-start: #ec4899;
-  --see-more-gradient-end: #d946ef;
-}
-```
+## Requirements
 
-### Custom Styling
+- `@clan/framework-core` - Core types and interfaces
+- `@clan/framework-providers` - Explorer implementations
+- `@clan/framework-components` - This component
 
-Add custom CSS classes for additional styling:
+## Related Documentation
 
-```tsx
-<TransactionHistory
-  transactions={transactions}
-  className="my-custom-transaction-history"
-/>
-```
+- [Explorer Guide](../../../providers/EXPLORER_GUIDE.md) - Complete explorer documentation
+- [Explorer Examples](../../../providers/src/explorer-usage-examples.ts) - More usage examples
+- [Component README](../../README.md) - Main components documentation
 
-```css
-.my-custom-transaction-history {
-  max-width: 1200px;
-  margin: 0 auto;
-}
+## Examples
 
-.my-custom-transaction-history .transaction-history-table {
-  font-size: 14px;
-}
-```
-
-## Transaction Types
-
-### Sent (Red)
-- Icon: 📤 (hand with upward arrow)
-- Color: Red (#ef4444)
-- Indicates outgoing transactions
-
-### Received (Green)
-- Icon: 🐷 (piggy bank)
-- Color: Green (#10b981)
-- Indicates incoming transactions
-
-### Withdrawal (Gray)
-- Icon: 💰 (coins/wallet)
-- Color: Gray (#6b7280)
-- Indicates stake reward withdrawals or similar operations
-
-## Responsive Behavior
-
-The component automatically adapts to different screen sizes:
-
-- **Desktop (> 768px)**: Full table layout with all columns
-- **Tablet (480px - 768px)**: Reduced padding and font sizes
-- **Mobile (< 480px)**: Stacked card layout with labeled fields
-
-## Accessibility
-
-- Semantic HTML table structure
-- ARIA labels on interactive buttons
-- Keyboard navigation support
-- Color is not the only means of conveying information
-- High contrast support in dark mode
-
-## Best Practices
-
-1. **Date Format**: Use DD-MM-YYYY format for consistency
-2. **Asset Amounts**: Always use `BigInt` for lovelace amounts (1 ADA = 1,000,000 lovelace)
-3. **Transaction Links**: Provide meaningful link text or use the hash for explorer links
-4. **Pagination**: Limit initial display to 5-10 transactions for better performance
-5. **Error Handling**: Wrap component in error boundary for production use
-
-## Browser Support
-
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
-
-## Related Components
-
-- `TransactionDetails` - Detailed view of individual transactions
-- `TokenElement` - Display token information
-- `PendingTransactionsList` - Display pending/unconfirmed transactions
-
-## License
-
-Mozilla Public License 2.0
-
+See [TransactionHistory.example.tsx](./TransactionHistory.example.tsx) for complete working examples including:
+- Basic usage with CExplorer
+- CardanoScan integration
+- Preprod network usage
+- Custom explorer selection

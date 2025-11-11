@@ -18,11 +18,14 @@ export type {
   ProviderConfig,
   MetadataProvider,
   TokenMetadata,
-  TokenSearchResult
+  TokenSearchResult,
+  ExplorerType,
+  BlockchainExplorer
 } from './types';
 
 export {
-  NoOpMetadataProvider
+  NoOpMetadataProvider,
+  NoOpExplorer
 } from './types';
 
 export type {

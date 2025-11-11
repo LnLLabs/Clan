@@ -29,6 +29,7 @@ export interface Transaction {
   hash: Hash;
   inputs: UTxO[];
   outputs: UTxO[];
+  withdrawals: { [credential: string]: bigint };
   fee: bigint;
   metadata?: any;
   timestamp?: number;
@@ -189,6 +190,112 @@ export class NoOpMetadataProvider implements MetadataProvider {
 
   async batchGetTokenMetadata(): Promise<undefined[]> {
     return [];
+  }
+}
+
+// Explorer Types
+export type ExplorerType = 'CExplorer' | 'CardanoScan' | 'ADAStat' | 'Custom';
+
+/**
+ * BlockchainExplorer interface for generating links to blockchain explorers
+ * Used to create links to tokens, transactions, addresses, and other blockchain entities
+ */
+export interface BlockchainExplorer {
+  /**
+   * Get the name of the explorer
+   */
+  readonly name: string;
+
+  /**
+   * Get the base URL of the explorer
+   */
+  readonly baseUrl: string;
+
+  /**
+   * Get link to a token/asset page
+   * @param policyId - The policy ID of the token
+   * @param assetName - The asset name (hex encoded, optional for policy-level view)
+   * @returns URL to the token page
+   */
+  getTokenLink(policyId: string, assetName?: string): string;
+
+  /**
+   * Get link to a transaction page
+   * @param txHash - Transaction hash
+   * @returns URL to the transaction page
+   */
+  getTransactionLink(txHash: string): string;
+
+  /**
+   * Get link to an address page
+   * @param address - Cardano address
+   * @returns URL to the address page
+   */
+  getAddressLink?(address: string): string;
+
+  /**
+   * Get link to a stake address page
+   * @param stakeAddress - Stake address
+   * @returns URL to the stake address page
+   */
+  getStakeAddressLink?(stakeAddress: string): string;
+
+  /**
+   * Get link to a pool page
+   * @param poolId - Pool ID (bech32)
+   * @returns URL to the pool page
+   */
+  getPoolLink?(poolId: string): string;
+
+  /**
+   * Get link to a block page
+   * @param blockHash - Block hash or block number
+   * @returns URL to the block page
+   */
+  getBlockLink?(blockHash: string | number): string;
+
+  /**
+   * Get link to a policy page
+   * @param policyId - The policy ID
+   * @returns URL to the policy page
+   */
+  getPolicyLink?(policyId: string): string;
+}
+
+/**
+ * NoOpExplorer - Returns empty strings for all links
+ * Use when no explorer is configured
+ */
+export class NoOpExplorer implements BlockchainExplorer {
+  readonly name = 'None';
+  readonly baseUrl = '';
+
+  getTokenLink(): string {
+    return '';
+  }
+
+  getTransactionLink(): string {
+    return '';
+  }
+
+  getAddressLink(): string {
+    return '';
+  }
+
+  getStakeAddressLink(): string {
+    return '';
+  }
+
+  getPoolLink(): string {
+    return '';
+  }
+
+  getBlockLink(): string {
+    return '';
+  }
+
+  getPolicyLink(): string {
+    return '';
   }
 }
 

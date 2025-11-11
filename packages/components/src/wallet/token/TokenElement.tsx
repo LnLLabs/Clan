@@ -31,6 +31,14 @@ export const TokenElement: React.FC<TokenElementProps> = ({
   const [tokenInfo, setTokenInfo] = React.useState<TokenInfo | undefined>(undefined);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<Error | undefined>(undefined);
+  const [imageError, setImageError] = React.useState(false);
+
+  // Generate placeholder color from tokenId (must be before any early returns)
+  const placeholderColor = React.useMemo(() => {
+    const colors = ['#8b5cf6', '#ec4899', '#06b6d4', '#10b981', '#f59e0b', '#ef4444'];
+    const index = tokenId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+    return colors[index];
+  }, [tokenId]);
 
   React.useEffect(() => {
     let isMounted = true;
@@ -125,35 +133,60 @@ export const TokenElement: React.FC<TokenElementProps> = ({
     </div>
   );
 
+  const isLongName = tokenInfo?.name && tokenInfo.name.length > 20;
+  const isPositiveAmount = amount > 0;
+  const placeholderInitial = (tokenInfo?.name || tokenId).charAt(0).toUpperCase();
+  
+  // Format amount with sign for display
+  const formattedAmount = isPositiveAmount 
+    ? `+${Math.abs(displayAmount).toLocaleString()}`
+    : `-${Math.abs(displayAmount).toLocaleString()}`;
+
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
   return (
     <div className={className} key={index}>
       <div
         className="token-element-wrapper"
+        style={{ position: 'relative' }}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
       >
         <div className="token-element" onClick={handleClick}>
-          <img
-            className="token-thumbnail"
-            src={tokenInfo?.image || '/assets/token.svg'}
-            alt={tokenInfo?.name || 'Token'}
-            onClick={handleThumbnailClick}
-          />
+          {!imageError && tokenInfo?.image ? (
+            <img
+              className="token-thumbnail"
+              src={tokenInfo.image}
+              alt={tokenInfo?.name || 'Token'}
+              onClick={handleThumbnailClick}
+              onError={handleImageError}
+            />
+          ) : (
+            <div 
+              className="token-thumbnail token-placeholder"
+              style={{ backgroundColor: placeholderColor }}
+              onClick={handleThumbnailClick}
+            >
+              {placeholderInitial}
+            </div>
+          )}
           <div className="token-element-text">
-            <div className={(tokenInfo?.name && tokenInfo.name.length > 20) ? 'scroll-container' : ''}>
+            <div className={isLongName ? 'scroll-container' : ''}>
               <span className="token-element-name">
                 {tokenInfo?.name || tokenId.slice(-8)}
               </span>
             </div>
             {!tokenInfo?.isNft && (
-              <span className={`token-element-amount ${amount > 0 ? 'positive' : 'negative'}`}>
-                {displayAmount.toString()}
+              <span className={`token-element-amount ${isPositiveAmount ? 'positive' : 'negative'}`}>
+                {formattedAmount}
               </span>
             )}
           </div>
         </div>
         {(showTooltip || expanded) && (
-          <div className="token-element-tooltip">
+          <div className="token-element-tooltip" style={{ position: 'absolute', zIndex: 1000, pointerEvents: 'none' }}>
             {tooltipInfo}
           </div>
         )}

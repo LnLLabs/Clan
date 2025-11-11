@@ -565,7 +565,7 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
       {/* Asset Picker Modal */}
       {showAssetPicker !== null && (
         <AssetPicker
-          availableAssets={availableAssets.filter(a => a.id !== 'lovelace')}
+          availableAssets={availableAssets.filter(a => a && a.id && a.id !== 'lovelace')}
           selectedAssets={assetsToSelectedAssets(recipients[showAssetPicker].assets)}
           onConfirm={(selected) => handleAssetsConfirmed(showAssetPicker, selected)}
           onClose={() => setShowAssetPicker(null)}

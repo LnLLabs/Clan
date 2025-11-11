@@ -76,6 +76,7 @@ const isAssetNFT = (asset: UIAsset): boolean => {
 const getAssetPolicyId = (asset: UIAsset): string => {
   if (asset.policyId) return asset.policyId;
   // Extract policy ID from asset ID (format: policyId.assetName)
+  if (!asset.id) return '';
   const parts = asset.id.split('.');
   return parts[0] || asset.id;
 };
@@ -94,6 +95,9 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
   // Filter assets based on tab and search
   const filteredAssets = useMemo(() => {
     return availableAssets.filter(asset => {
+      // Filter out invalid assets
+      if (!asset || !asset.id) return false;
+      
       const isNFT = isAssetNFT(asset);
       const matchesTab = 
         activeTab === 'all' ||

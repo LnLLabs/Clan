@@ -188,15 +188,39 @@
   padding: 0;
 }
 
-.transaction-token .token-thumbnail {
+.transaction-token .token-thumbnail,
+.transaction-token .token-placeholder {
   width: 24px;
   height: 24px;
   border-radius: 50%;
   object-fit: cover;
+  font-size: 12px;
+  flex-shrink: 0;
 }
 
 .transaction-token .token-element-text {
-  display: none; /* Hide token name in table, just show icon */
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.transaction-token .token-element-name {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.transaction-token .token-element-amount {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.transaction-token .token-element-amount.positive {
+  color: #10b981; /* Green */
+}
+
+.transaction-token .token-element-amount.negative {
+  color: #ef4444; /* Red */
 }
 
 /* ===== TRANSACTION LINK COLUMN ===== */

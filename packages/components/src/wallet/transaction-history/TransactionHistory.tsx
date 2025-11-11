@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Assets, WalletInterface, MetadataProvider, Transaction } from '@clan/framework-core';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Assets, WalletInterface, MetadataProvider, Transaction, BlockchainExplorer } from '@clan/framework-core';
 import { TokenElement } from '../token/TokenElement';
+import { createDefaultExplorer } from './default-explorer';
 
 export type TransactionType = 'sent' | 'received' | 'withdrawal';
 
@@ -15,6 +16,7 @@ export interface TransactionHistoryItem {
 export interface TransactionHistoryProps {
   wallet: WalletInterface;
   metadataProvider?: MetadataProvider;
+  explorer?: BlockchainExplorer;
   onSeeMore?: () => void;
   onTransactionLinkClick?: (transaction: TransactionHistoryItem) => void;
   className?: string;
@@ -26,6 +28,7 @@ export interface TransactionHistoryProps {
 export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
   wallet,
   metadataProvider,
+  explorer,
   onSeeMore,
   onTransactionLinkClick,
   className = '',
@@ -37,6 +40,12 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>(undefined);
   const walletAddress = wallet.getAddress();
+
+  // Create a default explorer if none provided - uses CExplorer with network auto-detection
+  const effectiveExplorer = useMemo(() => {
+    if (explorer) return explorer;
+    return createDefaultExplorer(wallet.getNetwork());
+  }, [explorer, wallet]);
 
   useEffect(() => {
     const fetchTransactionHistory = async () => {
@@ -52,34 +61,74 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
 
         // Transform Transaction to TransactionHistoryItem
         const historyItems: TransactionHistoryItem[] = rawTransactions.map((tx) => {
-          // Determine transaction type based on wallet address
+          // Calculate balance changes correctly:
+          // Balance change = received (own address outputs) - spent (own address inputs)
+          // This properly accounts for change coming back to the wallet
           let type: TransactionType = 'withdrawal';
           let assets: Assets = {};
 
-          // Check if transaction is incoming or outgoing
-          const isIncoming = tx.outputs.some(output => output.address === walletAddress);
-          const isOutgoing = tx.inputs.some(input => input.address === walletAddress);
+          // Sum all inputs from wallet address (what was spent)
+          const inputAssets: Assets = {};
+          tx.inputs.forEach(input => {
+            if (input.address === walletAddress) {
+              Object.entries(input.assets).forEach(([assetId, amount]) => {
+                inputAssets[assetId] = (inputAssets[assetId] || BigInt(0)) + amount;
+              });
+            }
+          });
 
-          if (isIncoming && !isOutgoing) {
+          // Sum all outputs to wallet address (what was received)
+          const outputAssets: Assets = {};
+          tx.outputs.forEach(output => {
+            if (output.address === walletAddress) {
+              Object.entries(output.assets).forEach(([assetId, amount]) => {
+                outputAssets[assetId] = (outputAssets[assetId] || BigInt(0)) + amount;
+              });
+            }
+          });
+
+          // Calculate net change for each asset: received - spent
+          const allAssetIds = new Set([
+            ...Object.keys(inputAssets),
+            ...Object.keys(outputAssets)
+          ]);
+
+          let totalChange = BigInt(0);
+          allAssetIds.forEach(assetId => {
+            const spent = inputAssets[assetId] || BigInt(0);
+            const received = outputAssets[assetId] || BigInt(0);
+            const netChange = received - spent;
+            
+            if (netChange !== BigInt(0)) {
+              assets[assetId] = netChange;
+            }
+            
+            // Track total change (use lovelace for determining tx type if present)
+            if (assetId === 'lovelace') {
+              totalChange = netChange;
+            }
+          });
+
+          // Determine transaction type based on net change
+          const hasInputs = Object.keys(inputAssets).length > 0;
+          const hasOutputs = Object.keys(outputAssets).length > 0;
+
+          if (!hasInputs && hasOutputs) {
+            // Only receiving, no spending
             type = 'received';
-            // Sum incoming assets
-            tx.outputs.forEach(output => {
-              if (output.address === walletAddress) {
-                Object.entries(output.assets).forEach(([assetId, amount]) => {
-                  assets[assetId] = (assets[assetId] || BigInt(0)) + amount;
-                });
-              }
-            });
-          } else if (isOutgoing && !isIncoming) {
+          } else if (hasInputs && !hasOutputs) {
+            // Only spending, no receiving
             type = 'sent';
-            // Sum outgoing assets
-            tx.inputs.forEach(input => {
-              if (input.address === walletAddress) {
-                Object.entries(input.assets).forEach(([assetId, amount]) => {
-                  assets[assetId] = (assets[assetId] || BigInt(0)) + amount;
-                });
-              }
-            });
+          } else if (hasInputs && hasOutputs) {
+            // Both - determine by net lovelace change
+            if (totalChange > BigInt(0)) {
+              type = 'received';
+            } else if (totalChange < BigInt(0)) {
+              type = 'sent';
+            } else {
+              // No net change in lovelace, could be token-only or contract interaction
+              type = 'withdrawal';
+            }
           }
 
           // Format date
@@ -95,11 +144,14 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
                 year: 'numeric'
               }).replace(/\//g, '-');
 
+          // Generate transaction link using the effective explorer
+          const transactionLink = effectiveExplorer.getTransactionLink(tx.hash);
+
           return {
             date,
             type,
             assets,
-            transactionLink: `${wallet.getNetwork().explorerUrl}/tx/${tx.hash}`,
+            transactionLink,
             hash: tx.hash
           };
         });
@@ -114,7 +166,7 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
     };
 
     fetchTransactionHistory();
-  }, [wallet, walletAddress, limit]);
+  }, [wallet, walletAddress, limit, effectiveExplorer]);
 
   const visibleTransactions = maxVisibleTransactions
     ? transactions.slice(0, maxVisibleTransactions)
@@ -243,31 +295,40 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
                           </div>
                           <span className="asset-amount">
                             {transaction.type === 'sent' ? '-' : '+'}
-                            {(Number(lovelaceEntry[1]) / 1000000).toFixed(2)}
+                            {(Math.abs(Number(lovelaceEntry[1])) / 1000000).toFixed(2)}
                           </span>
                         </div>
                       )}
                       
-                      {otherAssets.map(([assetId, amount], assetIndex) => (
-                        <div key={assetIndex} className="asset-item token-asset">
-                          <TokenElement
-                            tokenId={assetId}
-                            amount={Number(amount)}
-                            className="transaction-token"
-                            metadataProvider={metadataProvider}
-                          />
-                          <span className="asset-amount">
-                            {transaction.type === 'sent' ? '-' : '+'}
-                            {Number(amount)}
-                          </span>
-                        </div>
-                      ))}
+                      {otherAssets.map(([assetId, amount], assetIndex) => {
+                        const numAmount = Number(amount);
+                        return (
+                          <div key={assetIndex} className="asset-item token-asset">
+                            <TokenElement
+                              tokenId={assetId}
+                              amount={numAmount}
+                              className="transaction-token"
+                              metadataProvider={metadataProvider}
+                            />
+                          </div>
+                        );
+                      })}
                     </div>
                   </td>
                   
                   <td className="transaction-link">
                     <div className="transaction-link-content">
-                      <span className="link-text">{transaction.transactionLink}</span>
+                      {transaction.hash && (
+                        <a 
+                          href={transaction.transactionLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="link-text"
+                          title={`View transaction ${transaction.hash}`}
+                        >
+                          {transaction.hash.slice(0, 8)}...{transaction.hash.slice(-8)}
+                        </a>
+                      )}
                       <button
                         className="link-action-button"
                         onClick={() => handleTransactionLinkClick(transaction)}
