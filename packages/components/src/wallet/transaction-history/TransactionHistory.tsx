@@ -272,7 +272,9 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
               return (
                 <tr key={index} className={`transaction-row ${transactionClass}`}>
                   <td className={`transaction-date ${transactionClass}-date`}>
-                    {transaction.date}
+                    <div className="transaction-date-content">
+                      {transaction.date}
+                    </div>
                   </td>
                   
                   <td className="transaction-type">
