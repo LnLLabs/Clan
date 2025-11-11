@@ -45,9 +45,6 @@ export interface WalletInterface {
   // Transaction status
   getTransactionStatus(txHash: Hash): Promise<TransactionStatus>;
   getTransaction(txHash: Hash): Promise<Transaction>;
-  
-  // Transaction history
-  getTransactionHistory?(limit?: number, offset?: number): Promise<Transaction[]>;
 
   // Utility methods
   getCollateral?(): Promise<UTxO[]>;

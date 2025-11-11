@@ -104,11 +104,12 @@ export interface ProviderConfig {
 export interface TokenMetadata {
   policyId: PolicyId;
   assetName: AssetName;
-  name?: string;
-  ticker?: string;
+  isNft: boolean;
+  name: string;
+  ticker: string;
+  decimals: number;
+  logo: string;
   description?: string;
-  decimals?: number;
-  logo?: string;
   url?: string;
   [key: string]: any;
 }
@@ -120,6 +121,17 @@ export interface TokenSearchResult {
   ticker?: string;
   logo?: string;
 }
+
+export interface TransactionMetadata {
+  txHash: string;
+  inputUtxos: UTxO[];
+  outputUtxos: UTxO[];
+  balanceChanges: Assets;
+  blockHeight?: number;
+  blockTime?: number;
+  metadata?: any;
+}
+
 
 /**
  * MetadataProvider interface for fetching token metadata and other non-critical data
@@ -149,6 +161,7 @@ export interface MetadataProvider {
    */
   getTransactionMetadata?(txHash: string): Promise<Record<string, any> | undefined>;
 
+  getTransactionHistory?( walletAddress: Address, limit?: number , offset?: number,  page?: number): Promise<Transaction[]>;
   /**
    * Batch get metadata for multiple tokens
    * @param tokens - Array of {policyId, assetName} pairs

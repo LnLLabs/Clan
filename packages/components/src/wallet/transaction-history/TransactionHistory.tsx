@@ -46,8 +46,8 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
 
         // Try to fetch from wallet's getTransactionHistory method
         let rawTransactions: Transaction[] = [];
-        if (wallet.getTransactionHistory) {
-          rawTransactions = await wallet.getTransactionHistory(limit);
+        if (metadataProvider?.getTransactionHistory) {
+          rawTransactions = await metadataProvider.getTransactionHistory(walletAddress, limit);
         }
 
         // Transform Transaction to TransactionHistoryItem
