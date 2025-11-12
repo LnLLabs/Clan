@@ -25,6 +25,7 @@ export { default as SignIcon } from './sign.svg?react';
 export { default as CExplorerIcon } from './cexplorer.svg?react';
 export { default as ImportSigIcon } from './importSig.svg?react';
 export { default as DeleteIcon } from './delete.svg?react';
+export { CardanoLogo } from './CardanoLogo';
 
 // SVG Icons - URL strings (for use as src in img tags)
 export { default as MenuIconUrl } from './menu.svg';

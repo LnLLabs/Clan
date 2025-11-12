@@ -18,7 +18,12 @@ export interface TokenInfo {
   fetchTime: number;
 }
 
-const IPFS_GATEWAY = 'https://ipfs.blockfrost.dev/ipfs/';
+const IPFS_GATEWAYS = [
+  'https://ipfs.blockfrost.dev/ipfs/',
+  'https://ipfs.io/ipfs/',
+  'https://cloudflare-ipfs.com/ipfs/',
+  'https://gateway.pinata.cloud/ipfs/'
+];
 
 /**
  * Get token information with a provided MetadataProvider
@@ -42,12 +47,6 @@ export async function getTokenInfo(
     };
   }
 
-  // Try to get from cache first
-  const cached = getCachedTokenInfo(tokenId);
-  if (cached) {
-    return cached;
-  }
-
   // If no provider, return basic info
   if (!metadataProvider) {
     return createBasicTokenInfo(tokenId);
@@ -56,44 +55,7 @@ export async function getTokenInfo(
   // Fetch from metadata provider
   const tokenInfo = await fetchTokenDataWithProvider(tokenId, metadataProvider);
 
-  // Cache the result
-  if (tokenInfo) {
-    setCachedTokenInfo(tokenId, tokenInfo);
-  }
-
   return tokenInfo;
-}
-
-/**
- * Get cached token info
- */
-function getCachedTokenInfo(tokenId: string): TokenInfo | null {
-  try {
-    const cached = localStorage.getItem(`tokenInfo_${tokenId}`);
-    if (!cached) return null;
-
-    const parsed = JSON.parse(cached);
-    // Check if cache is still valid (24 hours)
-    if (Date.now() - parsed.fetchTime > 24 * 60 * 60 * 1000) {
-      localStorage.removeItem(`tokenInfo_${tokenId}`);
-      return null;
-    }
-
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Cache token info
- */
-function setCachedTokenInfo(tokenId: string, tokenInfo: TokenInfo): void {
-  try {
-    localStorage.setItem(`tokenInfo_${tokenId}`, JSON.stringify(tokenInfo));
-  } catch {
-    // Ignore cache errors
-  }
 }
 
 /**
@@ -141,14 +103,20 @@ function parseTokenId(tokenId: string): { policyId: string; assetName: string } 
  * Convert TokenMetadata to TokenInfo
  */
 function convertMetadataToTokenInfo(tokenId: string, metadata: TokenMetadata): TokenInfo {
+  const decodedName = metadata.name || decodeAssetName(tokenId);
+  const image = extractMetadataImage(metadata);
+  const decimals = typeof metadata.decimals === 'number' ? metadata.decimals : 0;
+  const ticker = normalizeTicker(metadata.ticker, decodedName);
+  const isNft = detectPotentialNft(metadata);
+
   return {
-    name: metadata.name || decodeAssetName(tokenId),
-    image: processImageUrl(metadata.logo || ''),
-    decimals: metadata.decimals,
-    ticker: metadata.ticker,
-    isNft: false, // This would need quantity info to determine
+    name: decodedName,
+    image,
+    decimals,
+    ticker,
+    isNft,
     provider: 'metadata-provider',
-    fingerprint: '', // Not provided by metadata
+    fingerprint: '',
     fetchTime: Date.now()
   };
 }
@@ -157,11 +125,12 @@ function convertMetadataToTokenInfo(tokenId: string, metadata: TokenMetadata): T
  * Create basic token info when metadata is not available
  */
 function createBasicTokenInfo(tokenId: string): TokenInfo {
+  const decodedName = decodeAssetName(tokenId);
   return {
-    name: decodeAssetName(tokenId),
+    name: decodedName,
     image: '',
     decimals: 0,
-    ticker: decodeAssetName(tokenId).slice(0, 6).toUpperCase(),
+    ticker: normalizeTicker(undefined, decodedName),
     isNft: false,
     provider: 'basic',
     fingerprint: tokenId.slice(0, 8),
@@ -306,19 +275,178 @@ export function getNFTDisplayInfo(
   };
 }
 
+function extractMetadataImage(metadata: TokenMetadata): string {
+  const candidates: any[] = [];
+  const extendedMetadata = metadata as Record<string, any>;
+
+  const enqueue = (value: any) => {
+    if (value !== undefined && value !== null) {
+      candidates.push(value);
+    }
+  };
+
+  enqueue(metadata.logo);
+  enqueue(extendedMetadata?.image);
+  enqueue(extendedMetadata?.images);
+  enqueue(extendedMetadata?.icon);
+  enqueue(extendedMetadata?.iconUrl);
+  enqueue(extendedMetadata?.thumbnail);
+  enqueue(extendedMetadata?.previewImage);
+  enqueue(extendedMetadata?.media);
+  enqueue(extendedMetadata?.files);
+
+  const resolved = resolveImageCandidateFromList(candidates);
+  return resolved || '';
+}
+
+function normalizeTicker(ticker: string | undefined, fallbackName?: string): string {
+  if (ticker && ticker.trim()) {
+    return ticker.trim();
+  }
+
+  if (fallbackName) {
+    const sanitized = fallbackName.replace(/[^A-Za-z0-9]/g, '');
+    if (sanitized) {
+      return sanitized.slice(0, 10).toUpperCase();
+    }
+    return fallbackName.slice(0, 10).toUpperCase();
+  }
+
+  return '';
+}
+
+function detectPotentialNft(metadata: TokenMetadata): boolean {
+  const extendedMetadata = metadata as Record<string, any>;
+
+  if (typeof metadata.decimals === 'number' && metadata.decimals === 0 && !metadata.ticker) {
+    return true;
+  }
+
+  if (typeof extendedMetadata?.isNft === 'boolean') {
+    return extendedMetadata.isNft;
+  }
+
+  if (typeof extendedMetadata?.assetType === 'string') {
+    return extendedMetadata.assetType.toLowerCase().includes('nft');
+  }
+
+  if (Array.isArray(extendedMetadata?.tags)) {
+    return extendedMetadata.tags.some(tag => {
+      const value = typeof tag === 'string' ? tag : String(tag);
+      return value.toLowerCase().includes('nft');
+    });
+  }
+
+  return false;
+}
+
 /**
  * Process image URL (handle IPFS, etc.)
  */
 function processImageUrl(imageUrl: string): string {
   if (!imageUrl) return '';
 
-  if (imageUrl.startsWith('ipfs://')) {
-    return imageUrl.replace('ipfs://', IPFS_GATEWAY);
+  const trimmed = imageUrl.trim();
+  if (!trimmed) return '';
+
+  if (trimmed.startsWith('ipfs://')) {
+    return resolveIpfsUrl(trimmed);
   }
 
-  if (Array.isArray(imageUrl)) {
-    return imageUrl.join('');
+  if (
+    trimmed.startsWith('http://') ||
+    trimmed.startsWith('https://') ||
+    trimmed.startsWith('data:')
+  ) {
+    return trimmed;
   }
 
-  return imageUrl;
+  const base64Candidate = trimmed.replace(/\s+/g, '');
+  const base64Pattern = /^[A-Za-z0-9+/=]+$/;
+  if (base64Candidate.length >= 60 && base64Pattern.test(base64Candidate)) {
+    const mimeType = inferMimeTypeFromBase64(base64Candidate);
+    return `data:${mimeType};base64,${base64Candidate}`;
+  }
+
+  return trimmed;
+}
+
+function inferMimeTypeFromBase64(base64Data: string): string {
+  const signatureMap: Array<{ prefix: string; mime: string }> = [
+    { prefix: 'iVBORw0KGgo', mime: 'image/png' },
+    { prefix: '/9j/', mime: 'image/jpeg' },
+    { prefix: 'R0lGOD', mime: 'image/gif' },
+    { prefix: 'PHN2Zy', mime: 'image/svg+xml' },
+    { prefix: 'Qk0', mime: 'image/bmp' },
+    { prefix: 'UklGR', mime: 'image/webp' }
+  ];
+
+  const match = signatureMap.find(entry => base64Data.startsWith(entry.prefix));
+  return match?.mime || 'image/png';
+}
+
+function resolveIpfsUrl(ipfsUrl: string): string {
+  // Remove protocol and redundant prefixes
+  let path = ipfsUrl.replace(/^ipfs:\/\//i, '');
+  path = path.replace(/^ipfs\//i, '');
+  path = path.replace(/^ipfs:/i, '');
+  path = path.replace(/^\/+/, '');
+
+  if (!path) {
+    return ipfsUrl;
+  }
+
+  // Prefer first gateway; others kept for potential future rotation/fallback
+  return `${IPFS_GATEWAYS[0]}${path}`;
+}
+
+function resolveImageCandidateFromList(candidates: any[]): string | undefined {
+  for (const candidate of candidates) {
+    const resolved = resolveImageCandidate(candidate);
+    if (resolved) {
+      return resolved;
+    }
+  }
+  return undefined;
+}
+
+function resolveImageCandidate(value: any): string | undefined {
+  if (!value) return undefined;
+
+  if (typeof value === 'string') {
+    return processImageUrl(value);
+  }
+
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const resolved = resolveImageCandidate(item);
+      if (resolved) return resolved;
+    }
+    return undefined;
+  }
+
+  if (typeof value === 'object') {
+    const preferredKeys = [
+      'url',
+      'src',
+      'href',
+      'image',
+      'logo',
+      'thumbnail',
+      'previewImage',
+      'default',
+      'large',
+      'medium',
+      'small'
+    ];
+
+    for (const key of preferredKeys) {
+      if (key in value) {
+        const resolved = resolveImageCandidate((value as Record<string, any>)[key]);
+        if (resolved) return resolved;
+      }
+    }
+  }
+
+  return undefined;
 }

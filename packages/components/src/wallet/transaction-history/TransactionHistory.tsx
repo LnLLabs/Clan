@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Assets, WalletInterface, MetadataProvider, Transaction, BlockchainExplorer } from '@clan/framework-core';
 import { TokenElement } from '../token/TokenElement';
 import { createDefaultExplorer } from './default-explorer';
+import { CardanoLogo } from '../../assets';
 
 export type TransactionType = 'sent' | 'received' | 'withdrawal';
 
@@ -172,6 +173,35 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
     ? transactions.slice(0, maxVisibleTransactions)
     : transactions;
 
+  const splitTokenId = (tokenId: string): { policyId: string; assetName: string } => {
+    if (!tokenId || tokenId === 'lovelace') {
+      return { policyId: '', assetName: '' };
+    }
+
+    if (tokenId.length <= 56) {
+      return { policyId: tokenId, assetName: '' };
+    }
+
+    return {
+      policyId: tokenId.slice(0, 56),
+      assetName: tokenId.slice(56)
+    };
+  };
+
+  const handleTokenClick = (tokenId: string) => {
+    if (!tokenId || tokenId === 'lovelace') return;
+
+    const { policyId, assetName } = splitTokenId(tokenId);
+    const mainnetBaseUrl = 'https://cexplorer.io';
+    const tokenLink = assetName && assetName !== ''
+      ? `${mainnetBaseUrl}/asset/${policyId}${assetName}`
+      : `${mainnetBaseUrl}/policy/${policyId}`;
+
+    if (tokenLink && typeof window !== 'undefined') {
+      window.open(tokenLink, '_blank', 'noopener');
+    }
+  };
+
   const getTransactionIcon = (type: TransactionType): string => {
     switch (type) {
       case 'sent':
@@ -293,7 +323,9 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
                       {lovelaceEntry && (
                         <div className="asset-item">
                           <div className="asset-icon-wrapper">
-                            <div className="asset-icon ada-icon">₳</div>
+                            <div className="asset-icon ada-icon">
+                              <CardanoLogo className="cardano-logo" />
+                            </div>
                           </div>
                           <span className="asset-amount">
                             {transaction.type === 'sent' ? '-' : '+'}
@@ -311,6 +343,7 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
                               amount={numAmount}
                               className="transaction-token"
                               metadataProvider={metadataProvider}
+                            onClick={handleTokenClick}
                             />
                           </div>
                         );

@@ -155,3 +155,4 @@ console.log(explorer.baseUrl); // 'https://cexplorer.io'
 console.log(explorer.getTransactionLink('abc123')); // 'https://cexplorer.io/tx/abc123'
 ```
 
+
