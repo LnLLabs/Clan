@@ -22,19 +22,27 @@ interface TokenRowProps {
   totalValue: number;
   onClick: () => void;
   metadataProvider?: MetadataProvider;
+  prefetchedTokenInfo?: TokenInfo | null;
 }
 
 const useOverviewTokenInfo = (
   tokenId: string,
-  metadataProvider?: MetadataProvider
+  metadataProvider?: MetadataProvider,
+  initialTokenInfo?: TokenInfo | null
 ): { tokenInfo: TokenInfo | null; loading: boolean } => {
-  const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(initialTokenInfo ?? null);
+  const [loading, setLoading] = useState<boolean>(initialTokenInfo === undefined);
 
   useEffect(() => {
     let isMounted = true;
 
     const fetchTokenInfo = async () => {
+      if (initialTokenInfo !== undefined) {
+        setTokenInfo(initialTokenInfo);
+        setLoading(false);
+        return;
+      }
+
       if (!tokenId) {
         if (isMounted) {
           setTokenInfo(null);
@@ -66,7 +74,7 @@ const useOverviewTokenInfo = (
     return () => {
       isMounted = false;
     };
-  }, [tokenId, metadataProvider]);
+  }, [tokenId, metadataProvider, initialTokenInfo]);
 
   return { tokenInfo, loading };
 };
@@ -86,8 +94,8 @@ const splitTokenId = (tokenId: string): { policyId: string; assetName: string } 
   };
 };
 
-const TokenRow: React.FC<TokenRowProps> = ({ tokenId, amount, totalValue, onClick, metadataProvider }) => {
-  const { tokenInfo, loading } = useOverviewTokenInfo(tokenId, metadataProvider);
+const TokenRow: React.FC<TokenRowProps> = ({ tokenId, amount, totalValue, onClick, metadataProvider, prefetchedTokenInfo }) => {
+  const { tokenInfo, loading } = useOverviewTokenInfo(tokenId, metadataProvider, prefetchedTokenInfo);
   
   if (loading) {
     return (
@@ -158,10 +166,11 @@ interface NFTItemProps {
   tokenId: string;
   onClick: () => void;
   metadataProvider?: MetadataProvider;
+  prefetchedTokenInfo?: TokenInfo | null;
 }
 
-const NFTItem: React.FC<NFTItemProps> = ({ tokenId, onClick, metadataProvider }) => {
-  const { tokenInfo, loading } = useOverviewTokenInfo(tokenId, metadataProvider);
+const NFTItem: React.FC<NFTItemProps> = ({ tokenId, onClick, metadataProvider, prefetchedTokenInfo }) => {
+  const { tokenInfo, loading } = useOverviewTokenInfo(tokenId, metadataProvider, prefetchedTokenInfo);
   
   if (loading) {
     return (
@@ -237,6 +246,7 @@ export const Overview: React.FC<OverviewProps> = ({
   const [search, setSearch] = useState('');
   const [balance, setBalance] = useState<Assets>({});
   const [visibleCount, setVisibleCount] = useState(5);
+  const [tokenMetadataMap, setTokenMetadataMap] = useState<Record<string, TokenInfo | null>>({});
 
   useEffect(() => {
     const loadWalletData = async () => {
@@ -261,6 +271,83 @@ export const Overview: React.FC<OverviewProps> = ({
 
     loadWalletData();
   }, [wallet, initialSelectedAddress]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const tokenIds = Object.keys(balance);
+
+    if (tokenIds.length === 0) {
+      setTokenMetadataMap({});
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    setTokenMetadataMap(prev => {
+      const next: Record<string, TokenInfo | null> = {};
+      tokenIds.forEach(tokenId => {
+        if (Object.prototype.hasOwnProperty.call(prev, tokenId)) {
+          next[tokenId] = prev[tokenId];
+        } else {
+          next[tokenId] = null;
+        }
+      });
+      return next;
+    });
+
+    const fetchMetadata = async () => {
+      try {
+        const entries = await Promise.all(
+          tokenIds.map(async tokenId => {
+            try {
+              const info = await getTokenInfo(tokenId, effectiveMetadataProvider);
+              return [tokenId, info ?? null] as const;
+            } catch {
+              return [tokenId, null] as const;
+            }
+          })
+        );
+
+        if (!isMounted) {
+          return;
+        }
+
+        const metadataMap = new Map(entries);
+
+        setTokenMetadataMap(prev => {
+          const next: Record<string, TokenInfo | null> = {};
+          tokenIds.forEach(tokenId => {
+            if (metadataMap.has(tokenId)) {
+              next[tokenId] = metadataMap.get(tokenId) ?? null;
+            } else if (Object.prototype.hasOwnProperty.call(prev, tokenId)) {
+              next[tokenId] = prev[tokenId];
+            } else {
+              next[tokenId] = null;
+            }
+          });
+          return next;
+        });
+      } catch {
+        if (!isMounted) {
+          return;
+        }
+
+        setTokenMetadataMap(() => {
+          const fallback: Record<string, TokenInfo | null> = {};
+          tokenIds.forEach(tokenId => {
+            fallback[tokenId] = null;
+          });
+          return fallback;
+        });
+      }
+    };
+
+    fetchMetadata();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [balance, effectiveMetadataProvider]);
 
   const handleAddressChange = (address: string) => {
     setSelectedAddress(address);
@@ -315,8 +402,34 @@ export const Overview: React.FC<OverviewProps> = ({
       return Number(balance[b]) - Number(balance[a]);
     });
 
-  const visibleTokens = filteredTokens.slice(0, visibleCount);
-  const hasMore = filteredTokens.length > visibleCount;
+  const typeFilteredTokens = filteredTokens.filter(tokenId => {
+    const metadata = tokenMetadataMap[tokenId];
+
+    if (filter === 'NFTs') {
+      if (tokenId === 'lovelace' || tokenId === 'ADA') {
+        return false;
+      }
+
+      if (!metadata) {
+        return false;
+      }
+
+      return metadata.provider === 'metadata-provider' && !!metadata.isNft;
+    }
+
+    if (tokenId === 'lovelace' || tokenId === 'ADA') {
+      return true;
+    }
+
+    if (metadata && metadata.provider === 'metadata-provider') {
+      return !metadata.isNft;
+    }
+
+    return true;
+  });
+
+  const visibleTokens = typeFilteredTokens.slice(0, visibleCount);
+  const hasMore = typeFilteredTokens.length > visibleCount;
 
   return (
     <div className={`overview-container ${className}`}>
@@ -366,6 +479,7 @@ export const Overview: React.FC<OverviewProps> = ({
                   totalValue={totalValue}
                   onClick={() => handleTokenClick(tokenId)}
                   metadataProvider={effectiveMetadataProvider}
+                  prefetchedTokenInfo={tokenMetadataMap[tokenId]}
                 />
               ))
             )}
@@ -389,6 +503,7 @@ export const Overview: React.FC<OverviewProps> = ({
                   tokenId={tokenId}
                   onClick={() => handleTokenClick(tokenId)}
                   metadataProvider={effectiveMetadataProvider}
+                  prefetchedTokenInfo={tokenMetadataMap[tokenId]}
                 />
               ))
             )}
