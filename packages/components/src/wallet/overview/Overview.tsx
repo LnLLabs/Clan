@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { WalletInterface, Assets, MetadataProvider } from '@clan/framework-core';
 import { useMetadataProvider } from '@clan/framework-providers';
 import { getTokenInfo, getNFTDisplayInfo, TokenInfo } from '@clan/framework-helpers';
+import { CardanoLogo } from '../../assets';
 import { TokenElement } from '../token/TokenElement';
 
 export interface OverviewProps {
@@ -96,6 +97,7 @@ const splitTokenId = (tokenId: string): { policyId: string; assetName: string } 
 
 const TokenRow: React.FC<TokenRowProps> = ({ tokenId, amount, totalValue, onClick, metadataProvider, prefetchedTokenInfo }) => {
   const { tokenInfo, loading } = useOverviewTokenInfo(tokenId, metadataProvider, prefetchedTokenInfo);
+  const isAdaToken = tokenId === 'lovelace' || tokenId === 'ADA';
   
   if (loading) {
     return (
@@ -128,12 +130,24 @@ const TokenRow: React.FC<TokenRowProps> = ({ tokenId, amount, totalValue, onClic
   return (
     <div className="overview-token-row" onClick={onClick}>
       <div className="overview-token-asset">
-        <TokenElement
-          tokenId={tokenId}
-          amount={amount}
-          metadataProvider={metadataProvider}
-          className="overview-token-chip"
-        />
+        {isAdaToken ? (
+          <div className="overview-token-chip overview-ada-chip">
+            <div className="overview-token-icon ada">
+              <CardanoLogo className="cardano-logo" />
+            </div>
+            <div className="overview-token-info">
+              <span className="overview-token-ticker">ADA</span>
+              <span className="overview-token-name">Cardano</span>
+            </div>
+          </div>
+        ) : (
+          <TokenElement
+            tokenId={tokenId}
+            amount={amount}
+            metadataProvider={metadataProvider}
+            className="overview-token-chip"
+          />
+        )}
       </div>
       <div className="overview-token-quantity">
         {displayAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}

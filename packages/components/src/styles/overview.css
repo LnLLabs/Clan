@@ -141,6 +141,19 @@
   flex-shrink: 0;
 }
 
+.overview-token-icon.ada {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.overview-token-icon.ada .cardano-logo {
+  width: 40px;
+  height: 40px;
+}
+
 .overview-token-placeholder {
   width: 42px;
   height: 42px;
@@ -158,6 +171,12 @@
 
 .overview-token-placeholder.hidden {
   display: none;
+}
+
+.overview-ada-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
 }
 
 .overview-token-chip .token-element-wrapper {
