@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Assets, UTxO, WalletInterface, TransactionBuildOptions } from '@clan/framework-core';
+import { Assets, UTxO, WalletInterface, TransactionBuildOptions, MetadataProvider } from '@clan/framework-core';
 import { coinSelect } from '@clan/framework-core';
 import { Button } from '../../ui/buttons/Button';
 import { Modal } from '../../ui/modals/Modal';
 import { ContactPicker } from '../../contacts/ContactPicker';
 import { AssetPicker, UIAsset, SelectedAsset } from '../asset-picker/AssetPicker';
+import { useMetadataProvider } from '@clan/framework-providers';
+import { getTokenInfo, TokenInfo, decodeAssetName as decodeAssetNameHelper } from '@clan/framework-helpers';
+import { TokenElement } from '../token/TokenElement';
 
 export interface TransactionRecipient {
   address: string;
@@ -15,21 +18,116 @@ export interface TransactionRecipient {
 
 export interface TransactionCreatorProps {
   wallet: WalletInterface;
-  availableUtxos: UTxO[];
-  availableAssets?: UIAsset[];
+  metadataProvider?: MetadataProvider;
   onTransactionCreated?: (options: TransactionBuildOptions) => void;
   onCancel?: () => void;
   className?: string;
+  /**
+   * @deprecated TransactionCreator now fetches UTxOs directly from the provided wallet.
+   */
+  availableUtxos?: UTxO[];
+  /**
+   * @deprecated TransactionCreator now derives available assets from the wallet balance.
+   */
+  availableAssets?: UIAsset[];
 }
+
+const useWalletSnapshot = (
+  wallet: WalletInterface
+): {
+  balance: Assets | null;
+  utxos: UTxO[];
+  balanceLoading: boolean;
+  utxosLoading: boolean;
+  balanceError: string | null;
+  utxosError: string | null;
+} => {
+  const [balance, setBalance] = useState<Assets | null>(null);
+  const [utxos, setUtxos] = useState<UTxO[]>([]);
+  const [balanceLoading, setBalanceLoading] = useState(true);
+  const [utxosLoading, setUtxosLoading] = useState(true);
+  const [balanceError, setBalanceError] = useState<string | null>(null);
+  const [utxosError, setUtxosError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchWalletData = async () => {
+      setBalanceLoading(true);
+      setBalanceError(null);
+      setUtxosLoading(true);
+      setUtxosError(null);
+
+      try {
+        const [balanceResult, utxosResult] = await Promise.allSettled([
+          wallet.getBalance(),
+          wallet.getUtxos()
+        ]);
+
+        if (!isMounted) {
+          return;
+        }
+
+        if (balanceResult.status === 'fulfilled') {
+          setBalance(balanceResult.value);
+        } else {
+          setBalance(null);
+          const reason = balanceResult.reason;
+          setBalanceError(reason instanceof Error ? reason.message : String(reason));
+        }
+
+        if (utxosResult.status === 'fulfilled') {
+          setUtxos(utxosResult.value);
+        } else {
+          setUtxos([]);
+          const reason = utxosResult.reason;
+          setUtxosError(reason instanceof Error ? reason.message : String(reason));
+        }
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+        setBalance(null);
+        setUtxos([]);
+        setBalanceError(error instanceof Error ? error.message : String(error));
+        setUtxosError(error instanceof Error ? error.message : String(error));
+      } finally {
+        if (isMounted) {
+          setBalanceLoading(false);
+          setUtxosLoading(false);
+        }
+      }
+    };
+
+    fetchWalletData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [wallet]);
+
+  return {
+    balance,
+    utxos,
+    balanceLoading,
+    utxosLoading,
+    balanceError,
+    utxosError
+  };
+};
 
 export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
   wallet,
-  availableUtxos,
-  availableAssets = [],
+  metadataProvider,
   onTransactionCreated,
   onCancel,
-  className = ''
+  className = '',
+  availableUtxos,
+  availableAssets = []
 }) => {
+  const metadataProviderFromContext = useMetadataProvider();
+  const effectiveMetadataProvider = metadataProvider ?? metadataProviderFromContext;
+
   const [recipients, setRecipients] = useState<TransactionRecipient[]>([
     { address: '', assets: { 'lovelace': 0n } }
   ]);
@@ -42,30 +140,177 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
   const [showContactPicker, setShowContactPicker] = useState<number | null>(null);
   const [addressErrors, setAddressErrors] = useState<{ [key: number]: string }>({});
   const [showAssetPicker, setShowAssetPicker] = useState<number | null>(null);
+  const [assetsForPicker, setAssetsForPicker] = useState<UIAsset[]>([]);
+  const [assetsLoading, setAssetsLoading] = useState(false);
+  const [assetsError, setAssetsError] = useState<string | null>(null);
+  const [hasMetadataForPicker, setHasMetadataForPicker] = useState(false);
+
+  const {
+    balance: walletBalance,
+    utxos: walletUtxos,
+    balanceLoading,
+    utxosLoading,
+    balanceError,
+    utxosError
+  } = useWalletSnapshot(wallet);
+  const usingDeprecatedUtxos = Boolean(availableUtxos && availableUtxos.length > 0);
+  const usingDeprecatedAssets = Boolean(availableAssets && availableAssets.length > 0);
+  const resolvedUtxos = usingDeprecatedUtxos ? (availableUtxos ?? []) : walletUtxos;
+
+  useEffect(() => {
+    if (availableUtxos && availableUtxos.length > 0) {
+      console.warn(
+        'TransactionCreator: `availableUtxos` prop is deprecated. The component now fetches UTxOs directly from the provided wallet.'
+      );
+    }
+  }, [availableUtxos]);
+
+  useEffect(() => {
+    if (availableAssets && availableAssets.length > 0) {
+      console.warn(
+        'TransactionCreator: `availableAssets` prop is deprecated. The component now derives assets from the wallet balance.'
+      );
+      setAssetsForPicker(availableAssets);
+      setHasMetadataForPicker(availableAssets.some(asset => asset.isNFT !== undefined));
+      setAssetsLoading(false);
+      setAssetsError(null);
+    }
+  }, [availableAssets]);
 
   // Decode hex-encoded asset name from assetId
   const decodeAssetName = (assetId: string): string => {
+    if (assetId === 'lovelace') {
+      return 'ADA';
+    }
     try {
-      // AssetId format: policyId (56 chars) + hex-encoded asset name
-      if (assetId.length <= 56) {
-        return assetId.slice(0, 8) + '...';
-      }
-      
-      const hexAssetName = assetId.slice(56);
-      if (!hexAssetName) {
-        return assetId.slice(0, 8) + '...';
-      }
-      
-      // Decode hex to UTF-8
-      const decoded = hexAssetName.match(/.{1,2}/g)
-        ?.map(byte => String.fromCharCode(parseInt(byte, 16)))
-        .join('');
-      
-      return decoded || assetId.slice(0, 8) + '...';
-    } catch (error) {
+      return decodeAssetNameHelper(assetId);
+    } catch {
       return assetId.slice(0, 8) + '...';
     }
   };
+  useEffect(() => {
+    let isMounted = true;
+
+    if (availableAssets && availableAssets.length > 0) {
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    if (!walletBalance) {
+      setAssetsForPicker([]);
+      setHasMetadataForPicker(false);
+      setAssetsLoading(false);
+      setAssetsError(null);
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    const assetEntries = Object.entries(walletBalance).filter(
+      ([assetId, balance]) => assetId !== 'lovelace' && balance > 0n
+    );
+
+    const fallbackAssets: UIAsset[] = assetEntries.map(([assetId, balance]) => ({
+      id: assetId,
+      balance,
+      name: decodeAssetName(assetId),
+      decimals: 0
+    }));
+
+    if (assetEntries.length === 0) {
+      setAssetsForPicker([]);
+      setHasMetadataForPicker(false);
+      setAssetsLoading(false);
+      setAssetsError(null);
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    if (!effectiveMetadataProvider) {
+      if (isMounted) {
+        setAssetsForPicker(fallbackAssets);
+        setHasMetadataForPicker(false);
+        setAssetsLoading(false);
+        setAssetsError(null);
+      }
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    setAssetsLoading(true);
+    setAssetsError(null);
+
+    const enrichAssets = async () => {
+      try {
+        const enriched = await Promise.all(
+          assetEntries.map(async ([assetId, balance]) => {
+            try {
+              const info = await getTokenInfo(assetId, effectiveMetadataProvider);
+              return [assetId, balance, info ?? null] as [string, bigint, TokenInfo | null];
+            } catch (error) {
+              console.warn(`Failed to fetch metadata for ${assetId}:`, error);
+              return [assetId, balance, null] as [string, bigint, TokenInfo | null];
+            }
+          })
+        );
+
+        if (!isMounted) {
+          return;
+        }
+
+        let metadataDetected = false;
+
+        const assets = enriched.map(([assetId, balance, info]) => {
+          const isMetadata = info?.provider === 'metadata-provider';
+          if (isMetadata) {
+            metadataDetected = true;
+          }
+
+          const decimals =
+            isMetadata && typeof info?.decimals === 'number'
+              ? info.decimals
+              : 0;
+          const name = isMetadata
+            ? info?.name || decodeAssetName(assetId)
+            : decodeAssetName(assetId);
+
+          return {
+            id: assetId,
+            balance,
+            name,
+            ticker: info?.ticker,
+            decimals,
+            isNFT: isMetadata ? !!info?.isNft : undefined,
+            icon: info?.image
+          } as UIAsset;
+        });
+
+        setAssetsForPicker(assets);
+        setHasMetadataForPicker(metadataDetected);
+        setAssetsLoading(false);
+        setAssetsError(null);
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+
+        console.error('Failed to load token metadata:', error);
+        setAssetsForPicker(fallbackAssets);
+        setHasMetadataForPicker(false);
+        setAssetsError(error instanceof Error ? error.message : String(error));
+        setAssetsLoading(false);
+      }
+    };
+
+    enrichAssets();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [walletBalance, effectiveMetadataProvider]);
 
   // Validate Cardano address
   const validateCardanoAddress = (address: string): boolean => {
@@ -177,6 +422,11 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
   // Calculate required UTXOs for the transaction
   const calculateRequiredUtxos = async () => {
     if (isCalculating) return;
+    if (resolvedUtxos.length === 0) {
+      setSelectedUtxos([]);
+      setEstimatedFee(0n);
+      return;
+    }
 
     setIsCalculating(true);
     try {
@@ -193,7 +443,7 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
       }
 
       // Use coin selection algorithm
-      const selected = coinSelect(requiredAssets, availableUtxos);
+      const selected = coinSelect(requiredAssets, resolvedUtxos);
       setSelectedUtxos(selected);
     } catch (error) {
       console.error('Error calculating UTXOs:', error);
@@ -256,8 +506,49 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
 
   // Recalculate when recipients change
   useEffect(() => {
+    if (!usingDeprecatedUtxos && utxosLoading) {
+      return;
+    }
     calculateRequiredUtxos();
-  }, [recipients, availableUtxos]);
+  }, [recipients, walletUtxos, availableUtxos, utxosLoading, usingDeprecatedUtxos]);
+
+  const balanceReady = usingDeprecatedAssets || !balanceLoading;
+  const utxosReady = usingDeprecatedUtxos || !utxosLoading;
+
+  if (!balanceReady || !utxosReady) {
+    return (
+      <div className={`transaction-creator ${className}`}>
+        <div className="transaction-creator-loading" style={{ padding: '2rem', textAlign: 'center' }}>
+          Loading wallet data...
+        </div>
+      </div>
+    );
+  }
+
+  const criticalBalanceError = !usingDeprecatedAssets && balanceError;
+  const criticalUtxosError = !usingDeprecatedUtxos && utxosError;
+
+  if (criticalBalanceError || criticalUtxosError) {
+    return (
+      <div className={`transaction-creator ${className}`}>
+        <div className="transaction-creator-error" style={{ padding: '2rem', color: '#ef4444' }}>
+          <div>Error loading wallet information</div>
+          {criticalBalanceError && <div>{criticalBalanceError}</div>}
+          {criticalUtxosError && <div>{criticalUtxosError}</div>}
+        </div>
+      </div>
+    );
+  }
+
+  if (resolvedUtxos.length === 0) {
+    return (
+      <div className={`transaction-creator ${className}`}>
+        <div className="transaction-creator-empty" style={{ padding: '2rem', textAlign: 'center' }}>
+          No funds available in wallet
+        </div>
+      </div>
+    );
+  }
 
   const totalAssets = calculateTotalAssets();
   const adaTotal = Number(totalAssets['lovelace'] || 0n) / 1000000;
@@ -350,7 +641,7 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
                     className="max-ada-button"
                     onClick={() => {
                       // Get total available ADA from wallet
-                      const totalLovelace = availableUtxos.reduce((sum, utxo) => 
+                      const totalLovelace = resolvedUtxos.reduce((sum, utxo) =>
                         sum + (utxo.assets['lovelace'] || 0n), 0n
                       );
                       const newRecipients = [...recipients];
@@ -377,30 +668,84 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
               <div className="assets-section">
                 <label>Assets</label>
 
+                {assetsLoading && (
+                  <div className="assets-loading" style={{ fontSize: '0.85rem', color: '#6b7280', marginBottom: '0.5rem' }}>
+                    Loading asset details...
+                  </div>
+                )}
+
+                {assetsError && (
+                  <div className="assets-error" style={{ fontSize: '0.85rem', color: '#ef4444', marginBottom: '0.5rem' }}>
+                    {assetsError}
+                  </div>
+                )}
+
                 {/* Selected Assets Chips (excluding ADA/lovelace) */}
                 <div className="selected-assets-chips">
                   {Object.entries(recipient.assets)
                     .filter(([assetId, amount]) => assetId !== 'lovelace' && amount > 0n)
                     .map(([assetId, amount]) => {
-                      const asset = availableAssets.find(a => a.id === assetId);
-                      
-                      // Fallback for decimals if asset metadata not available
-                      const decimals = asset?.decimals !== undefined 
-                        ? asset.decimals 
-                        : (asset?.isNFT || amount === 1n ? 0 : 6);
-                      
-                      const displayAmount = (Number(amount) / Math.pow(10, decimals)).toString();
-                      
-                      // Fallback for asset name - decode from hex if metadata not available
-                      const assetName = asset?.name 
-                        || asset?.ticker 
-                        || decodeAssetName(assetId);
+                      const handleTokenClick = () => {
+                        if (!assetId || assetId === 'lovelace') {
+                          return;
+                        }
+
+                        const policyId = assetId.slice(0, 56);
+                        const assetNameHex = assetId.slice(56);
+                        const explorerBaseUrl = 'https://cexplorer.io';
+                        const tokenLink = assetNameHex && assetNameHex !== ''
+                          ? `${explorerBaseUrl}/asset/${policyId}${assetNameHex}`
+                          : `${explorerBaseUrl}/policy/${policyId}`;
+
+                        if (tokenLink && typeof window !== 'undefined') {
+                          window.open(tokenLink, '_blank', 'noopener');
+                        }
+                      };
+
+                      const asset = assetsForPicker.find(a => a.id === assetId);
+                      const decimals = asset?.decimals !== undefined
+                        ? asset.decimals
+                        : (hasMetadataForPicker ? (asset?.isNFT ? 0 : 6) : 0);
+                      const displayAmount = decimals > 0
+                        ? Number(amount) / Math.pow(10, decimals)
+                        : Number(amount);
+
+                      const formattedAmount = decimals > 0
+                        ? displayAmount.toLocaleString('en-US', {
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: Math.min(decimals, 6)
+                          })
+                        : displayAmount.toLocaleString('en-US');
+
+                      const isMetadataAsset = Boolean(hasMetadataForPicker && asset?.id);
+                      const chipClassName = `asset-chip transaction-asset-chip${
+                        isMetadataAsset ? ' transaction-asset-chip--metadata' : ''
+                      }`;
 
                       return (
-                        <div key={assetId} className="asset-chip" title={assetId}>
-                          <span className="asset-chip-text">
-                            {assetName} {displayAmount}
-                          </span>
+                        <div key={assetId} className={chipClassName} title={assetId}>
+                          {isMetadataAsset
+                            ? (
+                            <TokenElement
+                              tokenId={assetId}
+                              amount={Number(amount)}
+                              metadataProvider={effectiveMetadataProvider}
+                              className="asset-chip-token"
+                              onClick={handleTokenClick}
+                            />
+                            )
+                            : (
+                            <>
+                              <span className="asset-chip-text">
+                                {decodeAssetName(assetId)} {formattedAmount}
+                              </span>
+                            </>
+                            )}
+                          {isMetadataAsset && (
+                            <span className="transaction-asset-amount">
+                              {formattedAmount}
+                            </span>
+                          )}
                           <button
                             className="asset-chip-remove"
                             onClick={() => removeAssetFromRecipient(index, assetId)}
@@ -418,6 +763,7 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
                   <button
                     className="add-assets-button"
                     onClick={() => setShowAssetPicker(index)}
+                    disabled={assetsLoading || assetsForPicker.length === 0}
                   >
                     Add Assets
                   </button>
@@ -565,10 +911,11 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
       {/* Asset Picker Modal */}
       {showAssetPicker !== null && (
         <AssetPicker
-          availableAssets={availableAssets.filter(a => a && a.id && a.id !== 'lovelace')}
+          availableAssets={assetsForPicker.filter(a => a && a.id && a.id !== 'lovelace')}
           selectedAssets={assetsToSelectedAssets(recipients[showAssetPicker].assets)}
           onConfirm={(selected) => handleAssetsConfirmed(showAssetPicker, selected)}
           onClose={() => setShowAssetPicker(null)}
+          hasMetadataProvider={hasMetadataForPicker}
         />
       )}
     </div>

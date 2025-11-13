@@ -385,6 +385,15 @@
   border-top-color: rgba(15, 23, 42, 0.95);
 }
 
+.token-group-header {
+  padding: var(--space-xs, 0.5rem) var(--space-md, 1rem) var(--space-xs, 0.5rem);
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-semibold, 600);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-tertiary, #6b7280);
+}
+
 .token-tooltip-row {
   display: flex;
   align-items: center;

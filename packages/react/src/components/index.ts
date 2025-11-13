@@ -1,7 +1,6 @@
 export { TransactionCreatorWithData } from './TransactionCreatorWithData';
 export type { 
-  TransactionCreatorWithDataProps, 
-  TokenMetadataProvider 
+  TransactionCreatorWithDataProps
 } from './TransactionCreatorWithData';
 
 export { WalletDelegationWithData } from './WalletDelegationWithData';

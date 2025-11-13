@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Assets } from '@clan/framework-core';
 
 /**
@@ -27,6 +27,7 @@ export interface AssetPickerProps {
   selectedAssets: SelectedAsset[];
   onConfirm: (assets: SelectedAsset[]) => void;
   onClose: () => void;
+  hasMetadataProvider?: boolean;
 }
 
 type TabType = 'all' | 'ft' | 'nft';
@@ -85,12 +86,21 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
   availableAssets,
   selectedAssets: initialSelected,
   onConfirm,
-  onClose
+  onClose,
+  hasMetadataProvider = false
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAssets, setSelectedAssets] = useState<SelectedAsset[]>(initialSelected);
   const [editingAmounts, setEditingAmounts] = useState<{ [key: string]: string }>({});
+
+  const showTabs = hasMetadataProvider;
+
+  useEffect(() => {
+    if (!showTabs && activeTab !== 'all') {
+      setActiveTab('all');
+    }
+  }, [showTabs, activeTab]);
 
   // Filter assets based on tab and search
   const filteredAssets = useMemo(() => {
@@ -98,8 +108,9 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
       // Filter out invalid assets
       if (!asset || !asset.id) return false;
       
-      const isNFT = isAssetNFT(asset);
+      const isNFT = showTabs ? isAssetNFT(asset) : false;
       const matchesTab = 
+        !showTabs ||
         activeTab === 'all' ||
         (activeTab === 'ft' && !isNFT) ||
         (activeTab === 'nft' && isNFT);
@@ -143,7 +154,7 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
     
     const numValue = parseFloat(value);
     if (!isNaN(numValue) && numValue >= 0) {
-      const decimals = getAssetDecimals(asset);
+      const decimals = hasMetadataProvider ? getAssetDecimals(asset) : (asset.decimals ?? 0);
       const amount = BigInt(Math.floor(numValue * Math.pow(10, decimals)));
       updateAssetAmount(assetId, amount);
     }
@@ -151,7 +162,7 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
 
   const setMaxAmount = (assetId: string, asset: UIAsset) => {
     updateAssetAmount(assetId, asset.balance);
-    const decimals = getAssetDecimals(asset);
+    const decimals = hasMetadataProvider ? getAssetDecimals(asset) : (asset.decimals ?? 0);
     const displayAmount = Number(asset.balance) / Math.pow(10, decimals);
     setEditingAmounts({ ...editingAmounts, [assetId]: displayAmount.toString() });
   };
@@ -170,7 +181,7 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
     
     const newEditingAmounts: { [key: string]: string } = {};
     filteredAssets.forEach(asset => {
-      const decimals = getAssetDecimals(asset);
+      const decimals = hasMetadataProvider ? getAssetDecimals(asset) : (asset.decimals ?? 0);
       const displayAmount = Number(asset.balance) / Math.pow(10, decimals);
       newEditingAmounts[asset.id] = displayAmount.toString();
     });
@@ -182,7 +193,7 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
       return editingAmounts[assetId];
     }
     const amount = getSelectedAmount(assetId);
-    const decimals = getAssetDecimals(asset);
+    const decimals = hasMetadataProvider ? getAssetDecimals(asset) : (asset.decimals ?? 0);
     return (Number(amount) / Math.pow(10, decimals)).toString();
   };
 
@@ -212,26 +223,28 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
         </div>
 
         {/* Tabs */}
-        <div className="asset-picker-tabs">
-          <button
-            className={`asset-tab ${activeTab === 'all' ? 'active' : ''}`}
-            onClick={() => setActiveTab('all')}
-          >
-            All
-          </button>
-          <button
-            className={`asset-tab ${activeTab === 'ft' ? 'active' : ''}`}
-            onClick={() => setActiveTab('ft')}
-          >
-            FTs
-          </button>
-          <button
-            className={`asset-tab ${activeTab === 'nft' ? 'active' : ''}`}
-            onClick={() => setActiveTab('nft')}
-          >
-            NFTs
-          </button>
-        </div>
+        {showTabs && (
+          <div className="asset-picker-tabs">
+            <button
+              className={`asset-tab ${activeTab === 'all' ? 'active' : ''}`}
+              onClick={() => setActiveTab('all')}
+            >
+              All
+            </button>
+            <button
+              className={`asset-tab ${activeTab === 'ft' ? 'active' : ''}`}
+              onClick={() => setActiveTab('ft')}
+            >
+              FTs
+            </button>
+            <button
+              className={`asset-tab ${activeTab === 'nft' ? 'active' : ''}`}
+              onClick={() => setActiveTab('nft')}
+            >
+              NFTs
+            </button>
+          </div>
+        )}
       </div>
 
         {/* Assets Grid */}
@@ -240,10 +253,10 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
             const selectedAmount = getSelectedAmount(asset.id);
             const isSelected = selectedAmount > 0n;
             const displayAmount = getDisplayAmount(asset.id, asset);
-            const decimals = getAssetDecimals(asset);
+            const decimals = hasMetadataProvider ? getAssetDecimals(asset) : (asset.decimals ?? 0);
             const maxAmount = Number(asset.balance) / Math.pow(10, decimals);
             const assetName = getAssetName(asset);
-            const isNFT = isAssetNFT(asset);
+            const isNFT = showTabs ? isAssetNFT(asset) : false;
 
             const isEditing = editingAmounts[asset.id] !== undefined;
             const showInput = !isSelected || isEditing;
@@ -299,7 +312,7 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
                         type="number"
                         min="0"
                         max={maxAmount}
-                        step={isNFT ? "1" : "0.000001"}
+                        step={decimals > 0 ? (Math.pow(10, -decimals)).toString() : "1"}
                         value={displayAmount}
                         onChange={(e) => handleAmountChange(asset.id, e.target.value, asset)}
                         placeholder="0"
