@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { WalletInterface, Assets } from '@clan/framework-core';
+import { WalletInterface, Assets, MetadataProvider } from '@clan/framework-core';
+import { useMetadataProvider } from '@clan/framework-providers';
+import { getTokenInfo, getNFTDisplayInfo, TokenInfo } from '@clan/framework-helpers';
 import { TokenElement } from '../token/TokenElement';
-import { AddressSelect } from '../AddressSelect';
-import { useTokenInfo } from '@clan/framework-providers';
-import { getTokenDisplayInfo, getNFTDisplayInfo } from '@clan/framework-helpers';
 
 export interface OverviewProps {
   wallet: WalletInterface;
@@ -12,6 +11,7 @@ export interface OverviewProps {
   onTokenClick?: (tokenId: string) => void;
   onSetDefaultAddress?: (address: string) => void;
   onChangeAddressName?: (address: string, name: string) => void;
+  metadataProvider?: MetadataProvider;
   className?: string;
 }
 
@@ -21,10 +21,73 @@ interface TokenRowProps {
   amount: number;
   totalValue: number;
   onClick: () => void;
+  metadataProvider?: MetadataProvider;
 }
 
-const TokenRow: React.FC<TokenRowProps> = ({ tokenId, amount, totalValue, onClick }) => {
-  const { tokenInfo, loading } = useTokenInfo(tokenId);
+const useOverviewTokenInfo = (
+  tokenId: string,
+  metadataProvider?: MetadataProvider
+): { tokenInfo: TokenInfo | null; loading: boolean } => {
+  const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchTokenInfo = async () => {
+      if (!tokenId) {
+        if (isMounted) {
+          setTokenInfo(null);
+          setLoading(false);
+        }
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        const info = await getTokenInfo(tokenId, metadataProvider);
+        if (isMounted) {
+          setTokenInfo(info ?? null);
+        }
+      } catch {
+        if (isMounted) {
+          setTokenInfo(null);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchTokenInfo();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [tokenId, metadataProvider]);
+
+  return { tokenInfo, loading };
+};
+
+const splitTokenId = (tokenId: string): { policyId: string; assetName: string } => {
+  if (!tokenId || tokenId === 'lovelace') {
+    return { policyId: '', assetName: '' };
+  }
+
+  if (tokenId.length <= 56) {
+    return { policyId: tokenId, assetName: '' };
+  }
+
+  return {
+    policyId: tokenId.slice(0, 56),
+    assetName: tokenId.slice(56)
+  };
+};
+
+const TokenRow: React.FC<TokenRowProps> = ({ tokenId, amount, totalValue, onClick, metadataProvider }) => {
+  const { tokenInfo, loading } = useOverviewTokenInfo(tokenId, metadataProvider);
   
   if (loading) {
     return (
@@ -48,59 +111,21 @@ const TokenRow: React.FC<TokenRowProps> = ({ tokenId, amount, totalValue, onClic
     : amount;
   
   // Calculate USD value if price is available
-  const usdValue = 0
-  const rawUsdValue =0 
+  const usdValue = 0;
+  const rawUsdValue = 0;
   const portfolioPercentage = (rawUsdValue && totalValue > 0) 
     ? (rawUsdValue / totalValue) * 100 
     : null;
 
-  // Get display information using helper
-  const { displayName, displayTicker, placeholderColor, placeholderInitials } = getTokenDisplayInfo(tokenId, tokenInfo);
-  
-  // Generate placeholder with initials from ticker
-  const getPlaceholder = () => {
-    return (
-      <div 
-        className="overview-token-placeholder" 
-        style={{ backgroundColor: placeholderColor }}
-      >
-        {placeholderInitials}
-      </div>
-    );
-  };
-
-  const hasImage = tokenInfo?.image && tokenInfo.image !== '/assets/token.svg';
-
   return (
     <div className="overview-token-row" onClick={onClick}>
       <div className="overview-token-asset">
-        {hasImage ? (
-          <>
-            <img 
-              className="overview-token-icon" 
-              src={tokenInfo.image} 
-              alt={displayTicker}
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-                const placeholder = e.currentTarget.parentElement?.querySelector('.overview-token-placeholder');
-                if (placeholder) {
-                  placeholder.classList.remove('hidden');
-                }
-              }}
-            />
-            <div className="overview-token-placeholder hidden" style={{ backgroundColor: '#8b5cf6' }}>
-              {displayTicker.slice(0, 4).toUpperCase()}
-            </div>
-          </>
-        ) : (
-          getPlaceholder()
-        )}
-        <div className="overview-token-info">
-          <div className="overview-token-ticker">{displayTicker}</div>
-          {displayName !== displayTicker && (
-            <div className="overview-token-name">{displayName}</div>
-          )}
-        </div>
+        <TokenElement
+          tokenId={tokenId}
+          amount={amount}
+          metadataProvider={metadataProvider}
+          className="overview-token-chip"
+        />
       </div>
       <div className="overview-token-quantity">
         {displayAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -132,10 +157,11 @@ const TokenRow: React.FC<TokenRowProps> = ({ tokenId, amount, totalValue, onClic
 interface NFTItemProps {
   tokenId: string;
   onClick: () => void;
+  metadataProvider?: MetadataProvider;
 }
 
-const NFTItem: React.FC<NFTItemProps> = ({ tokenId, onClick }) => {
-  const { tokenInfo, loading } = useTokenInfo(tokenId);
+const NFTItem: React.FC<NFTItemProps> = ({ tokenId, onClick, metadataProvider }) => {
+  const { tokenInfo, loading } = useOverviewTokenInfo(tokenId, metadataProvider);
   
   if (loading) {
     return (
@@ -199,8 +225,11 @@ export const Overview: React.FC<OverviewProps> = ({
   onTokenClick,
   onSetDefaultAddress,
   onChangeAddressName,
+  metadataProvider,
   className = ''
 }) => {
+  const metadataProviderFromContext = useMetadataProvider();
+  const effectiveMetadataProvider = metadataProvider ?? metadataProviderFromContext;
   const [selectedAddress, setSelectedAddress] = useState(initialSelectedAddress || '');
   const [defaultAddress, setDefaultAddress] = useState('');
   const [fundedAddresses, setFundedAddresses] = useState<string[]>([]);
@@ -240,6 +269,20 @@ export const Overview: React.FC<OverviewProps> = ({
 
   const handleTokenClick = (tokenId: string) => {
     onTokenClick?.(tokenId);
+
+    if (!tokenId || tokenId === 'lovelace' || tokenId === 'ADA') {
+      return;
+    }
+
+    const { policyId, assetName } = splitTokenId(tokenId);
+    const explorerBaseUrl = 'https://cexplorer.io';
+    const tokenLink = assetName && assetName !== ''
+      ? `${explorerBaseUrl}/asset/${policyId}${assetName}`
+      : `${explorerBaseUrl}/policy/${policyId}`;
+
+    if (tokenLink && typeof window !== 'undefined') {
+      window.open(tokenLink, '_blank', 'noopener');
+    }
   };
 
   const handleSeeMore = () => {
@@ -322,6 +365,7 @@ export const Overview: React.FC<OverviewProps> = ({
                   amount={Number(balance[tokenId])}
                   totalValue={totalValue}
                   onClick={() => handleTokenClick(tokenId)}
+                  metadataProvider={effectiveMetadataProvider}
                 />
               ))
             )}
@@ -344,6 +388,7 @@ export const Overview: React.FC<OverviewProps> = ({
                   key={`${tokenId}-${index}`}
                   tokenId={tokenId}
                   onClick={() => handleTokenClick(tokenId)}
+                  metadataProvider={effectiveMetadataProvider}
                 />
               ))
             )}
