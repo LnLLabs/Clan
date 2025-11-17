@@ -245,31 +245,41 @@ export const ContactsMenu = ({
                   >
                     ✏️ Edit
                   </button>
-                  <div className="actions-dropdown">
+                  {actions.length === 1 ? (
                     <button
-                      className="btn-actions"
-                      onClick={() => toggleActionsMenu(contact.id)}
+                      className="btn-actions btn-actions-single"
+                      onClick={() => actions[0].onClick(contact)}
                     >
-                      <span className="actions-chevron">▼</span> Actions
+                      <span className="action-icon">{actions[0].icon}</span>
+                      {actions[0].label}
                     </button>
-                    {expandedActionsId === contact.id && (
-                      <div className="actions-menu">
-                        {actions.map((action) => (
-                          <button 
-                            key={action.id}
-                            className="action-item"
-                            onClick={() => {
-                              action.onClick(contact);
-                              setExpandedActionsId(null);
-                            }}
-                          >
-                            <span className="action-icon">{action.icon}</span>
-                            {action.label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  ) : actions.length > 1 ? (
+                    <div className="actions-dropdown">
+                      <button
+                        className="btn-actions"
+                        onClick={() => toggleActionsMenu(contact.id)}
+                      >
+                        <span className="actions-chevron">▼</span> Actions
+                      </button>
+                      {expandedActionsId === contact.id && (
+                        <div className="actions-menu">
+                          {actions.map((action) => (
+                            <button 
+                              key={action.id}
+                              className="action-item"
+                              onClick={() => {
+                                action.onClick(contact);
+                                setExpandedActionsId(null);
+                              }}
+                            >
+                              <span className="action-icon">{action.icon}</span>
+                              {action.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : null}
                 <button
                   className={`btn-delete ${deletingContactId === contact.id ? 'btn-delete-active' : ''}`}
                   onMouseDown={() => handleDeleteStart(contact.id)}

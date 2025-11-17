@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { MetadataProvider } from '@clan/framework-core';
 import { getTokenInfo, TokenInfo } from '@clan/framework-helpers';
 
@@ -56,7 +57,9 @@ export const TokenElement: React.FC<TokenElementProps> = ({
   const [error, setError] = React.useState<Error | undefined>(undefined);
   const [imageError, setImageError] = React.useState(false);
   const [tooltipDirection, setTooltipDirection] = React.useState<'up' | 'down'>('down');
+  const [tooltipPosition, setTooltipPosition] = React.useState<{ top: number; left: number } | null>(null);
   const tooltipRef = React.useRef<HTMLDivElement | null>(null);
+  const wrapperRef = React.useRef<HTMLDivElement | null>(null);
 
   // Generate placeholder color from tokenId (must be before any early returns)
   const placeholderColor = React.useMemo(() => {
@@ -92,39 +95,72 @@ export const TokenElement: React.FC<TokenElementProps> = ({
 
   React.useEffect(() => {
     if (!(showTooltip || expanded)) {
+      setTooltipPosition(null);
       return;
     }
 
-    const tooltipEl = tooltipRef.current;
-    if (!tooltipEl) {
+    const wrapperEl = wrapperRef.current;
+    if (!wrapperEl || typeof window === 'undefined') {
       return;
     }
 
-    const frame =
-      typeof window !== 'undefined'
-        ? window.requestAnimationFrame(() => {
-            const rect = tooltipEl.getBoundingClientRect();
-            const viewportHeight =
-              window.innerHeight ||
-              (typeof document !== 'undefined' ? document.documentElement.clientHeight : 0) ||
-              (typeof document !== 'undefined' ? document.body.clientHeight : 0);
-            const spaceBelow = viewportHeight ? viewportHeight - rect.bottom : 0;
-            const spaceAbove = rect.top;
+    const updateTooltipPosition = () => {
+      const rect = wrapperEl.getBoundingClientRect();
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+      const spaceBelow = viewportHeight - rect.bottom;
+      const spaceAbove = rect.top;
 
-            if (spaceBelow < 24 && spaceAbove > spaceBelow) {
-              setTooltipDirection('up');
-            } else {
-              setTooltipDirection('down');
-            }
-          })
-        : null;
+      const direction = spaceBelow < 200 && spaceAbove > spaceBelow ? 'up' : 'down';
+      setTooltipDirection(direction);
+
+      // Calculate position for fixed positioning
+      const left = rect.left + rect.width / 2;
+      let top: number;
+      
+      if (direction === 'down') {
+        top = rect.bottom + window.scrollY + 10;
+      } else {
+        // For 'up' direction, we need to estimate tooltip height (approximately 200px)
+        // We'll adjust this after the tooltip renders, but use a reasonable estimate
+        const estimatedTooltipHeight = 200;
+        top = rect.top + window.scrollY - estimatedTooltipHeight - 10;
+      }
+
+      setTooltipPosition({ top, left });
+    };
+
+    const frame = window.requestAnimationFrame(updateTooltipPosition);
+    
+    // Update on scroll/resize
+    window.addEventListener('scroll', updateTooltipPosition, true);
+    window.addEventListener('resize', updateTooltipPosition);
 
     return () => {
-      if (frame !== null && typeof window !== 'undefined') {
-        window.cancelAnimationFrame(frame);
-      }
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', updateTooltipPosition, true);
+      window.removeEventListener('resize', updateTooltipPosition);
     };
   }, [showTooltip, expanded, tokenInfo, displayInfo]);
+
+  // Adjust tooltip position after it renders (for 'up' direction)
+  React.useEffect(() => {
+    if (!(showTooltip || expanded) || !tooltipPosition || tooltipDirection !== 'up') {
+      return;
+    }
+
+    const adjustPosition = () => {
+      if (tooltipRef.current && wrapperRef.current) {
+        const tooltipHeight = tooltipRef.current.offsetHeight;
+        const rect = wrapperRef.current.getBoundingClientRect();
+        const newTop = rect.top + window.scrollY - tooltipHeight - 10;
+        setTooltipPosition(prev => prev ? { ...prev, top: newTop } : null);
+      }
+    };
+
+    // Use a small delay to ensure the tooltip is rendered
+    const timeout = setTimeout(adjustPosition, 0);
+    return () => clearTimeout(timeout);
+  }, [showTooltip, expanded, tooltipPosition, tooltipDirection]);
 
   React.useEffect(() => {
     let isMounted = true;
@@ -259,9 +295,31 @@ export const TokenElement: React.FC<TokenElementProps> = ({
     setImageError(true);
   };
 
+  const tooltipContent = (showTooltip || expanded) && tooltipPosition ? (
+    ReactDOM.createPortal(
+      <div
+        className={`token-element-tooltip token-element-tooltip--${tooltipDirection}`}
+        style={{
+          position: 'fixed',
+          left: `${tooltipPosition.left}px`,
+          top: `${tooltipPosition.top}px`,
+          transform: 'translateX(-50%)',
+          zIndex: 10000,
+          pointerEvents: 'none',
+          overflow: 'visible'
+        }}
+        ref={tooltipRef}
+      >
+        {tooltipInfo}
+      </div>,
+      document.body
+    )
+  ) : null;
+
   return (
     <div className={className} key={index}>
       <div
+        ref={wrapperRef}
         className="token-element-wrapper"
         style={{ position: 'relative' }}
         onMouseEnter={() => setShowTooltip(true)}
@@ -298,16 +356,8 @@ export const TokenElement: React.FC<TokenElementProps> = ({
             )}
           </div>
         </div>
-        {(showTooltip || expanded) && (
-          <div
-            className={`token-element-tooltip token-element-tooltip--${tooltipDirection}`}
-            style={{ position: 'absolute', zIndex: 1000, pointerEvents: 'none' }}
-            ref={tooltipRef}
-          >
-            {tooltipInfo}
-          </div>
-        )}
       </div>
+      {tooltipContent}
     </div>
   );
 };
