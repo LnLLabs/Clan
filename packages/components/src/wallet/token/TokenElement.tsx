@@ -113,17 +113,17 @@ export const TokenElement: React.FC<TokenElementProps> = ({
       const direction = spaceBelow < 200 && spaceAbove > spaceBelow ? 'up' : 'down';
       setTooltipDirection(direction);
 
-      // Calculate position for fixed positioning
+      // Calculate position for fixed positioning (viewport-relative, no scroll offset needed)
       const left = rect.left + rect.width / 2;
       let top: number;
       
       if (direction === 'down') {
-        top = rect.bottom + window.scrollY + 10;
+        top = rect.bottom + 10;
       } else {
         // For 'up' direction, we need to estimate tooltip height (approximately 200px)
         // We'll adjust this after the tooltip renders, but use a reasonable estimate
         const estimatedTooltipHeight = 200;
-        top = rect.top + window.scrollY - estimatedTooltipHeight - 10;
+        top = rect.top - estimatedTooltipHeight - 10;
       }
 
       setTooltipPosition({ top, left });
@@ -152,7 +152,7 @@ export const TokenElement: React.FC<TokenElementProps> = ({
       if (tooltipRef.current && wrapperRef.current) {
         const tooltipHeight = tooltipRef.current.offsetHeight;
         const rect = wrapperRef.current.getBoundingClientRect();
-        const newTop = rect.top + window.scrollY - tooltipHeight - 10;
+        const newTop = rect.top - tooltipHeight - 10;
         setTooltipPosition(prev => prev ? { ...prev, top: newTop } : null);
       }
     };
