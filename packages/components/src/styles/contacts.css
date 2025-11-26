@@ -10,6 +10,11 @@
 /* ===== HEADER ===== */
 .contacts-header {
   margin-bottom: var(--space-xl);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-md);
 }
 
 .contacts-header h2 {
@@ -17,6 +22,56 @@
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-semibold);
   margin: 0;
+}
+
+.contacts-header-actions {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+.btn-export,
+.btn-import {
+  padding: var(--space-sm) var(--space-lg);
+  border: none;
+  border-radius: 6px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  background: var(--color-accent-purple);
+  color: var(--color-text-dark-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.btn-export:hover,
+.btn-import:hover {
+  background: var(--color-accent-purple-hover);
+  transform: translateY(-1px);
+}
+
+/* ===== MESSAGE ===== */
+.contacts-message {
+  padding: var(--space-md) var(--space-lg);
+  border-radius: 6px;
+  margin-bottom: var(--space-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  animation: slideDown 0.2s ease-out;
+}
+
+.contacts-message-success {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.contacts-message-error {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--color-error);
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 /* ===== CONTAINER ===== */

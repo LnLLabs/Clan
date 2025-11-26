@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { loadContactsFromStorage, saveContactsToStorage } from './contactStorage';
+import { useState, useEffect, useRef } from "react";
+import { loadContactsFromStorage, saveContactsToStorage, exportContactsToFile, importContactsFromFile, mergeContacts } from './contactStorage';
 
 export interface Contact {
   id: string;
@@ -85,6 +85,8 @@ export const ContactsMenu = ({
   const [deletingContactId, setDeletingContactId] = useState<string | null>(null);
   const [deleteProgress, setDeleteProgress] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Save to localStorage whenever contacts change
   useEffect(() => {
@@ -211,11 +213,100 @@ export const ContactsMenu = ({
     (contact.email && contact.email.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+  // Export contacts to JSON file
+  const handleExport = () => {
+    try {
+      exportContactsToFile(contacts);
+      setMessage({ type: 'success', text: `Exported ${contacts.length} contact(s) successfully` });
+      setTimeout(() => setMessage(null), 3000);
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Failed to export contacts' });
+      setTimeout(() => setMessage(null), 3000);
+    }
+  };
+
+  // Handle file import
+  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const importedContacts = await importContactsFromFile(file);
+      
+      if (!importedContacts) {
+        setMessage({ type: 'error', text: 'Invalid file format or no valid contacts found' });
+        setTimeout(() => setMessage(null), 3000);
+        return;
+      }
+
+      console.log('Current contacts:', contacts.length, contacts.map(c => ({ id: c.id, name: c.name })));
+      console.log('Imported contacts:', importedContacts.length, importedContacts.map(c => ({ id: c.id, name: c.name })));
+
+      // Merge imported contacts with existing ones
+      const merged = mergeContacts(contacts, importedContacts);
+      const addedCount = merged.length - contacts.length;
+      
+      console.log('Merged contacts:', merged.length, 'Added:', addedCount);
+      console.log('Final contacts:', merged.map(c => ({ id: c.id, name: c.name })));
+      
+      setContacts(merged);
+      
+      if (addedCount > 0) {
+        setMessage({ type: 'success', text: `Imported ${addedCount} new contact(s) successfully` });
+      } else {
+        setMessage({ type: 'success', text: 'Import completed (no new contacts added - duplicates skipped)' });
+      }
+      setTimeout(() => setMessage(null), 3000);
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Failed to import contacts: ' + (error instanceof Error ? error.message : 'Unknown error') });
+      setTimeout(() => setMessage(null), 3000);
+    } finally {
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  // Trigger file input click
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
     <div className="contacts-menu">
       <div className="contacts-header">
         <h2>Contact List</h2>
+        <div className="contacts-header-actions">
+          <button
+            className="btn-export"
+            onClick={handleExport}
+            title="Export contacts to JSON file"
+          >
+            📥 Export
+          </button>
+          <button
+            className="btn-import"
+            onClick={handleImportClick}
+            title="Import contacts from JSON file"
+          >
+            📤 Import
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json,application/json"
+            onChange={handleImport}
+            style={{ display: 'none' }}
+          />
+        </div>
       </div>
+      
+      {message && (
+        <div className={`contacts-message contacts-message-${message.type}`}>
+          {message.text}
+        </div>
+      )}
 
       <div className="contacts-container">
         {/* Search bar */}
