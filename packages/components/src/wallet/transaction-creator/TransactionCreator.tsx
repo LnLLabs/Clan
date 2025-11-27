@@ -787,38 +787,6 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
         </div>
       </div>
 
-      {/* Transaction Summary */}
-      <div className="transaction-summary">
-        <h3>Transaction Summary</h3>
-
-        <div className="summary-grid">
-          <div className="summary-item">
-            <span className="label">Total ADA:</span>
-            <span className="value">{adaTotal.toFixed(6)} ₳</span>
-          </div>
-
-          <div className="summary-item">
-            <span className="label">Recipients:</span>
-            <span className="value">{recipients.length}</span>
-          </div>
-
-          <div className="summary-item">
-            <span className="label">UTXOs Selected:</span>
-            <span className="value">{selectedUtxos.length}</span>
-          </div>
-
-          <div className="summary-item">
-            <span className="label">Estimated Fee:</span>
-            <span className="value">{Number(estimatedFee) / 1000000} ₳</span>
-          </div>
-        </div>
-
-        {isCalculating && (
-          <div className="calculating-indicator">
-            Calculating optimal UTXO selection...
-          </div>
-        )}
-      </div>
 
       {/* Action Buttons */}
       <div className="creator-actions">
