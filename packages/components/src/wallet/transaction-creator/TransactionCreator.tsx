@@ -781,22 +781,17 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
           ))}
 
           {/* Add Recipient Button */}
+          <div className="add-recipient-button-container">
           <button className="add-recipient-button" onClick={addRecipient}>
             + Add Recipient
           </button>
+          </div>
         </div>
       </div>
 
 
       {/* Action Buttons */}
       <div className="creator-actions">
-        <Button
-          variant="secondary"
-          onClick={previewTransactionCreation}
-          disabled={isCalculating || recipients.some(r => !r.address)}
-        >
-          Preview Transaction
-        </Button>
 
         <Button
           variant="primary"
@@ -807,58 +802,6 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
         </Button>
       </div>
 
-      {/* Transaction Preview Modal */}
-      {showPreview && previewOptions && (
-        <Modal
-          isOpen={showPreview}
-          onClose={() => setShowPreview(false)}
-          title="Transaction Preview"
-        >
-          <div className="transaction-preview">
-            <div className="preview-details">
-              <h4>Transaction Details</h4>
-              <div className="preview-recipients">
-                {recipients.map((recipient, idx) => (
-                  <div key={idx} className="preview-recipient">
-                    <div><strong>Recipient {idx + 1}:</strong></div>
-                    <div className="preview-address">{recipient.address}</div>
-                    <div className="preview-assets">
-                      {Object.entries(recipient.assets).map(([assetId, amount]) => (
-                        <div key={assetId}>
-                          {assetId === 'lovelace' ? 'ADA' : assetId.slice(0, 12)}:{' '}
-                          {amount.toString()}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="preview-summary">
-                <div>Selected UTXOs: {selectedUtxos.length}</div>
-                <div>Estimated Fee: {Number(estimatedFee) / 1000000} ₳</div>
-              </div>
-            </div>
-
-            <div className="preview-actions">
-              <Button
-                variant="secondary"
-                onClick={() => setShowPreview(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                onClick={() => {
-                  setShowPreview(false);
-                  createTransaction();
-                }}
-              >
-                Confirm & Create
-              </Button>
-            </div>
-          </div>
-        </Modal>
-      )}
 
       {/* Contact Picker Modal */}
       {showContactPicker !== null && (
