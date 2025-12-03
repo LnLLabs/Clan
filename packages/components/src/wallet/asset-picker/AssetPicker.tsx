@@ -28,6 +28,7 @@ export interface AssetPickerProps {
   onConfirm: (assets: SelectedAsset[]) => void;
   onClose: () => void;
   hasMetadataProvider?: boolean;
+  maxItems?: number;
 }
 
 type TabType = 'all' | 'ft' | 'nft';
@@ -87,12 +88,21 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
   selectedAssets: initialSelected,
   onConfirm,
   onClose,
-  hasMetadataProvider = false
+  hasMetadataProvider = false,
+  maxItems
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedAssets, setSelectedAssets] = useState<SelectedAsset[]>(initialSelected);
+  // Initialize with maxItems limit enforced if provided
+  const initialAssets = maxItems !== undefined && initialSelected.length > maxItems
+    ? initialSelected.slice(0, maxItems)
+    : initialSelected;
+  const [selectedAssets, setSelectedAssets] = useState<SelectedAsset[]>(initialAssets);
   const [editingAmounts, setEditingAmounts] = useState<{ [key: string]: string }>({});
+  // Track selection order for FIFO behavior when maxItems is enforced
+  const [selectionOrder, setSelectionOrder] = useState<string[]>(
+    initialAssets.map(s => s.assetId)
+  );
 
   const showTabs = hasMetadataProvider;
 
@@ -136,15 +146,31 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
 
   const updateAssetAmount = (assetId: string, amount: bigint) => {
     if (amount === 0n) {
+      // Remove asset from selection
       setSelectedAssets(selectedAssets.filter(s => s.assetId !== assetId));
+      setSelectionOrder(selectionOrder.filter(id => id !== assetId));
     } else {
       const existing = selectedAssets.find(s => s.assetId === assetId);
       if (existing) {
+        // Update existing asset amount
         setSelectedAssets(
           selectedAssets.map(s => s.assetId === assetId ? { ...s, amount } : s)
         );
       } else {
-        setSelectedAssets([...selectedAssets, { assetId, amount }]);
+        // Adding a new asset
+        let newSelectedAssets = [...selectedAssets, { assetId, amount }];
+        let newSelectionOrder = [...selectionOrder, assetId];
+        
+        // Enforce maxItems limit with FIFO behavior
+        if (maxItems !== undefined && newSelectedAssets.length > maxItems) {
+          // Remove the oldest selected asset (first in selectionOrder)
+          const oldestAssetId = newSelectionOrder[0];
+          newSelectedAssets = newSelectedAssets.filter(s => s.assetId !== oldestAssetId);
+          newSelectionOrder = newSelectionOrder.filter(id => id !== oldestAssetId);
+        }
+        
+        setSelectedAssets(newSelectedAssets);
+        setSelectionOrder(newSelectionOrder);
       }
     }
   };
@@ -170,20 +196,33 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
   const handleReset = () => {
     setSelectedAssets([]);
     setEditingAmounts({});
+    setSelectionOrder([]);
   };
 
   const handleAddAll = () => {
-    const allAssets = filteredAssets.map(asset => ({
+    let allAssets = filteredAssets.map(asset => ({
       assetId: asset.id,
       amount: asset.balance
     }));
+    let newSelectionOrder = allAssets.map(asset => asset.assetId);
+    
+    // Enforce maxItems limit with FIFO behavior
+    if (maxItems !== undefined && allAssets.length > maxItems) {
+      allAssets = allAssets.slice(0, maxItems);
+      newSelectionOrder = newSelectionOrder.slice(0, maxItems);
+    }
+    
     setSelectedAssets(allAssets);
+    setSelectionOrder(newSelectionOrder);
     
     const newEditingAmounts: { [key: string]: string } = {};
-    filteredAssets.forEach(asset => {
-      const decimals = hasMetadataProvider ? getAssetDecimals(asset) : (asset.decimals ?? 0);
-      const displayAmount = Number(asset.balance) / Math.pow(10, decimals);
-      newEditingAmounts[asset.id] = displayAmount.toString();
+    allAssets.forEach(asset => {
+      const uiAsset = filteredAssets.find(a => a.id === asset.assetId);
+      if (uiAsset) {
+        const decimals = hasMetadataProvider ? getAssetDecimals(uiAsset) : (uiAsset.decimals ?? 0);
+        const displayAmount = Number(asset.amount) / Math.pow(10, decimals);
+        newEditingAmounts[asset.assetId] = displayAmount.toString();
+      }
     });
     setEditingAmounts(newEditingAmounts);
   };
