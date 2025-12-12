@@ -1,0 +1,602 @@
+/* BroClan Framework - Delegation Component Styles */
+
+/* ===== MAIN CONTAINER ===== */
+.delegation-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  background: var(--color-overview-bg, #36393F);
+  border-radius: var(--radius-3xl);
+  min-height: 500px;
+  font-family: var(--font-family-base);
+}
+
+/* ===== TABS ===== */
+.delegation-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 0;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+}
+
+.delegation-tab {
+  padding: 12px 32px;
+  background: rgba(255, 255, 255, 0.03);
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 15px;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  position: relative;
+  margin-right: 4px;
+}
+
+.delegation-tab:first-child {
+  border-radius: var(--radius-xl) 0 0 0;
+}
+
+.delegation-tab:last-child {
+  border-radius: 0 var(--radius-xl) 0 0;
+  margin-right: 0;
+}
+
+.delegation-tab.active {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.95);
+  border-bottom: 2px solid var(--color-accent-violet, #8b5cf6);
+  z-index: 2;
+}
+
+.delegation-tab:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ===== CONTENT VIEWS ===== */
+.delegation-status-view,
+.delegation-delegate-view {
+  padding: 32px 24px;
+  background: rgba(255, 255, 255, 0.02);
+  min-height: 500px;
+}
+
+.delegation-title {
+  font-size: 28px;
+  font-weight: var(--font-weight-semibold);
+  color: rgba(255, 255, 255, 0.95);
+  text-align: center;
+  margin: 0 0 32px 0;
+  letter-spacing: -0.5px;
+}
+
+/* ===== REWARDS SECTION ===== */
+.delegation-rewards {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-2xl);
+  margin-bottom: 32px;
+}
+
+.delegation-rewards-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.delegation-rewards-label {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: var(--font-weight-medium);
+}
+
+.delegation-rewards-amount {
+  font-size: 36px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-success, #22c55e);
+  font-family: var(--font-family-mono);
+  letter-spacing: -1px;
+}
+
+/* ===== SPLIT LAYOUT ===== */
+.delegation-split-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+/* ===== PANEL ===== */
+.delegation-panel {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-2xl);
+  padding: 20px;
+}
+
+.delegation-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.delegation-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: var(--font-weight-semibold);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.delegation-panel-icon {
+  font-size: 22px;
+}
+
+/* ===== SEARCH INPUT ===== */
+.delegation-search-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: var(--font-size-sm);
+  margin-bottom: 16px;
+  transition: all var(--transition-base);
+  outline: none;
+}
+
+.delegation-search-input:focus {
+  border-color: var(--color-accent-violet, #8b5cf6);
+  background: rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+}
+
+.delegation-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ===== OPTIONS LIST ===== */
+.delegation-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* Scrollbar styling */
+.delegation-options-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.delegation-options-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.delegation-options-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.delegation-options-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* ===== LOADING STATE ===== */
+.delegation-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: var(--font-size-sm);
+}
+
+.delegation-spinner {
+  animation: delegation-spin 1s linear infinite;
+  font-size: 16px;
+}
+
+@keyframes delegation-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ===== NO RESULTS ===== */
+.delegation-no-results {
+  text-align: center;
+  padding: 40px 20px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: var(--font-size-sm);
+}
+
+/* ===== SELECTION SUMMARY ===== */
+.delegation-summary {
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: var(--radius-2xl);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.delegation-summary-title {
+  font-size: 15px;
+  font-weight: var(--font-weight-semibold);
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 16px;
+}
+
+.delegation-summary-content {
+  display: flex;
+  gap: 32px;
+  font-size: var(--font-size-sm);
+}
+
+.delegation-summary-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.delegation-summary-label {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.delegation-summary-value {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: var(--font-weight-medium);
+}
+
+.delegation-summary-unchanged {
+  color: var(--color-accent-violet, #8b5cf6);
+  font-size: var(--font-size-xs);
+  margin-left: 8px;
+}
+
+/* ===== ACTIONS ===== */
+.delegation-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 16px;
+}
+
+/* ===== POOL CARD ===== */
+.pool-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-xl);
+  padding: 16px;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.pool-card:hover {
+  border-color: rgba(139, 92, 246, 0.4);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+}
+
+.pool-card.selected {
+  border-color: var(--color-accent-violet, #8b5cf6);
+  background: rgba(139, 92, 246, 0.1);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+}
+
+.pool-card.current {
+  border-color: var(--color-primary, #3b82f6);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.pool-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.pool-card-icon {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.2));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  overflow: hidden;
+}
+
+.pool-card-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+}
+
+.pool-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.pool-card-name {
+  font-size: 15px;
+  font-weight: var(--font-weight-semibold);
+  color: rgba(255, 255, 255, 0.95);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.pool-card-ticker {
+  font-size: var(--font-size-xs);
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 2px;
+}
+
+.pool-card-badges {
+  display: flex;
+  gap: 6px;
+}
+
+/* ===== BADGES ===== */
+.delegation-badge {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.delegation-badge.current {
+  background: var(--color-primary, #3b82f6);
+  color: #fff;
+}
+
+.delegation-badge.selected {
+  background: var(--color-accent-violet, #8b5cf6);
+  color: #fff;
+}
+
+.delegation-badge.special {
+  background: var(--color-warning, #f59e0b);
+  color: #fff;
+}
+
+.delegation-badge.retiring {
+  background: var(--color-error, #ef4444);
+  color: #fff;
+}
+
+/* ===== POOL STATS ===== */
+.pool-card-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.pool-card-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.pool-card-stat-label {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.pool-card-stat-value {
+  color: rgba(255, 255, 255, 0.95);
+  font-family: var(--font-family-mono);
+  font-weight: var(--font-weight-medium);
+}
+
+.pool-card-retiring {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--color-error, #ef4444);
+  font-size: var(--font-size-xs);
+}
+
+/* ===== DREP CARD ===== */
+.drep-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-xl);
+  padding: 16px;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.drep-card:hover {
+  border-color: rgba(139, 92, 246, 0.4);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+}
+
+.drep-card.selected {
+  border-color: var(--color-accent-violet, #8b5cf6);
+  background: rgba(139, 92, 246, 0.1);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+}
+
+.drep-card.current {
+  border-color: var(--color-primary, #3b82f6);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.drep-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.drep-card-icon {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(168, 85, 247, 0.2));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  overflow: hidden;
+}
+
+.drep-card-icon.special {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(234, 88, 12, 0.2));
+}
+
+.drep-card-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+}
+
+.drep-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.drep-card-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: var(--font-weight-semibold);
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.3;
+}
+
+.drep-card-id {
+  font-size: var(--font-size-xs);
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 2px;
+  font-family: var(--font-family-mono);
+}
+
+.drep-card-badges {
+  display: flex;
+  gap: 6px;
+}
+
+.drep-card-description {
+  font-size: var(--font-size-xs);
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.drep-card-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.drep-card-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.drep-card-stat-label {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.drep-card-stat-value {
+  font-weight: var(--font-weight-medium);
+}
+
+.drep-card-stat-value.active {
+  color: var(--color-success, #22c55e);
+}
+
+.drep-card-stat-value.inactive {
+  color: var(--color-error, #ef4444);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .delegation-split-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .delegation-container {
+    border-radius: var(--radius-xl);
+  }
+
+  .delegation-status-view,
+  .delegation-delegate-view {
+    padding: 20px 16px;
+  }
+
+  .delegation-title {
+    font-size: 22px;
+    margin-bottom: 24px;
+  }
+
+  .delegation-rewards {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .delegation-rewards-amount {
+    font-size: 28px;
+  }
+
+  .delegation-tab {
+    flex: 1;
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+
+  .delegation-summary-content {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .delegation-actions {
+    flex-direction: column;
+  }
+
+  .delegation-actions button {
+    width: 100%;
+  }
+
+  .pool-card-stats,
+  .drep-card-stats {
+    grid-template-columns: 1fr;
+  }
+}
+

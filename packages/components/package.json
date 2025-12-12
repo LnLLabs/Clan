@@ -17,8 +17,15 @@
         "default": "./dist/index.js"
       }
     },
-    "./styles": "./dist/styles/index.css"
+    "./styles": {
+      "import": "./dist/styles/index.css",
+      "require": "./dist/styles/index.css",
+      "default": "./dist/styles/index.css"
+    },
+    "./styles/index.css": "./dist/styles/index.css",
+    "./dist/styles/index.css": "./dist/styles/index.css"
   },
+  "style": "./dist/styles/index.css",
   "scripts": {
     "build": "vite build",
     "dev": "vite build --watch",

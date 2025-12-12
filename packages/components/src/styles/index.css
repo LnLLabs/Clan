@@ -25,3 +25,6 @@
 
 /* ===== CONTACT PICKER (existing file) ===== */
 @import '../contacts/ContactPicker.css';
+
+/* ===== DELEGATION COMPONENT ===== */
+@import '../wallet/delegation/delegation.css';
