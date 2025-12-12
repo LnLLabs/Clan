@@ -1,8 +1,8 @@
 import { Assets } from '@clan/framework-core';
 import { default as default_2 } from 'react';
 import { DelegationInfo } from '@clan/framework-core';
+import { MetadataProvider } from '@clan/framework-core';
 import { TransactionBuildOptions } from '@clan/framework-core';
-import { UIAsset } from '@clan/framework-components';
 import { UseMutationResult } from '@tanstack/react-query';
 import { UseQueryResult } from '@tanstack/react-query';
 import { UTxO } from '@clan/framework-core';
@@ -30,15 +30,7 @@ export declare interface SendTransactionResult {
 }
 
 /**
- * Token metadata provider interface for enriching assets with metadata
- * Compatible with future BroClan metadata provider integration
- */
-export declare interface TokenMetadataProvider {
-    getMetadata(assetId: string): Promise<Partial<Omit<UIAsset, 'id' | 'balance'>>>;
-}
-
-/**
- * Smart wrapper around TransactionCreator that automatically fetches wallet data
+ * Backwards compatible wrapper that forwards props to the enhanced TransactionCreator.
  *
  * @example
  * // Simple usage (no metadata)
@@ -59,11 +51,10 @@ export declare const TransactionCreatorWithData: default_2.FC<TransactionCreator
 
 export declare interface TransactionCreatorWithDataProps {
     wallet: WalletInterface;
-    metadataProvider?: TokenMetadataProvider;
+    metadataProvider?: MetadataProvider;
     onTransactionCreated?: (options: TransactionBuildOptions) => void;
     onCancel?: () => void;
     className?: string;
-    refetchInterval?: number;
 }
 
 /**

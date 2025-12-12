@@ -1,194 +1,153 @@
-import { useQuery as m, useQueryClient as v, useMutation as x } from "@tanstack/react-query";
-import { jsx as d, jsxs as D } from "react/jsx-runtime";
-import { useState as A, useEffect as T } from "react";
-import { TransactionCreator as W, convertAssetsToAssetArray as I, convertAssetsToAssetArraySync as p, WalletDelegation as K } from "@clan/framework-components";
-const N = (e, s = {}) => {
-  const { refetchInterval: t = 1e4, enabled: i = !0 } = s, a = e.getName();
-  return m({
+import { useQuery as w, useQueryClient as y, useMutation as h } from "@tanstack/react-query";
+import { jsx as g } from "react/jsx-runtime";
+import { TransactionCreator as v, WalletDelegation as x } from "@clan/framework-components";
+const Q = (e, i = {}) => {
+  const { refetchInterval: t = 1e4, enabled: s = !0 } = i, a = e.getName();
+  return w({
     queryKey: ["wallet", a, "balance"],
     queryFn: async () => await e.getBalance(),
     refetchInterval: t,
-    enabled: i
+    enabled: s
   });
-}, Q = (e, s = {}) => {
-  const { refetchInterval: t = 1e4, enabled: i = !0 } = s, a = e.getName();
-  return m({
+}, R = (e, i = {}) => {
+  const { refetchInterval: t = 1e4, enabled: s = !0 } = i, a = e.getName();
+  return w({
     queryKey: ["wallet", a, "utxos"],
     queryFn: async () => await e.getUtxos(),
     refetchInterval: t,
-    enabled: i
+    enabled: s
   });
-}, j = (e, s = {}) => {
-  const { onSuccess: t, onError: i } = s, a = e.getName(), r = v();
-  return x({
-    mutationFn: async ({ recipientAddress: n, assets: c, options: l }) => {
-      const u = await e.createTransaction(
-        [{ address: n, assets: c }],
-        l
-      ), g = await e.signTransaction(u);
-      return { txHash: await e.submitTransaction(g), draft: u, signedTx: g };
+}, N = (e, i = {}) => {
+  const { onSuccess: t, onError: s } = i, a = e.getName(), r = y();
+  return h({
+    mutationFn: async ({ recipientAddress: n, assets: l, options: d }) => {
+      const c = await e.createTransaction(
+        [{ address: n, assets: l }],
+        d
+      ), u = await e.signTransaction(c);
+      return { txHash: await e.submitTransaction(u), draft: c, signedTx: u };
     },
     onSuccess: (n) => {
       r.invalidateQueries({ queryKey: ["wallet", a, "balance"] }), r.invalidateQueries({ queryKey: ["wallet", a, "utxos"] }), r.invalidateQueries({ queryKey: ["wallet", a, "transactions"] }), t == null || t(n);
     },
     onError: (n) => {
-      i == null || i(n);
+      s == null || s(n);
     }
   });
-}, L = (e, s = {}) => {
-  const { onSuccess: t, onError: i } = s, a = e.getName(), r = v();
-  return x({
+}, p = (e, i = {}) => {
+  const { onSuccess: t, onError: s } = i, a = e.getName(), r = y();
+  return h({
     mutationFn: async ({ poolId: n }) => {
       if (!e.createDelegationTransaction)
         throw new Error("Wallet does not support delegation transactions");
-      const c = await e.createDelegationTransaction(n), l = await e.signTransaction(c);
-      return { txHash: await e.submitTransaction(l), poolId: n };
+      const l = await e.createDelegationTransaction(n), d = await e.signTransaction(l);
+      return { txHash: await e.submitTransaction(d), poolId: n };
     },
     onSuccess: (n) => {
       r.invalidateQueries({ queryKey: ["wallet", a, "balance"] }), r.invalidateQueries({ queryKey: ["wallet", a, "delegation"] }), r.invalidateQueries({ queryKey: ["wallet", a, "transactions"] }), t == null || t(n);
     },
     onError: (n) => {
-      i == null || i(n);
+      s == null || s(n);
     }
   });
-}, R = (e, s = {}) => {
-  const { refetchInterval: t = 3e4, enabled: i = !0 } = s, a = e.getName();
-  return m({
+}, T = (e, i = {}) => {
+  const { refetchInterval: t = 3e4, enabled: s = !0 } = i, a = e.getName();
+  return w({
     queryKey: ["wallet", a, "delegation"],
     queryFn: async () => {
       if (e.getDelegationInfo)
         return await e.getDelegationInfo();
     },
     refetchInterval: t,
-    enabled: i
+    enabled: s
   });
-}, F = (e, s = {}) => {
-  const { onSuccess: t, onError: i } = s, a = e.getName(), r = v();
-  return x({
+}, W = (e, i = {}) => {
+  const { onSuccess: t, onError: s } = i, a = e.getName(), r = y();
+  return h({
     mutationFn: async () => {
       if (!e.withdrawRewards)
         throw new Error("Wallet does not support reward withdrawal");
-      const n = e.getDelegationInfo ? await e.getDelegationInfo() : void 0, c = (n == null ? void 0 : n.rewards) || 0n, l = await e.withdrawRewards(), u = await e.signTransaction(l);
-      return { txHash: await e.submitTransaction(u), amount: c };
+      const n = e.getDelegationInfo ? await e.getDelegationInfo() : void 0, l = (n == null ? void 0 : n.rewards) || 0n, d = await e.withdrawRewards(), c = await e.signTransaction(d);
+      return { txHash: await e.submitTransaction(c), amount: l };
     },
     onSuccess: (n) => {
       r.invalidateQueries({ queryKey: ["wallet", a, "balance"] }), r.invalidateQueries({ queryKey: ["wallet", a, "delegation"] }), r.invalidateQueries({ queryKey: ["wallet", a, "transactions"] }), t == null || t(n);
     },
     onError: (n) => {
-      i == null || i(n);
+      s == null || s(n);
     }
   });
-}, B = ({
+}, C = ({
   wallet: e,
-  metadataProvider: s,
-  refetchInterval: t = 1e4,
-  ...i
-}) => {
-  const [a, r] = A([]), [n, c] = A(!1), { data: l, isLoading: u, error: g } = N(e, {
-    refetchInterval: t,
-    enabled: !0
-  }), { data: y, isLoading: f, error: h } = Q(e, {
-    refetchInterval: t,
-    enabled: !0
-  });
-  return T(() => {
-    if (!l) return;
-    (async () => {
-      c(!0);
-      try {
-        if (s) {
-          const w = await I(
-            l,
-            async (b) => {
-              try {
-                return await s.getMetadata(b);
-              } catch (q) {
-                return console.warn(`Failed to fetch metadata for ${b}:`, q), {};
-              }
-            }
-          );
-          r(w);
-        } else {
-          const w = p(l);
-          r(w);
-        }
-      } catch (w) {
-        console.error("Error enriching assets:", w), r(p(l));
-      } finally {
-        c(!1);
-      }
-    })();
-  }, [l, s]), u || f ? /* @__PURE__ */ d("div", { className: "transaction-creator-loading", style: { padding: "2rem", textAlign: "center" }, children: /* @__PURE__ */ d("div", { children: "Loading wallet data..." }) }) : g || h ? /* @__PURE__ */ D("div", { className: "transaction-creator-error", style: { padding: "2rem", color: "#ef4444" }, children: [
-    /* @__PURE__ */ d("div", { children: "Error loading wallet data" }),
-    g && /* @__PURE__ */ d("div", { children: g.message }),
-    h && /* @__PURE__ */ d("div", { children: h.message })
-  ] }) : !y || y.length === 0 ? /* @__PURE__ */ d("div", { className: "transaction-creator-no-utxos", style: { padding: "2rem", textAlign: "center" }, children: /* @__PURE__ */ d("div", { children: "No funds available in wallet" }) }) : /* @__PURE__ */ d(
-    W,
-    {
-      wallet: e,
-      availableUtxos: y,
-      availableAssets: a,
-      ...i
-    }
-  );
-}, E = ({
+  metadataProvider: i,
+  ...t
+}) => /* @__PURE__ */ g(
+  v,
+  {
+    wallet: e,
+    metadataProvider: i,
+    ...t
+  }
+), F = ({
   wallet: e,
-  onSuccess: s,
+  onSuccess: i,
   onError: t,
-  className: i
+  className: s
 }) => {
-  const { data: a, isLoading: r } = R(e, {
+  const { data: a, isLoading: r } = T(e, {
     refetchInterval: 3e4,
     enabled: !0
-  }), { mutateAsync: n, isPending: c } = L(e, {
+  }), { mutateAsync: n, isPending: l } = p(e, {
     onSuccess: (o) => {
-      console.log("Delegation successful:", o), s == null || s("delegate", o);
+      console.log("Delegation successful:", o), i == null || i("delegate", o);
     },
     onError: (o) => {
       console.error("Delegation failed:", o), t == null || t(o);
     }
-  }), { mutateAsync: l, isPending: u } = F(e, {
+  }), { mutateAsync: d, isPending: c } = W(e, {
     onSuccess: (o) => {
-      console.log("Withdrawal successful:", o), s == null || s("withdraw", o);
+      console.log("Withdrawal successful:", o), i == null || i("withdraw", o);
     },
     onError: (o) => {
       console.error("Withdrawal failed:", o), t == null || t(o);
     }
-  }), g = a ? {
+  }), u = a ? {
     stakeAddress: a.stakeAddress,
     delegatedPool: a.delegatedPool,
+    delegatedDRep: a.delegatedDRep,
+    // May not exist in older core types
     rewards: a.rewards,
     activeEpoch: a.activeEpoch,
     nextRewardEpoch: a.nextRewardEpoch
-  } : void 0, y = async (o) => {
-    await n({ poolId: o });
-  }, f = async () => {
+  } : void 0, f = async (o, q) => {
+    o && await n({ poolId: o }), console.log("Delegation requested - Pool:", o, "dRep:", q);
+  }, m = async () => {
     console.log("Undelegate not yet implemented"), t == null || t(new Error("Undelegate functionality not yet implemented"));
-  }, h = async () => {
-    await l();
+  }, D = async () => {
+    await d();
   };
-  return r ? /* @__PURE__ */ d("div", { className: "delegation-loading", children: "Loading delegation info..." }) : /* @__PURE__ */ d(
-    K,
+  return r ? /* @__PURE__ */ g("div", { className: "delegation-loading", children: "Loading delegation info..." }) : /* @__PURE__ */ g(
+    x,
     {
       wallet: e,
-      delegationInfo: g,
-      onDelegate: y,
-      onUndelegate: f,
-      onWithdrawRewards: h,
-      isDelegating: c,
-      isWithdrawing: u,
-      className: i
+      delegationInfo: u,
+      onDelegate: f,
+      onUndelegate: m,
+      onWithdrawRewards: D,
+      isDelegating: l,
+      isWithdrawing: c,
+      className: s
     }
   );
 };
 export {
-  B as TransactionCreatorWithData,
-  E as WalletDelegationWithData,
-  L as useDelegateStake,
-  j as useSendTransaction,
-  N as useWalletBalance,
-  R as useWalletDelegation,
-  Q as useWalletUtxos,
-  F as useWithdrawRewards
+  C as TransactionCreatorWithData,
+  F as WalletDelegationWithData,
+  p as useDelegateStake,
+  N as useSendTransaction,
+  Q as useWalletBalance,
+  T as useWalletDelegation,
+  R as useWalletUtxos,
+  W as useWithdrawRewards
 };
 //# sourceMappingURL=index.mjs.map

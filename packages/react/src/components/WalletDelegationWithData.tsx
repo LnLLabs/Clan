@@ -69,14 +69,23 @@ export const WalletDelegationWithData: React.FC<WalletDelegationWithDataProps> =
   const componentDelegationInfo: ComponentDelegationInfo | undefined = delegationInfo ? {
     stakeAddress: delegationInfo.stakeAddress,
     delegatedPool: delegationInfo.delegatedPool,
+    delegatedDRep: (delegationInfo as any).delegatedDRep, // May not exist in older core types
     rewards: delegationInfo.rewards,
     activeEpoch: delegationInfo.activeEpoch,
     nextRewardEpoch: delegationInfo.nextRewardEpoch
   } : undefined;
 
-  // Handle delegation
-  const handleDelegate = async (poolId: string) => {
-    await delegateStake({ poolId });
+  // Handle delegation - now accepts both pool and dRep
+  const handleDelegate = async (poolId: string | null, drepId: string | null) => {
+    // Delegate to pool if provided
+    if (poolId) {
+      await delegateStake({ poolId });
+    }
+    // TODO: Add dRep delegation when supported by the hooks
+    // if (drepId) {
+    //   await delegateDRep({ drepId });
+    // }
+    console.log('Delegation requested - Pool:', poolId, 'dRep:', drepId);
   };
 
   // Handle undelegation (delegate to null pool or use specific undelegate method if available)

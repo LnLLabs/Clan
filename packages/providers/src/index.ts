@@ -45,6 +45,21 @@ export {
   getAvailableExplorers
 } from './reference-explorers';
 
+// Delegation Provider System (Koios)
+export { 
+  DelegationProviderWrapper, 
+  useDelegationProvider,
+  getKoiosUrl,
+  KOIOS_NETWORK_URLS,
+} from './DelegationProvider';
+
+export type {
+  KoiosConfig,
+  DelegationProviderConfig,
+  DelegationContextValue,
+  DelegationProviderWrapperProps,
+} from './DelegationProvider';
+
 // Hooks
 export { useTokenInfo } from './hooks/useTokenInfo';
 export type { UseTokenInfoResult } from './hooks/useTokenInfo';
