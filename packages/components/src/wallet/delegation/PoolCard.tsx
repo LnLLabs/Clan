@@ -74,12 +74,9 @@ export const PoolCard: React.FC<PoolCardProps> = ({
         </div>
         <div className="pool-card-stat">
           <span className="pool-card-stat-label">Saturation</span>
-          <span className="pool-card-stat-value">{pool.saturation.toFixed(1)}%</span>
+          <span className="pool-card-stat-value">{(pool.saturation / 100).toFixed(1)}%</span>
         </div>
-        <div className="pool-card-stat">
-          <span className="pool-card-stat-label">ROI</span>
-          <span className="pool-card-stat-value">{pool.lifetimeROI.toFixed(2)}%</span>
-        </div>
+
       </div>
 
     
@@ -88,4 +85,5 @@ export const PoolCard: React.FC<PoolCardProps> = ({
 };
 
 export default PoolCard;
+
 

@@ -103,9 +103,11 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
   const [isLoadingPools, setIsLoadingPools] = useState(false);
   const [isLoadingDreps, setIsLoadingDreps] = useState(false);
   
-  // Current delegation info (fetched separately if not in pools list)
+  // Current delegation info (fetched separately if not in pools/dreps list)
   const [currentPoolInfo, setCurrentPoolInfo] = useState<PoolDisplayInfo | null>(null);
   const [isLoadingCurrentPool, setIsLoadingCurrentPool] = useState(false);
+  const [currentDRepInfo, setCurrentDRepInfo] = useState<DRepDisplayInfo | null>(null);
+  const [isLoadingCurrentDRep, setIsLoadingCurrentDRep] = useState(false);
 
   // Get network - prefer koiosConfig.network, then wallet network, then mainnet
   const getNetworkName = useCallback(() => {
@@ -235,6 +237,51 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
     
     fetchCurrentPool();
   }, [delegationInfo?.delegatedPool, pools, isLoadingPools, getNetworkName, koiosConfig]);
+
+  // Fetch current delegated dRep info if not in dreps list
+  useEffect(() => {
+    const fetchCurrentDRep = async () => {
+      if (!delegationInfo?.delegatedDRep) {
+        setCurrentDRepInfo(null);
+        return;
+      }
+      
+      // Check if it's a special dRep
+      const specialDRep = SPECIAL_DREPS.find(d => d.id === delegationInfo.delegatedDRep);
+      if (specialDRep) {
+        setCurrentDRepInfo(specialDRep);
+        return;
+      }
+      
+      // Skip if we already have info for this dRep
+      if (currentDRepInfo?.id === delegationInfo.delegatedDRep) {
+        return;
+      }
+      
+      // Check if already in dreps list
+      const existingDRep = dreps.find(d => d.id === delegationInfo.delegatedDRep);
+      if (existingDRep) {
+        setCurrentDRepInfo(existingDRep);
+        return;
+      }
+      
+      // Fetch the dRep info
+      setIsLoadingCurrentDRep(true);
+      try {
+        const network = getNetworkName();
+        const drepInfo = await getDRepInfo(delegationInfo.delegatedDRep, network, koiosConfig, true);
+        if (drepInfo) {
+          setCurrentDRepInfo(convertDRepToDisplayInfo(drepInfo));
+        }
+      } catch (error) {
+        console.warn('Failed to fetch current dRep info:', error);
+      } finally {
+        setIsLoadingCurrentDRep(false);
+      }
+    };
+    
+    fetchCurrentDRep();
+  }, [delegationInfo?.delegatedDRep, dreps, getNetworkName, koiosConfig]);
 
   // Filter pools based on search
   useEffect(() => {
@@ -457,9 +504,14 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
               </div>
               {delegationInfo?.delegatedDRep ? (
                 <div>
-                  {dreps.find(d => d.id === delegationInfo.delegatedDRep) ? (
+                  {isLoadingCurrentDRep ? (
+                    <div className="delegation-loading">
+                      <span className="delegation-spinner">🔄</span>
+                      Loading dRep info...
+                    </div>
+                  ) : currentDRepInfo ? (
                     <DRepCard 
-                      drep={dreps.find(d => d.id === delegationInfo.delegatedDRep)!}
+                      drep={currentDRepInfo}
                       isCurrent={true}
                     />
                   ) : (
@@ -562,7 +614,7 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
               
               <input
                 type="text"
-                placeholder="Search dReps by name..."
+                placeholder="Search dReps by id(CIP-129)..."
                 value={drepSearch}
                 onChange={(e) => setDrepSearch(e.target.value)}
                 className="delegation-search-input"
@@ -576,7 +628,20 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
               )}
               
               <div className="delegation-options-list">
-                {filteredDreps.length === 0 && !isLoadingDreps ? (
+                {/* Show current dRep at top if not in filtered list */}
+                {currentDRepInfo && 
+                 !currentDRepInfo.isSpecial &&
+                 !filteredDreps.find(d => d.id === currentDRepInfo.id) && 
+                 !drepSearch && (
+                  <DRepCard
+                    key={currentDRepInfo.id}
+                    drep={currentDRepInfo}
+                    isSelected={selectedDRep === currentDRepInfo.id}
+                    isCurrent={true}
+                    onClick={() => setSelectedDRep(currentDRepInfo.id)}
+                  />
+                )}
+                {filteredDreps.length === 0 && !isLoadingDreps && !currentDRepInfo ? (
                   <div className="delegation-no-results">
                     {drepSearch ? 'No dReps found' : 'No dReps available'}
                   </div>
@@ -620,7 +685,9 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
                   <span className="delegation-summary-label">dRep:</span>
                   <span className="delegation-summary-value">
                     {selectedDRep 
-                      ? (dreps.find(d => d.id === selectedDRep)?.name || selectedDRep.slice(0, 16) + '...')
+                      ? (dreps.find(d => d.id === selectedDRep)?.name || 
+                         (currentDRepInfo?.id === selectedDRep ? currentDRepInfo?.name : null) || 
+                         selectedDRep.slice(0, 16) + '...')
                       : 'None'
                     }
                   </span>

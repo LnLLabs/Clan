@@ -80,3 +80,4 @@ export const DRepCard: React.FC<DRepCardProps> = ({
 
 export default DRepCard;
 
+

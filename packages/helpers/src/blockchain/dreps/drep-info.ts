@@ -129,17 +129,18 @@ export async function getDRepMetadata(
 
     const data = await response.json();
     
-    // CIP-119 compliant metadata structure
+    // CIP-119 compliant metadata structure - data may be nested in 'body' object
+    const body = data.body || data;
     const metadata: DRepMetadata = {
-      name: data.givenName || data.name,
-      bio: data.bio,
-      email: data.email,
-      website: data.website || data.paymentAddress,
-      image: data.image?.contentUrl || data.image,
-      objectives: data.objectives,
-      qualifications: data.qualifications,
-      motivations: data.motivations,
-      references: data.references,
+      name: body.givenName || body.name || data.givenName || data.name,
+      bio: body.bio || data.bio,
+      email: body.email || data.email,
+      website: body.website || body.paymentAddress || data.website || data.paymentAddress,
+      image: body.image?.contentUrl || body.image || data.image?.contentUrl || data.image,
+      objectives: body.objectives || data.objectives,
+      qualifications: body.qualifications || data.qualifications,
+      motivations: body.motivations || data.motivations,
+      references: body.references || data.references,
     };
 
     metadataCache.set(anchorUrl, metadata);
@@ -193,10 +194,14 @@ export async function getDRepInfo(
 
     const drepData = data[0];
     
+    // Koios returns meta_url and meta_hash for the anchor
+    const anchorUrl = drepData.meta_url || drepData.url;
+    const anchorHash = drepData.meta_hash || drepData.hash;
+    
     // Optionally fetch metadata from anchor URL
     let metadata: DRepMetadata | undefined = undefined;
-    if (fetchMetadata && drepData.url) {
-      metadata = (await getDRepMetadata(drepData.url)) || undefined;
+    if (fetchMetadata && anchorUrl) {
+      metadata = (await getDRepMetadata(anchorUrl)) || undefined;
     }
 
     return {
@@ -208,9 +213,9 @@ export async function getDRepInfo(
       active: drepData.active,
       expires_epoch_no: drepData.expires_epoch_no,
       amount: drepData.amount,
-      anchor: drepData.url || drepData.hash ? {
-        url: drepData.url,
-        hash: drepData.hash,
+      anchor: anchorUrl || anchorHash ? {
+        url: anchorUrl,
+        hash: anchorHash,
       } : undefined,
       metadata,
       logo: metadata?.image,
@@ -262,9 +267,13 @@ export async function getDRepsInfo(
     // Process results
     for (const drepData of data) {
       if (drepData?.drep_id) {
+        // Koios returns meta_url and meta_hash for the anchor
+        const anchorUrl = drepData.meta_url || drepData.url;
+        const anchorHash = drepData.meta_hash || drepData.hash;
+        
         let metadata: DRepMetadata | undefined = undefined;
-        if (fetchMetadata && drepData.url) {
-          metadata = (await getDRepMetadata(drepData.url)) || undefined;
+        if (fetchMetadata && anchorUrl) {
+          metadata = (await getDRepMetadata(anchorUrl)) || undefined;
         }
 
         results[drepData.drep_id] = {
@@ -276,9 +285,9 @@ export async function getDRepsInfo(
           active: drepData.active,
           expires_epoch_no: drepData.expires_epoch_no,
           amount: drepData.amount,
-          anchor: drepData.url || drepData.hash ? {
-            url: drepData.url,
-            hash: drepData.hash,
+          anchor: anchorUrl || anchorHash ? {
+            url: anchorUrl,
+            hash: anchorHash,
           } : undefined,
           metadata,
           logo: metadata?.image,
@@ -334,8 +343,8 @@ export async function searchDReps(
       hex: drep.hex,
       has_script: drep.has_script,
       registered: drep.registered,
-      anchor_url: drep.url,
-      anchor_hash: drep.hash,
+      anchor_url: drep.meta_url || drep.url,
+      anchor_hash: drep.meta_hash || drep.hash,
     }));
   } catch (error) {
     console.warn('Failed to search dReps:', error);
@@ -374,8 +383,8 @@ export async function getDRepList(
       hex: drep.hex,
       has_script: drep.has_script,
       registered: drep.registered,
-      anchor_url: drep.url,
-      anchor_hash: drep.hash,
+      anchor_url: drep.meta_url || drep.url,
+      anchor_hash: drep.meta_hash || drep.hash,
     }));
   } catch (error) {
     console.warn('Failed to fetch dRep list:', error);

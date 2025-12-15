@@ -553,7 +553,9 @@ export async function getPoolInfoExtended(
       live_saturation: poolData.live_saturation,
       live_delegators: poolData.live_delegators,
       block_count: poolData.block_count,
-      roa: poolData.pool_status ? parseFloat(poolData.pool_status) : undefined,
+      roa: typeof poolData.pool_roa === 'number' ? poolData.pool_roa : 
+           typeof poolData.roa === 'number' ? poolData.roa : 
+           typeof poolData.ros === 'number' ? poolData.ros : undefined,
       logo,
     };
   } catch (error) {
