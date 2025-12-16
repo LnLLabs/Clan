@@ -20,22 +20,16 @@ export interface DelegationProviderConfig {
 }
 
 /**
- * Default Koios URLs by network
+ * Base Koios passthrough URL
  */
-export const KOIOS_NETWORK_URLS: Record<string, string> = {
-  mainnet: 'https://api.koios.rest/api/v1',
-  testnet: 'https://testnet.koios.rest/api/v1',
-  preprod: 'https://preprod.koios.rest/api/v1',
-  preview: 'https://preview.koios.rest/api/v1',
-  guild: 'https://guild.koios.rest/api/v1',
-};
+export const KOIOS_PASSTHROUGH_BASE_URL = 'https://koios.keypact.io/';
 
 /**
- * Get Koios URL for a specific network
+ * Get Koios base URL for a specific network
+ * Returns base URL without query parameters (network is added in koiosFetch)
  */
 export function getKoiosUrl(network: string): string {
-  const normalizedNetwork = network.toLowerCase().replace(/cardano[-_\s]*/gi, '').trim();
-  return KOIOS_NETWORK_URLS[normalizedNetwork] || KOIOS_NETWORK_URLS.mainnet;
+  return KOIOS_PASSTHROUGH_BASE_URL;
 }
 
 /**
@@ -66,8 +60,11 @@ const defaultContextValue: DelegationContextValue = {
   getKoiosUrl: (network?: string) => getKoiosUrl(network || 'mainnet'),
   getApiKey: () => undefined,
   koiosFetch: async (endpoint: string, network?: string) => {
-    const url = getKoiosUrl(network || 'mainnet');
-    return fetch(`${url}${endpoint}`, {
+    const baseUrl = getKoiosUrl(network || 'mainnet');
+    const normalizedNetwork = (network || 'mainnet').toLowerCase().replace(/cardano[-_\s]*/gi, '').trim();
+    const networkParam = normalizedNetwork || 'mainnet';
+    const fullUrl = `${baseUrl}${endpoint}?network=${networkParam}`;
+    return fetch(fullUrl, {
       headers: { 'accept': 'application/json' },
     });
   },
@@ -125,6 +122,12 @@ export const DelegationProviderWrapper: React.FC<DelegationProviderWrapperProps>
     ): Promise<Response> => {
       const baseUrl = getKoiosUrlForNetwork(network);
       const apiKey = getApiKey();
+      const networkName = network || mergedConfig.koios.network || 'mainnet';
+      const normalizedNetwork = networkName.toLowerCase().replace(/cardano[-_\s]*/gi, '').trim();
+      const networkParam = normalizedNetwork || 'mainnet';
+      
+      // Construct URL: baseUrl + endpoint + query parameter
+      const fullUrl = `${baseUrl}${endpoint}?network=${networkParam}`;
       
       const headers: HeadersInit = {
         'accept': 'application/json',
@@ -135,7 +138,7 @@ export const DelegationProviderWrapper: React.FC<DelegationProviderWrapperProps>
         (headers as Record<string, string>)['Authorization'] = `Bearer ${apiKey}`;
       }
 
-      return fetch(`${baseUrl}${endpoint}`, {
+      return fetch(fullUrl, {
         ...options,
         headers,
       });

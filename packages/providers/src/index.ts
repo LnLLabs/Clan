@@ -50,7 +50,7 @@ export {
   DelegationProviderWrapper, 
   useDelegationProvider,
   getKoiosUrl,
-  KOIOS_NETWORK_URLS,
+  KOIOS_PASSTHROUGH_BASE_URL,
 } from './DelegationProvider';
 
 export type {

@@ -13,15 +13,9 @@ export interface KoiosApiConfig {
 }
 
 /**
- * Default Koios URLs by network
+ * Base Koios passthrough URL
  */
-export const KOIOS_URLS: Record<string, string> = {
-  mainnet: 'https://api.koios.rest/api/v1',
-  testnet: 'https://testnet.koios.rest/api/v1',
-  preprod: 'https://preprod.koios.rest/api/v1',
-  preview: 'https://preview.koios.rest/api/v1',
-  guild: 'https://guild.koios.rest/api/v1',
-};
+export const KOIOS_PASSTHROUGH_BASE_URL = 'https://koios.keypact.io';
 
 /**
  * Normalize network name (remove "cardano" prefix, etc.)
@@ -31,16 +25,14 @@ function normalizeNetwork(network: string): string {
 }
 
 /**
- * Get Koios URL for a network
+ * Get Koios base URL for a network
+ * Returns base URL without query parameters (network is added in koiosFetch)
  */
 export function getKoiosApiUrl(network: string, config?: KoiosApiConfig): string {
   // If custom URL is provided, use that
   if (config?.url) return config.url;
-  // Prefer config.network over the network parameter
-  const networkToUse = config?.network || network;
-  const normalizedNetwork = normalizeNetwork(networkToUse);
-  console.log('[Koios] Using network:', normalizedNetwork, 'URL:', KOIOS_URLS[normalizedNetwork] || KOIOS_URLS.mainnet);
-  return KOIOS_URLS[normalizedNetwork] || KOIOS_URLS.mainnet;
+  // Return base URL - network parameter will be added when constructing the full URL
+  return KOIOS_PASSTHROUGH_BASE_URL;
 }
 
 /**
@@ -53,6 +45,14 @@ async function koiosFetch(
   options?: RequestInit
 ): Promise<Response> {
   const baseUrl = getKoiosApiUrl(network, config);
+  // Prefer config.network over the network parameter
+  const networkToUse = config?.network || network;
+  const normalizedNetwork = normalizeNetwork(networkToUse);
+  const networkParam = normalizedNetwork || 'mainnet';
+  
+  // Construct URL: baseUrl + endpoint + query parameter
+  const fullUrl = `${baseUrl}${endpoint}?network=${networkParam}`;
+  
   const headers: HeadersInit = {
     'accept': 'application/json',
     ...(options?.headers || {}),
@@ -65,8 +65,8 @@ async function koiosFetch(
     console.log('[Koios] No API key provided');
   }
 
-  console.log('[Koios] Fetching:', baseUrl + endpoint);
-  return fetch(`${baseUrl}${endpoint}`, {
+  console.log('[Koios] Using network:', normalizedNetwork, 'Fetching:', fullUrl);
+  return fetch(fullUrl, {
     ...options,
     headers,
   });
@@ -398,6 +398,10 @@ export async function searchPools(
 ): Promise<string[]> {
   try {
     const baseUrl = getKoiosApiUrl(network, koiosConfig);
+    const networkToUse = koiosConfig?.network || network;
+    const normalizedNetwork = normalizeNetwork(networkToUse);
+    const networkParam = normalizedNetwork || 'mainnet';
+    
     const headers: HeadersInit = {
       'accept': 'application/json',
     };
@@ -408,7 +412,7 @@ export async function searchPools(
 
     // Search by ticker (case-insensitive with ilike)
     const tickerPromise = fetch(
-      `${baseUrl}/pool_list?ticker=ilike.*${query}*`,
+      `${baseUrl}/pool_list?ticker=ilike.*${query}*&network=${networkParam}`,
       { headers }
     );
 
@@ -416,7 +420,7 @@ export async function searchPools(
     let idPromise: Promise<Response> | null = null;
     if (query.startsWith('pool1') || query.length > 10) {
       idPromise = fetch(
-        `${baseUrl}/pool_list?pool_id_bech32=ilike.*${query}*`,
+        `${baseUrl}/pool_list?pool_id_bech32=ilike.*${query}*&network=${networkParam}`,
         { headers }
       );
     }

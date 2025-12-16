@@ -41,15 +41,22 @@ export class BlockfrostMetadataProvider implements MetadataProvider {
 
       const data = await response.json();
       
+      const name = data.onchain_metadata?.name || data.asset_name || '';
+      const ticker = data.onchain_metadata?.ticker || '';
+      const decimals = typeof data.onchain_metadata?.decimals === 'number' 
+        ? data.onchain_metadata.decimals 
+        : 0;
+      
       const metadata: TokenMetadata = {
         policyId,
         assetName,
-        name: data.onchain_metadata?.name || data.asset_name,
-        ticker: data.onchain_metadata?.ticker,
+        name,
+        ticker,
         description: data.onchain_metadata?.description,
-        decimals: data.onchain_metadata?.decimals,
+        decimals,
         logo: this.processImageUrl(data.onchain_metadata?.logo || data.onchain_metadata?.image),
         url: data.onchain_metadata?.url,
+        isNft: this.detectIsNft(data.onchain_metadata, decimals, ticker),
         // Include raw metadata
         raw: data.onchain_metadata
       };
@@ -82,8 +89,8 @@ export class BlockfrostMetadataProvider implements MetadataProvider {
     return results;
   }
 
-  private processImageUrl(imageUrl?: string): string | undefined {
-    if (!imageUrl) return undefined;
+  private processImageUrl(imageUrl?: string): string {
+    if (!imageUrl) return '';
     
     // Handle IPFS URLs
     if (imageUrl.startsWith('ipfs://')) {
@@ -96,6 +103,32 @@ export class BlockfrostMetadataProvider implements MetadataProvider {
     }
     
     return imageUrl;
+  }
+
+  private detectIsNft(data: any, decimals?: number, ticker?: string): boolean {
+    // Check explicit flag
+    if (typeof data?.isNft === 'boolean') {
+      return data.isNft;
+    }
+
+    // Check assetType
+    if (typeof data?.assetType === 'string') {
+      return data.assetType.toLowerCase().includes('nft');
+    }
+
+    // Check tags
+    if (Array.isArray(data?.tags)) {
+      if (data.tags.some((tag: any) => String(tag).toLowerCase().includes('nft'))) {
+        return true;
+      }
+    }
+
+    // Heuristic: decimals === 0 and no ticker suggests NFT
+    if (typeof decimals === 'number' && decimals === 0 && !ticker) {
+      return true;
+    }
+
+    return false;
   }
 }
 
@@ -138,15 +171,23 @@ export class MaestroMetadataProvider implements MetadataProvider {
 
       const data = await response.json();
       
+      const name = data.asset_name || data.token_registry_metadata?.name || '';
+      const ticker = data.token_registry_metadata?.ticker || '';
+      const decimals = typeof data.token_registry_metadata?.decimals === 'number'
+        ? data.token_registry_metadata.decimals
+        : 0;
+      const logo = data.token_registry_metadata?.logo || '';
+      
       const metadata: TokenMetadata = {
         policyId,
         assetName,
-        name: data.asset_name || data.token_registry_metadata?.name,
-        ticker: data.token_registry_metadata?.ticker,
+        name,
+        ticker,
         description: data.token_registry_metadata?.description,
-        decimals: data.token_registry_metadata?.decimals,
-        logo: data.token_registry_metadata?.logo,
+        decimals,
+        logo,
         url: data.token_registry_metadata?.url,
+        isNft: this.detectIsNft(data.token_registry_metadata || data, decimals, ticker),
         // Include raw metadata
         raw: data
       };
@@ -175,6 +216,32 @@ export class MaestroMetadataProvider implements MetadataProvider {
       )
     );
     return results;
+  }
+
+  private detectIsNft(data: any, decimals?: number, ticker?: string): boolean {
+    // Check explicit flag
+    if (typeof data?.isNft === 'boolean') {
+      return data.isNft;
+    }
+
+    // Check assetType
+    if (typeof data?.assetType === 'string') {
+      return data.assetType.toLowerCase().includes('nft');
+    }
+
+    // Check tags
+    if (Array.isArray(data?.tags)) {
+      if (data.tags.some((tag: any) => String(tag).toLowerCase().includes('nft'))) {
+        return true;
+      }
+    }
+
+    // Heuristic: decimals === 0 and no ticker suggests NFT
+    if (typeof decimals === 'number' && decimals === 0 && !ticker) {
+      return true;
+    }
+
+    return false;
   }
 }
 

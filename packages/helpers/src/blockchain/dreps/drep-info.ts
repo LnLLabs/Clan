@@ -10,6 +10,13 @@ import {
 } from '../pools/pool-info';
 
 /**
+ * Normalize network name (remove "cardano" prefix, etc.)
+ */
+function normalizeNetwork(network: string): string {
+  return network.toLowerCase().replace(/cardano[-_\s]*/gi, '').trim() || 'mainnet';
+}
+
+/**
  * Make authenticated Koios API request
  */
 async function koiosFetch(
@@ -19,6 +26,14 @@ async function koiosFetch(
   options?: RequestInit
 ): Promise<Response> {
   const baseUrl = getKoiosApiUrl(network, config);
+  // Prefer config.network over the network parameter
+  const networkToUse = config?.network || network;
+  const normalizedNetwork = normalizeNetwork(networkToUse);
+  const networkParam = normalizedNetwork || 'mainnet';
+  
+  // Construct URL: baseUrl + endpoint + query parameter
+  const fullUrl = `${baseUrl}${endpoint}?network=${networkParam}`;
+  
   const headers: HeadersInit = {
     'accept': 'application/json',
     ...(options?.headers || {}),
@@ -28,7 +43,7 @@ async function koiosFetch(
     (headers as Record<string, string>)['Authorization'] = `Bearer ${config.apiKey}`;
   }
 
-  return fetch(`${baseUrl}${endpoint}`, {
+  return fetch(fullUrl, {
     ...options,
     headers,
   });
@@ -314,6 +329,10 @@ export async function searchDReps(
 ): Promise<DRepListItem[]> {
   try {
     const baseUrl = getKoiosApiUrl(network, koiosConfig);
+    const networkToUse = koiosConfig?.network || network;
+    const normalizedNetwork = normalizeNetwork(networkToUse);
+    const networkParam = normalizedNetwork || 'mainnet';
+    
     const headers: HeadersInit = {
       'accept': 'application/json',
     };
@@ -324,7 +343,7 @@ export async function searchDReps(
 
     // Search by dRep ID (partial match)
     const response = await fetch(
-      `${baseUrl}/drep_list?drep_id=ilike.*${query}*&limit=${limit}`,
+      `${baseUrl}/drep_list?drep_id=ilike.*${query}*&limit=${limit}&network=${networkParam}`,
       { headers }
     );
 

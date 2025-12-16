@@ -152,38 +152,7 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
     };
   };
 
-  // Load pools on mount
-  const loadPools = useCallback(async () => {
-    setIsLoadingPools(true);
-    try {
-      const network = getNetworkName();
-      const popularPoolIds = await getPopularPools(network, 10, koiosConfig);
-      
-      const poolsData = await Promise.all(
-        popularPoolIds.map(async (poolId: string) => {
-          try {
-            const poolInfo = await getPoolInfoExtended(poolId, network, koiosConfig);
-            return poolInfo ? convertPoolToDisplayInfo(poolInfo) : null;
-          } catch (error) {
-            console.warn(`Failed to load pool ${poolId}:`, error);
-            return null;
-          }
-        })
-      );
 
-      const validPools = poolsData.filter((pool): pool is PoolDisplayInfo => pool !== null);
-      setPools(validPools);
-      setFilteredPools(validPools);
-    } catch (error) {
-      console.error('Error loading pools:', error);
-    } finally {
-      setIsLoadingPools(false);
-    }
-  }, [getNetworkName, koiosConfig]);
-
-  useEffect(() => {
-    loadPools();
-  }, [loadPools]);
 
   // Pre-select based on current delegation
   useEffect(() => {
