@@ -1,0 +1,59 @@
+/* Clan Framework Components - Light Theme (placeholder)
+ *
+ * This file intentionally contains NO literal colors/gradients yet.
+ * It only provides placeholders so consuming apps can import it safely.
+ */
+
+:root {
+  --theme-bg-primary: initial;
+  --theme-bg-secondary: initial;
+  --theme-bg-tertiary: initial;
+
+  --theme-surface-1: initial;
+  --theme-surface-2: initial;
+
+  --theme-text-primary: initial;
+  --theme-text-muted: initial;
+  --theme-text-accent: initial;
+
+  --theme-border-primary: initial;
+  --theme-border-strong: initial;
+
+  --theme-button-primary-solid-bg: initial;
+  --theme-button-primary-solid-text: initial;
+  --theme-button-primary-gradient-bg: initial;
+  --theme-button-unhovered-gradient-bg: initial;
+
+  --theme-tab-readable-bg: initial;
+  --theme-tab-unreadable-bg: initial;
+
+  --theme-asset-surface: initial;
+  --theme-asset-border-selected: initial;
+  --theme-asset-border-active: initial;
+  --theme-asset-name: initial;
+  --theme-asset-amount-muted: initial;
+  --theme-asset-remove-icon: initial;
+
+  --theme-status-unclaimable: initial;
+  --theme-status-claimable: initial;
+
+  --theme-overlay-backdrop: initial;
+  --theme-tooltip-bg: initial;
+  --theme-tooltip-border: initial;
+  --theme-focus-ring: initial;
+  --theme-link: initial;
+  --theme-link-hover: initial;
+
+  --theme-shadow-tooltip: initial;
+  --theme-shadow-card-hover: initial;
+  --theme-shadow-token: initial;
+
+  --theme-surface-subtle: initial;
+  --theme-surface-subtle-2: initial;
+  --theme-surface-hover: initial;
+  --theme-surface-selected: initial;
+
+  --theme-image-select-chevron: initial;
+}
+
+

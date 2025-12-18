@@ -22,19 +22,19 @@
 
 /* ===== BUTTON VARIANTS ===== */
 .button-primary {
-  background-color: var(--color-primary);
-  color: white;
-  border-color: var(--color-primary);
+  background-color: var(--color-button-primary-solid-bg);
+  color: var(--color-button-primary-solid-text);
+  border-color: var(--color-button-primary-solid-bg);
 }
 
 .button-primary:hover:not(:disabled) {
-  background-color: var(--color-primary-hover);
-  border-color: var(--color-primary-hover);
+  background-color: var(--color-button-primary-solid-bg);
+  border-color: var(--color-button-primary-solid-bg);
 }
 
 .button-secondary {
   background-color: var(--color-secondary);
-  color: white;
+  color: var(--color-text-primary);
   border-color: var(--color-secondary);
 }
 
@@ -44,7 +44,7 @@
 }
 
 .button-outline {
-  background-color: white;
+  background-color: var(--color-bg-primary);
   color: var(--color-text-secondary);
   border-color: var(--color-border-secondary);
 }
@@ -82,14 +82,14 @@
 /* ===== DARK MODE SUPPORT ===== */
 @media (prefers-color-scheme: dark) {
   .button-outline {
-    background-color: var(--color-bg-dark-primary);
-    border-color: var(--color-border-dark-secondary);
-    color: var(--color-text-dark-primary);
+    background-color: var(--color-bg-primary);
+    border-color: var(--color-border-secondary);
+    color: var(--color-text-primary);
   }
 
   .button-outline:hover:not(:disabled) {
-    background-color: var(--color-bg-dark-secondary);
-    border-color: var(--color-border-dark-tertiary);
+    background-color: var(--color-bg-secondary);
+    border-color: var(--color-border-hover);
   }
 }
 

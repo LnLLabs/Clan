@@ -12,7 +12,7 @@
 .settingsButton{
     position: absolute;
     top: 15px;
-    background-color: #F27B87;
+    background-color: var(--color-button-primary-solid-bg);
     border-radius: 10px;
     right: 0px;
     margin: 10px;
@@ -38,9 +38,8 @@
         margin-right: 90px;
         padding: 5px 15px;
         margin: 26px 60px 2px;
-        border: rgb(59, 59, 59) solid 1px;
-        
-        color: rgb(59, 59, 59);
+        border: var(--color-border-primary) solid 1px;
+        color: var(--color-text-primary);
         border-radius: 20px;
         font-size: 17px;
         cursor: pointer;
@@ -49,7 +48,7 @@
 
 .menuIconOpen{
     
-    background-color: #F27B87;
+    background-color: var(--color-button-primary-solid-bg);
     border-bottom: var(--clrInputs);
     border-radius: 10px;
     padding-bottom: 55px;
@@ -63,8 +62,7 @@
     top: -30px;
     height: 32px;
     padding-top: 10px;
-    /* background-color: red; */
-    background-image: linear-gradient(30deg, #EF4A42 0%,  #F27B87 70%);
+    background-image: var(--color-button-primary-gradient-bg);
 }
 
 
@@ -87,7 +85,7 @@
     right: 10px;
     width: fit-content;
     padding: 10px;
-    background-image:  linear-gradient(30deg, #F68F42 0%, #F48037 10% , #EF4A42 80%, #F27B87 100% );
+    background-image:  var(--color-button-primary-gradient-bg);
     border-radius: 25px;
     border-top-right-radius: 0px;
     height: fit-content;
@@ -102,7 +100,7 @@
     position: absolute;
     width: 100%;
     top: 100px;
-    background-image:linear-gradient(  30deg , #F68F42 0%, #F48037 15%, #EF4A42, #F27B87 );
+    background-image: var(--color-button-primary-gradient-bg);
     height: 10px;
 }
 
@@ -150,8 +148,9 @@
 }
 
 .modeIcon{
-    fill: white;
+    fill: currentColor;
     background-color: var(--clrNav);
+    color: var(--color-text-primary);
     
     border-radius: 50%;
     break-inside: avoid;
@@ -163,11 +162,11 @@
 }
 
 .nightIcon{
-    border-color:rgb(0, 0, 0);
+    border-color: var(--color-border-primary);
 
 }
 
 .dayIcon{
-    border-color:rgb(255, 255, 255);
+    border-color: var(--color-border-primary);
 }
 

@@ -47,7 +47,7 @@
 .input-base:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .input-with-start-adornment .input-base {
@@ -64,7 +64,7 @@
 
 .input-error:focus {
   border-color: var(--color-error);
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .input-error-text {
@@ -102,7 +102,7 @@
 .search-input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 /* ===== ADDRESS SELECT ===== */
@@ -118,7 +118,7 @@
 .address-select:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .address-select-container {
@@ -138,7 +138,7 @@
 .address-select-container select:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .address-select-container .defaultButton {
@@ -147,7 +147,7 @@
   top: 50%;
   transform: translateY(-50%);
   background: var(--color-secondary);
-  color: white;
+  color: var(--color-text-primary);
   border: none;
   padding: var(--space-xs) var(--space-sm);
   border-radius: var(--radius-sm);
@@ -234,9 +234,9 @@
 /* ===== DARK MODE SUPPORT ===== */
 @media (prefers-color-scheme: dark) {
   .input-base {
-    background-color: var(--color-bg-dark-secondary);
-    border-color: var(--color-border-dark-secondary);
-    color: var(--color-text-dark-primary);
+    background-color: var(--color-bg-primary);
+    border-color: var(--color-border-secondary);
+    color: var(--color-text-primary);
   }
 
   .input-base::placeholder {
@@ -244,14 +244,14 @@
   }
 
   .button-outline {
-    background-color: var(--color-bg-dark-primary);
-    border-color: var(--color-border-dark-secondary);
-    color: var(--color-text-dark-primary);
+    background-color: var(--color-bg-primary);
+    border-color: var(--color-border-secondary);
+    color: var(--color-text-primary);
   }
 
   .button-outline:hover:not(:disabled) {
-    background-color: var(--color-bg-dark-secondary);
-    border-color: var(--color-border-dark-tertiary);
+    background-color: var(--color-bg-secondary);
+    border-color: var(--color-border-hover);
   }
 }
 

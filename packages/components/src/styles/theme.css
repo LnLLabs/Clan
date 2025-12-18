@@ -1,108 +1,113 @@
-/* BroClan Framework - Central Theme & Design Tokens */
+/* Clan Framework Components - Theme Variable Contract (NO LITERALS)
+ *
+ * Hard rule: outside of shipped theme files (e.g. src/themes/dark.css),
+ * there must be no literal colors or gradients in the library sources.
+ *
+ * This file is the "contract": it declares/aliases variable names and
+ * provides non-color defaults only (e.g. spacing, typography).
+ */
 
-/* ===== COLOR PALETTE ===== */
 :root {
-  /* Primary Colors */
-  --color-primary: #3b82f6;
-  --color-primary-hover: #2563eb;
-  --color-primary-light: #dbeafe;
-  --color-primary-dark: #1d4ed8;
+  /* ===== SEMANTIC COLOR TOKENS (values come from theme files) ===== */
+  --color-bg-primary: var(--theme-bg-primary);
+  --color-bg-secondary: var(--theme-bg-secondary);
+  --color-bg-tertiary: var(--theme-bg-tertiary);
+
+  --color-surface-1: var(--theme-surface-1);
+  --color-surface-2: var(--theme-surface-2);
+
+  --color-text-primary: var(--theme-text-primary);
+  --color-text-muted: var(--theme-text-muted);
+  --color-text-accent: var(--theme-text-accent);
+
+  --color-border-primary: var(--theme-border-primary);
+  --color-border-strong: var(--theme-border-strong);
+
+  /* Opacity tokens (non-color) */
+  --opacity-overlay: 0.85;
+
+  /* Overlays / tooltips / shadows (values come from theme files) */
+  --color-overlay-backdrop: var(--theme-overlay-backdrop);
+  --color-tooltip-bg: var(--theme-tooltip-bg);
+  --color-tooltip-border: var(--theme-tooltip-border);
+  --color-focus-ring: var(--theme-focus-ring);
+  --color-link: var(--theme-link);
+  --color-link-hover: var(--theme-link-hover);
+
+  --shadow-tooltip: var(--theme-shadow-tooltip);
+  --shadow-card-hover: var(--theme-shadow-card-hover);
+  --shadow-token: var(--theme-shadow-token);
+
+  /* Wallet / delegation surfaces */
+  --color-surface-subtle: var(--theme-surface-subtle);
+  --color-surface-subtle-2: var(--theme-surface-subtle-2);
+  --color-surface-hover: var(--theme-surface-hover);
+  --color-surface-selected: var(--theme-surface-selected);
+
+  /* Icons / misc */
+  --image-select-chevron: var(--theme-image-select-chevron);
+
+  /* Buttons */
+  --color-button-primary-solid-bg: var(--theme-button-primary-solid-bg);
+  --color-button-primary-solid-text: var(--theme-button-primary-solid-text);
+  --color-button-primary-gradient-bg: var(--theme-button-primary-gradient-bg);
+  --color-button-unhovered-gradient-bg: var(--theme-button-unhovered-gradient-bg);
+
+  /* Tabs */
+  --color-tab-readable-bg: var(--theme-tab-readable-bg);
+  --color-tab-unreadable-bg: var(--theme-tab-unreadable-bg);
+
+  /* Token / asset selector */
+  --color-asset-surface: var(--theme-asset-surface);
+  --color-asset-border-selected: var(--theme-asset-border-selected);
+  --color-asset-border-active: var(--theme-asset-border-active);
+  --color-asset-name: var(--theme-asset-name);
+  --color-asset-amount-muted: var(--theme-asset-amount-muted);
+  --color-asset-remove-icon: var(--theme-asset-remove-icon);
+
+  /* Status */
+  --color-status-claimable: var(--theme-status-claimable);
+  --color-status-unclaimable: var(--theme-status-unclaimable);
+
+  /* ===== LEGACY ALIASES (keep old CSS working; still no literals) ===== */
+  --color-primary: var(--color-button-primary-solid-bg);
+  --color-primary-hover: var(--color-button-primary-solid-bg);
+  --color-secondary: var(--color-bg-secondary);
+  --color-secondary-hover: var(--color-bg-secondary);
+  --color-bg-quaternary: var(--color-bg-tertiary);
+
+  --color-text-secondary: var(--color-text-primary);
+  --color-text-tertiary: var(--color-text-muted);
+  --color-text-quaternary: var(--color-text-muted);
+
+  --color-border-secondary: var(--color-border-primary);
+  --color-border-hover: var(--color-border-strong);
+
+  /* Deprecated "dark mode" aliases (themes control actual values) */
+  --color-bg-dark-primary: var(--color-bg-primary);
+  --color-bg-dark-secondary: var(--color-bg-secondary);
+  --color-bg-dark-tertiary: var(--color-bg-tertiary);
+  --color-text-dark-primary: var(--color-text-primary);
+  --color-border-dark-primary: var(--color-border-primary);
+  --color-border-dark-secondary: var(--color-border-primary);
+  --color-border-dark-tertiary: var(--color-border-strong);
+  --color-success: var(--color-status-claimable);
+  --color-error: var(--color-status-unclaimable);
+  --color-warning: var(--color-text-accent);
+  --color-info: var(--color-text-accent);
+  --color-accent-violet: var(--color-text-accent);
+  --color-accent-purple: var(--color-text-accent);
+  --color-accent-purple-gradient: var(--color-button-primary-gradient-bg);
+  --color-overview-bg: var(--color-bg-primary);
   
-  /* Secondary Colors */
-  --color-secondary: #6b7280;
-  --color-secondary-hover: #4b5563;
-  --color-secondary-light: #9ca3af;
-  --color-secondary-dark: #374151;
-  
-  /* Accent Colors */
-  --color-accent-pink: #ec4899;
-  --color-accent-pink-hover: #db2777;
-  --color-accent-pink-light: rgba(236, 72, 153, 0.1);
-  --color-accent-purple: #7c3aed;
-  --color-accent-purple-hover: #6d28d9;
-  --color-accent-purple-light: #a78bfa;
-  --color-accent-purple-gradient: linear-gradient(90deg, #d946ef 0%, #a855f7 100%);
-  --color-accent-violet: #8b5cf6;
-  --color-accent-violet-dark: #9333ea;
-  
-  /* Success Colors */
-  --color-success: #22c55e;
-  --color-success-bg: #dcfce7;
-  --color-success-border: #bbf7d0;
-  --color-success-text: #166534;
-  
-  /* Error Colors */
-  --color-error: #ef4444;
-  --color-error-bg: #fee2e2;
-  --color-error-hover: #dc2626;
-  --color-error-text: #dc2626;
-  
-  /* Warning Colors */
-  --color-warning: #f59e0b;
-  --color-warning-bg: #fef3c7;
-  --color-warning-border: #f59e0b;
-  --color-warning-text: #92400e;
-  --color-warning-hover: #d97706;
-  
-  /* Info Colors */
-  --color-info: #3b82f6;
-  --color-info-bg: #eff6ff;
-  --color-info-border: #bfdbfe;
-  --color-info-text: #1d4ed8;
-  
-  /* Neutral Colors - Light Mode */
-  --color-bg-primary: #ffffff;
-  --color-bg-secondary: #f9fafb;
-  --color-bg-tertiary: #f3f4f6;
-  --color-bg-quaternary: #e5e7eb;
-  
-  --color-text-primary: #111827;
-  --color-text-secondary: #374151;
-  --color-text-tertiary: #6b7280;
-  --color-text-quaternary: #9ca3af;
-  
-  --color-border-primary: #e5e7eb;
-  --color-border-secondary: #d1d5db;
-  --color-border-hover: #9ca3af;
-  
-  /* Neutral Colors - Dark Mode */
-  --color-bg-dark-primary: #1f2937;
-  --color-bg-dark-secondary: #2a2a3e;
-  --color-bg-dark-tertiary: #363650;
-  --color-bg-dark-quaternary: #4a4a5e;
-  
-  --color-text-dark-primary: #f9fafb;
-  --color-text-dark-secondary: #d1d5db;
-  --color-text-dark-tertiary: #9ca3af;
-  --color-text-dark-quaternary: #7a7a8e;
-  
-  --color-border-dark-primary: #374151;
-  --color-border-dark-secondary: #4a4a5e;
-  --color-border-dark-tertiary: #5a5a6e;
-  
-  /* Special Dark Mode Colors */
-  --color-dark-base: #36393F;
-  --color-dark-card: #2a2a3e;
-  --color-dark-card-hover: #3f3f59;
-  --color-dark-input: #0f0f1e;
-  
-  /* Overview Specific Colors */
-  --color-overview-bg: #36393F;
-  --color-overview-card-light: #ECECEC;
-  --color-overview-card-dark: #4A4A4A;
-  --color-overview-tab-inactive: #666666;
-  --color-overview-tab-hover: #555555;
-  --color-overview-text-light: #2d2d2d;
-  --color-overview-text-muted: #888888;
-  --color-overview-text-light-muted: #999999;
-  --color-overview-bar-bg: #c9c9c9;
-  --color-overview-bar-fill: linear-gradient(90deg, #a855f7 0%, #7c3aed 100%);
-  --color-overview-hover: #d8d8d8;
-  
-  /* Special UI Colors */
-  --color-coral: #f27b87;
-  --color-coral-hover: #ef4444;
-  
+
+  /* Very old NavBar variables */
+  --clrNav: var(--color-bg-primary);
+  --clrNavText: var(--color-text-primary);
+  --clrBackground: var(--color-bg-primary);
+  --clrInputs: var(--color-surface-1);
+  --clrorange: var(--color-border-primary);
+
   /* ===== SPACING ===== */
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
@@ -124,18 +129,22 @@
   --radius-circle: 50%;
   
   /* ===== SHADOWS ===== */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 2px 8px rgba(0, 0, 0, 0.15);
-  --shadow-2xl: 0 4px 12px rgba(0, 0, 0, 0.3);
-  --shadow-3xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  --shadow-4xl: 0 20px 60px rgba(0, 0, 0, 0.5);
-  --shadow-button: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-button-hover: 0 4px 8px rgba(124, 58, 237, 0.3);
-  --shadow-accent: 0 2px 4px rgba(139, 92, 246, 0.3);
-  --shadow-accent-hover: 0 4px 12px rgba(168, 85, 247, 0.5);
-  --shadow-pink: 0 2px 8px rgba(236, 72, 153, 0.2);
+  /* Note: shadow color literals are forbidden outside theme files.
+   * Themes may override these, but should prefer "none" unless they can
+   * express shadows without introducing non-approved colors.
+   */
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
+  --shadow-3xl: none;
+  --shadow-4xl: none;
+  --shadow-button: none;
+  --shadow-button-hover: none;
+  --shadow-accent: none;
+  --shadow-accent-hover: none;
+  --shadow-pink: none;
   
   /* ===== TYPOGRAPHY ===== */
   --font-family-base: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -178,25 +187,6 @@
   --breakpoint-lg: 1024px;
   --breakpoint-xl: 1280px;
   --breakpoint-2xl: 1536px;
-}
-
-/* ===== DARK MODE OVERRIDES ===== */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg-primary: var(--color-bg-dark-primary);
-    --color-bg-secondary: var(--color-bg-dark-secondary);
-    --color-bg-tertiary: var(--color-bg-dark-tertiary);
-    --color-bg-quaternary: var(--color-bg-dark-quaternary);
-    
-    --color-text-primary: var(--color-text-dark-primary);
-    --color-text-secondary: var(--color-text-dark-secondary);
-    --color-text-tertiary: var(--color-text-dark-tertiary);
-    --color-text-quaternary: var(--color-text-dark-quaternary);
-    
-    --color-border-primary: var(--color-border-dark-primary);
-    --color-border-secondary: var(--color-border-dark-secondary);
-    --color-border-hover: var(--color-border-dark-tertiary);
-  }
 }
 
 /* ===== UTILITY CLASSES ===== */

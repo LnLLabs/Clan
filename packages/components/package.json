@@ -22,12 +22,14 @@
       "require": "./dist/styles/index.css",
       "default": "./dist/styles/index.css"
     },
+    "./themes/dark.css": "./dist/themes/dark.css",
+    "./themes/light.css": "./dist/themes/light.css",
     "./styles/index.css": "./dist/styles/index.css",
     "./dist/styles/index.css": "./dist/styles/index.css"
   },
   "style": "./dist/styles/index.css",
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && node scripts/copy-themes.mjs",
     "dev": "vite build --watch",
     "clean": "rimraf dist",
     "preview": "vite preview",

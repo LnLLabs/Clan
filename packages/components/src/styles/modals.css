@@ -6,7 +6,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--color-bg-primary);
+  opacity: var(--opacity-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -78,16 +79,16 @@
 /* ===== DARK MODE SUPPORT ===== */
 @media (prefers-color-scheme: dark) {
   .modal-content {
-    background: var(--color-bg-dark-primary);
-    color: var(--color-text-dark-primary);
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
   }
 
   .modal-header {
-    border-bottom-color: var(--color-border-dark-primary);
+    border-bottom-color: var(--color-border-primary);
   }
 
   .modal-footer {
-    border-top-color: var(--color-border-dark-primary);
+    border-top-color: var(--color-border-primary);
   }
 }
 

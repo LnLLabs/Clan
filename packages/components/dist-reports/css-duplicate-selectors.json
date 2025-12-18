@@ -1,0 +1,2477 @@
+{
+  "generatedAt": "2025-12-18T14:56:05.362Z",
+  "duplicates": [
+    {
+      "key": "base:::root",
+      "context": "base",
+      "selector": ":root",
+      "count": 3,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/theme.css",
+          "line": 10,
+          "context": "base",
+          "selector": ":root",
+          "decls": {
+            "--color-bg-primary": "var(--theme-bg-primary)",
+            "--color-bg-secondary": "var(--theme-bg-secondary)",
+            "--color-bg-tertiary": "var(--theme-bg-tertiary)",
+            "--color-surface-1": "var(--theme-surface-1)",
+            "--color-surface-2": "var(--theme-surface-2)",
+            "--color-text-primary": "var(--theme-text-primary)",
+            "--color-text-muted": "var(--theme-text-muted)",
+            "--color-text-accent": "var(--theme-text-accent)",
+            "--color-border-primary": "var(--theme-border-primary)",
+            "--color-border-strong": "var(--theme-border-strong)",
+            "--opacity-overlay": "0.85",
+            "--color-button-primary-solid-bg": "var(--theme-button-primary-solid-bg)",
+            "--color-button-primary-solid-text": "var(--theme-button-primary-solid-text)",
+            "--color-button-primary-gradient-bg": "var(--theme-button-primary-gradient-bg)",
+            "--color-button-unhovered-gradient-bg": "var(--theme-button-unhovered-gradient-bg)",
+            "--color-tab-readable-bg": "var(--theme-tab-readable-bg)",
+            "--color-tab-unreadable-bg": "var(--theme-tab-unreadable-bg)",
+            "--color-asset-surface": "var(--theme-asset-surface)",
+            "--color-asset-border-selected": "var(--theme-asset-border-selected)",
+            "--color-asset-border-active": "var(--theme-asset-border-active)",
+            "--color-asset-name": "var(--theme-asset-name)",
+            "--color-asset-amount-muted": "var(--theme-asset-amount-muted)",
+            "--color-asset-remove-icon": "var(--theme-asset-remove-icon)",
+            "--color-status-claimable": "var(--theme-status-claimable)",
+            "--color-status-unclaimable": "var(--theme-status-unclaimable)",
+            "--color-primary": "var(--color-button-primary-solid-bg)",
+            "--color-primary-hover": "var(--color-button-primary-solid-bg)",
+            "--color-secondary": "var(--color-bg-secondary)",
+            "--color-secondary-hover": "var(--color-bg-secondary)",
+            "--color-bg-quaternary": "var(--color-bg-tertiary)",
+            "--color-text-secondary": "var(--color-text-primary)",
+            "--color-text-tertiary": "var(--color-text-muted)",
+            "--color-text-quaternary": "var(--color-text-muted)",
+            "--color-border-secondary": "var(--color-border-primary)",
+            "--color-border-hover": "var(--color-border-strong)",
+            "--color-bg-dark-primary": "var(--color-bg-primary)",
+            "--color-bg-dark-secondary": "var(--color-bg-secondary)",
+            "--color-bg-dark-tertiary": "var(--color-bg-tertiary)",
+            "--color-text-dark-primary": "var(--color-text-primary)",
+            "--color-border-dark-primary": "var(--color-border-primary)",
+            "--color-border-dark-secondary": "var(--color-border-primary)",
+            "--color-border-dark-tertiary": "var(--color-border-strong)",
+            "--color-success": "var(--color-status-claimable)",
+            "--color-error": "var(--color-status-unclaimable)",
+            "--color-warning": "var(--color-text-accent)",
+            "--color-info": "var(--color-text-accent)",
+            "--color-accent-violet": "var(--color-text-accent)",
+            "--color-accent-purple": "var(--color-text-accent)",
+            "--color-accent-purple-gradient": "var(--color-button-primary-gradient-bg)",
+            "--color-overview-bg": "var(--color-bg-primary)",
+            "--clrNav": "var(--color-bg-primary)",
+            "--clrNavText": "var(--color-text-primary)",
+            "--clrBackground": "var(--color-bg-primary)",
+            "--clrInputs": "var(--color-surface-1)",
+            "--clrorange": "var(--color-border-primary)",
+            "--space-xs": "0.25rem",
+            "--space-sm": "0.5rem",
+            "--space-md": "0.75rem",
+            "--space-lg": "1rem",
+            "--space-xl": "1.5rem",
+            "--space-2xl": "2rem",
+            "--space-3xl": "3rem",
+            "--radius-sm": "0.25rem",
+            "--radius-md": "0.375rem",
+            "--radius-lg": "0.5rem",
+            "--radius-xl": "0.625rem",
+            "--radius-2xl": "0.75rem",
+            "--radius-3xl": "0.875rem",
+            "--radius-full": "9999px",
+            "--radius-pill": "1.5rem",
+            "--radius-circle": "50%",
+            "--shadow-sm": "none",
+            "--shadow-md": "none",
+            "--shadow-lg": "none",
+            "--shadow-xl": "none",
+            "--shadow-2xl": "none",
+            "--shadow-3xl": "none",
+            "--shadow-4xl": "none",
+            "--shadow-button": "none",
+            "--shadow-button-hover": "none",
+            "--shadow-accent": "none",
+            "--shadow-accent-hover": "none",
+            "--shadow-pink": "none",
+            "--font-family-base": "system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+            "--font-family-mono": "'Monaco', 'Menlo', 'Courier New', monospace",
+            "--font-size-xs": "0.75rem",
+            "--font-size-sm": "0.875rem",
+            "--font-size-base": "1rem",
+            "--font-size-lg": "1.125rem",
+            "--font-size-xl": "1.25rem",
+            "--font-size-2xl": "1.5rem",
+            "--font-size-3xl": "2rem",
+            "--font-weight-normal": "400",
+            "--font-weight-medium": "500",
+            "--font-weight-semibold": "600",
+            "--font-weight-bold": "700",
+            "--line-height-tight": "1",
+            "--line-height-normal": "1.5",
+            "--line-height-relaxed": "1.75",
+            "--transition-fast": "0.15s ease-in-out",
+            "--transition-base": "0.2s ease",
+            "--transition-slow": "0.3s ease-in-out",
+            "--z-dropdown": "10",
+            "--z-sticky": "100",
+            "--z-fixed": "500",
+            "--z-modal-backdrop": "1000",
+            "--z-modal": "1000",
+            "--z-popover": "1010",
+            "--z-tooltip": "1020",
+            "--breakpoint-sm": "640px",
+            "--breakpoint-md": "768px",
+            "--breakpoint-lg": "1024px",
+            "--breakpoint-xl": "1280px",
+            "--breakpoint-2xl": "1536px"
+          }
+        },
+        {
+          "file": "src/themes/dark.css",
+          "line": 8,
+          "context": "base",
+          "selector": ":root",
+          "decls": {
+            "--theme-bg-primary": "#343a40",
+            "--theme-bg-secondary": "#40464b",
+            "--theme-bg-tertiary": "#53575d",
+            "--theme-surface-1": "#40464b",
+            "--theme-surface-2": "#564566",
+            "--theme-text-primary": "#ffffff",
+            "--theme-text-muted": "#989a9e",
+            "--theme-text-accent": "#c900ff",
+            "--theme-border-primary": "#7a7d82",
+            "--theme-border-strong": "#989a9e",
+            "--theme-button-primary-solid-bg": "#720876",
+            "--theme-button-primary-solid-text": "#ffffff",
+            "--theme-button-primary-gradient-bg": "linear-gradient(#cd1c64, #8e0f71 42.47%)",
+            "--theme-button-unhovered-gradient-bg": "linear-gradient(#888b8f, #474b4f 25.17%)",
+            "--theme-tab-readable-bg": "#484d53",
+            "--theme-tab-unreadable-bg": "#6d7175",
+            "--theme-asset-surface": "#53575d",
+            "--theme-asset-border-selected": "#cd1c64",
+            "--theme-asset-border-active": "#989a9e",
+            "--theme-asset-name": "#ffffff",
+            "--theme-asset-amount-muted": "#989a9e",
+            "--theme-asset-remove-icon": "#86888c",
+            "--theme-status-unclaimable": "#ff0000",
+            "--theme-status-claimable": "#19ff00"
+          }
+        },
+        {
+          "file": "src/themes/light.css",
+          "line": 7,
+          "context": "base",
+          "selector": ":root",
+          "decls": {
+            "--theme-bg-primary": "initial",
+            "--theme-bg-secondary": "initial",
+            "--theme-bg-tertiary": "initial",
+            "--theme-surface-1": "initial",
+            "--theme-surface-2": "initial",
+            "--theme-text-primary": "initial",
+            "--theme-text-muted": "initial",
+            "--theme-text-accent": "initial",
+            "--theme-border-primary": "initial",
+            "--theme-border-strong": "initial",
+            "--theme-button-primary-solid-bg": "initial",
+            "--theme-button-primary-solid-text": "initial",
+            "--theme-button-primary-gradient-bg": "initial",
+            "--theme-button-unhovered-gradient-bg": "initial",
+            "--theme-tab-readable-bg": "initial",
+            "--theme-tab-unreadable-bg": "initial",
+            "--theme-asset-surface": "initial",
+            "--theme-asset-border-selected": "initial",
+            "--theme-asset-border-active": "initial",
+            "--theme-asset-name": "initial",
+            "--theme-asset-amount-muted": "initial",
+            "--theme-asset-remove-icon": "initial",
+            "--theme-status-unclaimable": "initial",
+            "--theme-status-claimable": "initial"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.ada-icon",
+      "context": "base",
+      "selector": ".ada-icon",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 162,
+          "context": "base",
+          "selector": ".ada-icon",
+          "decls": {
+            "background": "#0033ad",
+            "color": "white"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 957,
+          "context": "base",
+          "selector": ".ada-icon",
+          "decls": {
+            "background": "#3b82f6"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.add-all-button",
+      "context": "base",
+      "selector": ".add-all-button",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/asset-picker.css",
+          "line": 455,
+          "context": "base",
+          "selector": ".add-all-button",
+          "decls": {
+            "padding": "var(--space-md) var(--space-xl)",
+            "border": "none",
+            "border-radius": "var(--radius-pill)",
+            "font-size": "var(--font-size-sm)",
+            "font-weight": "var(--font-weight-medium)",
+            "cursor": "pointer",
+            "transition": "all var(--transition-fast)"
+          }
+        },
+        {
+          "file": "src/styles/asset-picker.css",
+          "line": 467,
+          "context": "base",
+          "selector": ".add-all-button",
+          "decls": {
+            "background": "var(--color-secondary)",
+            "color": "var(--color-text-dark-primary)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.add-assets-button",
+      "context": "base",
+      "selector": ".add-assets-button",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/asset-picker.css",
+          "line": 62,
+          "context": "base",
+          "selector": ".add-assets-button",
+          "decls": {
+            "padding": "0.625rem var(--space-xl)",
+            "border": "none",
+            "border-radius": "var(--radius-pill)",
+            "font-size": "var(--font-size-sm)",
+            "font-weight": "var(--font-weight-medium)",
+            "cursor": "pointer",
+            "transition": "all var(--transition-fast)"
+          }
+        },
+        {
+          "file": "src/styles/asset-picker.css",
+          "line": 73,
+          "context": "base",
+          "selector": ".add-assets-button",
+          "decls": {
+            "background": "var(--color-secondary)",
+            "color": "var(--color-text-dark-primary)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "@media (prefers-color-scheme: dark)::.address-text",
+      "context": "@media (prefers-color-scheme: dark)",
+      "selector": ".address-text",
+      "count": 2,
+      "identicalDecls": true,
+      "occurrences": [
+        {
+          "file": "src/styles/transactions.css",
+          "line": 374,
+          "context": "@media (prefers-color-scheme: dark)",
+          "selector": ".address-text",
+          "decls": {
+            "color": "var(--color-text-dark-secondary)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 477,
+          "context": "@media (prefers-color-scheme: dark)",
+          "selector": ".address-text",
+          "decls": {
+            "color": "var(--color-text-dark-secondary)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.asset-actions",
+      "context": "base",
+      "selector": ".asset-actions",
+      "count": 2,
+      "identicalDecls": true,
+      "occurrences": [
+        {
+          "file": "src/styles/asset-picker.css",
+          "line": 55,
+          "context": "base",
+          "selector": ".asset-actions",
+          "decls": {
+            "display": "flex",
+            "gap": "var(--space-md)",
+            "justify-content": "space-around",
+            "margin-top": "var(--space-lg)"
+          }
+        },
+        {
+          "file": "src/styles/transaction-creator.css",
+          "line": 486,
+          "context": "base",
+          "selector": ".asset-actions",
+          "decls": {
+            "display": "flex",
+            "gap": "var(--space-md)",
+            "justify-content": "space-around",
+            "margin-top": "var(--space-lg)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.asset-amount",
+      "context": "base",
+      "selector": ".asset-amount",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 167,
+          "context": "base",
+          "selector": ".asset-amount",
+          "decls": {
+            "font-weight": "var(--font-weight-medium)",
+            "color": "var(--color-text-secondary)",
+            "font-size": "var(--font-size-sm)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 961,
+          "context": "base",
+          "selector": ".asset-amount",
+          "decls": {
+            "font-size": "14px",
+            "font-weight": "500",
+            "color": "#1f2937",
+            "font-family": "var(--font-family-mono)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.asset-icon",
+      "context": "base",
+      "selector": ".asset-icon",
+      "count": 3,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/asset-picker.css",
+          "line": 296,
+          "context": "base",
+          "selector": ".asset-icon",
+          "decls": {
+            "width": "48px",
+            "height": "48px",
+            "border-radius": "var(--radius-circle)",
+            "overflow": "hidden",
+            "display": "flex",
+            "align-items": "center",
+            "justify-content": "center",
+            "background": "var(--color-border-dark-secondary)"
+          }
+        },
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 151,
+          "context": "base",
+          "selector": ".asset-icon",
+          "decls": {
+            "width": "24px",
+            "height": "24px",
+            "border-radius": "50%",
+            "display": "flex",
+            "align-items": "center",
+            "justify-content": "center",
+            "font-size": "var(--font-size-xs)",
+            "font-weight": "var(--font-weight-bold)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 945,
+          "context": "base",
+          "selector": ".asset-icon",
+          "decls": {
+            "width": "28px",
+            "height": "28px",
+            "border-radius": "50%",
+            "display": "flex",
+            "align-items": "center",
+            "justify-content": "center",
+            "font-size": "14px",
+            "font-weight": "600",
+            "color": "white"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.asset-icon-wrapper",
+      "context": "base",
+      "selector": ".asset-icon-wrapper",
+      "count": 2,
+      "identicalDecls": true,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 146,
+          "context": "base",
+          "selector": ".asset-icon-wrapper",
+          "decls": {
+            "display": "flex",
+            "align-items": "center"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 940,
+          "context": "base",
+          "selector": ".asset-icon-wrapper",
+          "decls": {
+            "display": "flex",
+            "align-items": "center"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.asset-item",
+      "context": "base",
+      "selector": ".asset-item",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 140,
+          "context": "base",
+          "selector": ".asset-item",
+          "decls": {
+            "display": "flex",
+            "align-items": "center",
+            "gap": "var(--space-xs)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 934,
+          "context": "base",
+          "selector": ".asset-item",
+          "decls": {
+            "display": "flex",
+            "align-items": "center",
+            "gap": "8px"
+          }
+        }
+      ]
+    },
+    {
+      "key": "@media (max-width: 768px)::.assets-container",
+      "context": "@media (max-width: 768px)",
+      "selector": ".assets-container",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 445,
+          "context": "@media (max-width: 768px)",
+          "selector": ".assets-container",
+          "decls": {
+            "flex-direction": "column",
+            "align-items": "flex-start",
+            "gap": "var(--space-xs)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 1185,
+          "context": "@media (max-width: 768px)",
+          "selector": ".assets-container",
+          "decls": {
+            "flex-direction": "column",
+            "align-items": "flex-start",
+            "gap": "8px"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.assets-container",
+      "context": "base",
+      "selector": ".assets-container",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 132,
+          "context": "base",
+          "selector": ".assets-container",
+          "decls": {
+            "display": "flex",
+            "flex-direction": "row",
+            "align-items": "center",
+            "gap": "var(--space-md)",
+            "flex-wrap": "wrap"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 929,
+          "context": "base",
+          "selector": ".assets-container",
+          "decls": {
+            "flex-wrap": "wrap",
+            "gap": "12px"
+          }
+        }
+      ]
+    },
+    {
+      "key": "@media (prefers-color-scheme: dark)::.balance-amount",
+      "context": "@media (prefers-color-scheme: dark)",
+      "selector": ".balance-amount",
+      "count": 2,
+      "identicalDecls": true,
+      "occurrences": [
+        {
+          "file": "src/styles/transactions.css",
+          "line": 374,
+          "context": "@media (prefers-color-scheme: dark)",
+          "selector": ".balance-amount",
+          "decls": {
+            "color": "var(--color-text-dark-secondary)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 477,
+          "context": "@media (prefers-color-scheme: dark)",
+          "selector": ".balance-amount",
+          "decls": {
+            "color": "var(--color-text-dark-secondary)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.btn-actions",
+      "context": "base",
+      "selector": ".btn-actions",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/contacts.css",
+          "line": 194,
+          "context": "base",
+          "selector": ".btn-actions",
+          "decls": {
+            "padding": "var(--space-sm) var(--space-lg)",
+            "border": "none",
+            "border-radius": "6px",
+            "font-size": "var(--font-size-sm)",
+            "cursor": "pointer",
+            "transition": "all var(--transition-base)"
+          }
+        },
+        {
+          "file": "src/styles/contacts.css",
+          "line": 215,
+          "context": "base",
+          "selector": ".btn-actions",
+          "decls": {
+            "background": "var(--color-accent-purple)",
+            "color": "var(--color-text-dark-primary)",
+            "font-weight": "var(--font-weight-medium)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.btn-cancel",
+      "context": "base",
+      "selector": ".btn-cancel",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/contacts.css",
+          "line": 390,
+          "context": "base",
+          "selector": ".btn-cancel",
+          "decls": {
+            "padding": "var(--space-md) var(--space-xl)",
+            "border": "none",
+            "border-radius": "6px",
+            "font-size": "var(--font-size-sm)",
+            "font-weight": "var(--font-weight-medium)",
+            "cursor": "pointer",
+            "transition": "all var(--transition-base)"
+          }
+        },
+        {
+          "file": "src/styles/contacts.css",
+          "line": 410,
+          "context": "base",
+          "selector": ".btn-cancel",
+          "decls": {
+            "background": "var(--color-border-dark-secondary)",
+            "color": "var(--color-text-dark-primary)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.btn-delete",
+      "context": "base",
+      "selector": ".btn-delete",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/contacts.css",
+          "line": 194,
+          "context": "base",
+          "selector": ".btn-delete",
+          "decls": {
+            "padding": "var(--space-sm) var(--space-lg)",
+            "border": "none",
+            "border-radius": "6px",
+            "font-size": "var(--font-size-sm)",
+            "cursor": "pointer",
+            "transition": "all var(--transition-base)"
+          }
+        },
+        {
+          "file": "src/styles/contacts.css",
+          "line": 225,
+          "context": "base",
+          "selector": ".btn-delete",
+          "decls": {
+            "background": "transparent",
+            "color": "var(--color-error)",
+            "padding": "var(--space-sm)",
+            "font-size": "1.25rem",
+            "position": "relative",
+            "overflow": "hidden",
+            "user-select": "none",
+            "-webkit-user-select": "none"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.btn-edit",
+      "context": "base",
+      "selector": ".btn-edit",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/contacts.css",
+          "line": 194,
+          "context": "base",
+          "selector": ".btn-edit",
+          "decls": {
+            "padding": "var(--space-sm) var(--space-lg)",
+            "border": "none",
+            "border-radius": "6px",
+            "font-size": "var(--font-size-sm)",
+            "cursor": "pointer",
+            "transition": "all var(--transition-base)"
+          }
+        },
+        {
+          "file": "src/styles/contacts.css",
+          "line": 205,
+          "context": "base",
+          "selector": ".btn-edit",
+          "decls": {
+            "background": "var(--color-accent-purple)",
+            "color": "var(--color-text-dark-primary)",
+            "font-weight": "var(--font-weight-medium)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.btn-save",
+      "context": "base",
+      "selector": ".btn-save",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/contacts.css",
+          "line": 390,
+          "context": "base",
+          "selector": ".btn-save",
+          "decls": {
+            "padding": "var(--space-md) var(--space-xl)",
+            "border": "none",
+            "border-radius": "6px",
+            "font-size": "var(--font-size-sm)",
+            "font-weight": "var(--font-weight-medium)",
+            "cursor": "pointer",
+            "transition": "all var(--transition-base)"
+          }
+        },
+        {
+          "file": "src/styles/contacts.css",
+          "line": 401,
+          "context": "base",
+          "selector": ".btn-save",
+          "decls": {
+            "background": "var(--color-accent-purple)",
+            "color": "var(--color-text-dark-primary)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "@media (prefers-color-scheme: dark)::.button-outline",
+      "context": "@media (prefers-color-scheme: dark)",
+      "selector": ".button-outline",
+      "count": 2,
+      "identicalDecls": true,
+      "occurrences": [
+        {
+          "file": "src/styles/buttons.css",
+          "line": 84,
+          "context": "@media (prefers-color-scheme: dark)",
+          "selector": ".button-outline",
+          "decls": {
+            "background-color": "var(--color-bg-primary)",
+            "border-color": "var(--color-border-secondary)",
+            "color": "var(--color-text-primary)"
+          }
+        },
+        {
+          "file": "src/styles/forms.css",
+          "line": 246,
+          "context": "@media (prefers-color-scheme: dark)",
+          "selector": ".button-outline",
+          "decls": {
+            "background-color": "var(--color-bg-primary)",
+            "border-color": "var(--color-border-secondary)",
+            "color": "var(--color-text-primary)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "@media (prefers-color-scheme: dark)::.button-outline:hover:not(:disabled)",
+      "context": "@media (prefers-color-scheme: dark)",
+      "selector": ".button-outline:hover:not(:disabled)",
+      "count": 2,
+      "identicalDecls": true,
+      "occurrences": [
+        {
+          "file": "src/styles/buttons.css",
+          "line": 90,
+          "context": "@media (prefers-color-scheme: dark)",
+          "selector": ".button-outline:hover:not(:disabled)",
+          "decls": {
+            "background-color": "var(--color-bg-secondary)",
+            "border-color": "var(--color-border-hover)"
+          }
+        },
+        {
+          "file": "src/styles/forms.css",
+          "line": 252,
+          "context": "@media (prefers-color-scheme: dark)",
+          "selector": ".button-outline:hover:not(:disabled)",
+          "decls": {
+            "background-color": "var(--color-bg-secondary)",
+            "border-color": "var(--color-border-hover)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.confirm-button",
+      "context": "base",
+      "selector": ".confirm-button",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/asset-picker.css",
+          "line": 455,
+          "context": "base",
+          "selector": ".confirm-button",
+          "decls": {
+            "padding": "var(--space-md) var(--space-xl)",
+            "border": "none",
+            "border-radius": "var(--radius-pill)",
+            "font-size": "var(--font-size-sm)",
+            "font-weight": "var(--font-weight-medium)",
+            "cursor": "pointer",
+            "transition": "all var(--transition-fast)"
+          }
+        },
+        {
+          "file": "src/styles/asset-picker.css",
+          "line": 478,
+          "context": "base",
+          "selector": ".confirm-button",
+          "decls": {
+            "background": "var(--color-accent-pink)",
+            "color": "var(--color-text-dark-primary)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "@media (max-width: 768px)::.delegation-tab",
+      "context": "@media (max-width: 768px)",
+      "selector": ".delegation-tab",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 759,
+          "context": "@media (max-width: 768px)",
+          "selector": ".delegation-tab",
+          "decls": {
+            "flex": "1",
+            "padding": "10px 20px",
+            "font-size": "14px"
+          }
+        },
+        {
+          "file": "src/wallet/delegation/delegation.css",
+          "line": 569,
+          "context": "@media (max-width: 768px)",
+          "selector": ".delegation-tab",
+          "decls": {
+            "flex": "1",
+            "padding": "10px 16px",
+            "font-size": "14px"
+          }
+        }
+      ]
+    },
+    {
+      "key": "@media (max-width: 768px)::.delegation-title",
+      "context": "@media (max-width: 768px)",
+      "selector": ".delegation-title",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 765,
+          "context": "@media (max-width: 768px)",
+          "selector": ".delegation-title",
+          "decls": {
+            "font-size": "24px",
+            "margin": "20px 0 24px"
+          }
+        },
+        {
+          "file": "src/wallet/delegation/delegation.css",
+          "line": 554,
+          "context": "@media (max-width: 768px)",
+          "selector": ".delegation-title",
+          "decls": {
+            "font-size": "22px",
+            "margin-bottom": "24px"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.link-action-button",
+      "context": "base",
+      "selector": ".link-action-button",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 258,
+          "context": "base",
+          "selector": ".link-action-button",
+          "decls": {
+            "display": "flex",
+            "align-items": "center",
+            "justify-content": "center",
+            "width": "28px",
+            "height": "28px",
+            "border-radius": "50%",
+            "background": "#a855f7",
+            "border": "none",
+            "cursor": "pointer",
+            "transition": "all var(--transition-fast)",
+            "flex-shrink": "0"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 1063,
+          "context": "base",
+          "selector": ".link-action-button",
+          "decls": {
+            "width": "32px",
+            "height": "32px",
+            "border-radius": "50%",
+            "background": "#a855f7",
+            "border": "none",
+            "display": "flex",
+            "align-items": "center",
+            "justify-content": "center",
+            "cursor": "pointer",
+            "transition": "all 0.2s ease"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.link-action-button:hover",
+      "context": "base",
+      "selector": ".link-action-button:hover",
+      "count": 2,
+      "identicalDecls": true,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 272,
+          "context": "base",
+          "selector": ".link-action-button:hover",
+          "decls": {
+            "background": "#9333ea",
+            "transform": "scale(1.05)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 1076,
+          "context": "base",
+          "selector": ".link-action-button:hover",
+          "decls": {
+            "background": "#9333ea",
+            "transform": "scale(1.05)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.link-text",
+      "context": "base",
+      "selector": ".link-text",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 249,
+          "context": "base",
+          "selector": ".link-text",
+          "decls": {
+            "color": "var(--color-text-secondary)",
+            "font-size": "var(--font-size-sm)",
+            "overflow": "hidden",
+            "text-overflow": "ellipsis",
+            "white-space": "nowrap",
+            "max-width": "150px"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 1052,
+          "context": "base",
+          "selector": ".link-text",
+          "decls": {
+            "font-size": "13px",
+            "color": "#1f2937",
+            "text-decoration": "none",
+            "font-family": "var(--font-family-mono)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.overview-token-ticker-skeleton",
+      "context": "base",
+      "selector": ".overview-token-ticker-skeleton",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/overview.css",
+          "line": 237,
+          "context": "base",
+          "selector": ".overview-token-ticker-skeleton",
+          "decls": {
+            "height": "12px",
+            "width": "80px",
+            "background": "linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%)",
+            "background-size": "200% 100%",
+            "animation": "shimmer 1.5s infinite",
+            "border-radius": "var(--radius-sm)"
+          }
+        },
+        {
+          "file": "src/styles/overview.css",
+          "line": 247,
+          "context": "base",
+          "selector": ".overview-token-ticker-skeleton",
+          "decls": {
+            "width": "60px",
+            "margin-bottom": "var(--space-xs)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.plus-icon",
+      "context": "base",
+      "selector": ".plus-icon",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 277,
+          "context": "base",
+          "selector": ".plus-icon",
+          "decls": {
+            "color": "white",
+            "font-size": "var(--font-size-lg)",
+            "font-weight": "var(--font-weight-bold)",
+            "line-height": "1"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 1081,
+          "context": "base",
+          "selector": ".plus-icon",
+          "decls": {
+            "color": "white",
+            "font-size": "20px",
+            "font-weight": "600",
+            "line-height": "1"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.pool-card",
+      "context": "base",
+      "selector": ".pool-card",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 627,
+          "context": "base",
+          "selector": ".pool-card",
+          "decls": {
+            "background": "rgba(255, 255, 255, 0.04)",
+            "border": "1.5px solid rgba(255, 255, 255, 0.1)",
+            "border-radius": "12px",
+            "padding": "20px",
+            "transition": "all 0.2s ease",
+            "cursor": "pointer"
+          }
+        },
+        {
+          "file": "src/wallet/delegation/delegation.css",
+          "line": 268,
+          "context": "base",
+          "selector": ".pool-card",
+          "decls": {
+            "background": "rgba(255, 255, 255, 0.03)",
+            "border": "2px solid rgba(255, 255, 255, 0.08)",
+            "border-radius": "var(--radius-xl)",
+            "padding": "16px",
+            "cursor": "pointer",
+            "transition": "all var(--transition-base)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.pool-card-header",
+      "context": "base",
+      "selector": ".pool-card-header",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 649,
+          "context": "base",
+          "selector": ".pool-card-header",
+          "decls": {
+            "display": "flex",
+            "align-items": "center",
+            "gap": "12px",
+            "margin-bottom": "16px"
+          }
+        },
+        {
+          "file": "src/wallet/delegation/delegation.css",
+          "line": 294,
+          "context": "base",
+          "selector": ".pool-card-header",
+          "decls": {
+            "display": "flex",
+            "align-items": "center",
+            "gap": "12px",
+            "margin-bottom": "12px"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.pool-card:hover",
+      "context": "base",
+      "selector": ".pool-card:hover",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 642,
+          "context": "base",
+          "selector": ".pool-card:hover",
+          "decls": {
+            "border-color": "rgba(139, 92, 246, 0.6)",
+            "transform": "translateY(-2px)",
+            "box-shadow": "0 8px 24px rgba(0, 0, 0, 0.3)",
+            "background": "rgba(255, 255, 255, 0.06)"
+          }
+        },
+        {
+          "file": "src/wallet/delegation/delegation.css",
+          "line": 277,
+          "context": "base",
+          "selector": ".pool-card:hover",
+          "decls": {
+            "border-color": "rgba(139, 92, 246, 0.4)",
+            "background": "rgba(255, 255, 255, 0.05)",
+            "transform": "translateY(-2px)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.pool-card.selected",
+      "context": "base",
+      "selector": ".pool-card.selected",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 636,
+          "context": "base",
+          "selector": ".pool-card.selected",
+          "decls": {
+            "border-color": "#8b5cf6",
+            "background": "rgba(139, 92, 246, 0.08)",
+            "box-shadow": "0 0 0 3px rgba(139, 92, 246, 0.15)"
+          }
+        },
+        {
+          "file": "src/wallet/delegation/delegation.css",
+          "line": 283,
+          "context": "base",
+          "selector": ".pool-card.selected",
+          "decls": {
+            "border-color": "var(--color-accent-violet, #8b5cf6)",
+            "background": "rgba(139, 92, 246, 0.1)",
+            "box-shadow": "0 0 0 3px rgba(139, 92, 246, 0.2)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.remove-all-button",
+      "context": "base",
+      "selector": ".remove-all-button",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/asset-picker.css",
+          "line": 62,
+          "context": "base",
+          "selector": ".remove-all-button",
+          "decls": {
+            "padding": "0.625rem var(--space-xl)",
+            "border": "none",
+            "border-radius": "var(--radius-pill)",
+            "font-size": "var(--font-size-sm)",
+            "font-weight": "var(--font-weight-medium)",
+            "cursor": "pointer",
+            "transition": "all var(--transition-fast)"
+          }
+        },
+        {
+          "file": "src/styles/asset-picker.css",
+          "line": 83,
+          "context": "base",
+          "selector": ".remove-all-button",
+          "decls": {
+            "background": "var(--color-secondary)",
+            "color": "var(--color-text-dark-primary)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.reset-button",
+      "context": "base",
+      "selector": ".reset-button",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/asset-picker.css",
+          "line": 455,
+          "context": "base",
+          "selector": ".reset-button",
+          "decls": {
+            "padding": "var(--space-md) var(--space-xl)",
+            "border": "none",
+            "border-radius": "var(--radius-pill)",
+            "font-size": "var(--font-size-sm)",
+            "font-weight": "var(--font-weight-medium)",
+            "cursor": "pointer",
+            "transition": "all var(--transition-fast)"
+          }
+        },
+        {
+          "file": "src/styles/asset-picker.css",
+          "line": 467,
+          "context": "base",
+          "selector": ".reset-button",
+          "decls": {
+            "background": "var(--color-secondary)",
+            "color": "var(--color-text-dark-primary)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.see-more-button",
+      "context": "base",
+      "selector": ".see-more-button",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 291,
+          "context": "base",
+          "selector": ".see-more-button",
+          "decls": {
+            "padding": "var(--space-md) var(--space-2xl)",
+            "background": "linear-gradient(135deg, #ec4899 0%, #d946ef 100%)",
+            "color": "white",
+            "border": "none",
+            "border-radius": "var(--radius-lg)",
+            "font-size": "var(--font-size-sm)",
+            "font-weight": "var(--font-weight-semibold)",
+            "cursor": "pointer",
+            "transition": "all var(--transition-fast)",
+            "box-shadow": "0 2px 4px rgba(236, 72, 153, 0.2)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 1094,
+          "context": "base",
+          "selector": ".see-more-button",
+          "decls": {
+            "padding": "14px 48px",
+            "background": "linear-gradient(135deg, #ec4899, #d946ef)",
+            "color": "white",
+            "border": "none",
+            "border-radius": "24px",
+            "font-size": "15px",
+            "font-weight": "600",
+            "cursor": "pointer",
+            "transition": "all 0.2s ease",
+            "box-shadow": "0 4px 12px rgba(236, 72, 153, 0.3)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.see-more-button:active",
+      "context": "base",
+      "selector": ".see-more-button:active",
+      "count": 2,
+      "identicalDecls": true,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 310,
+          "context": "base",
+          "selector": ".see-more-button:active",
+          "decls": {
+            "transform": "translateY(0)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 1112,
+          "context": "base",
+          "selector": ".see-more-button:active",
+          "decls": {
+            "transform": "translateY(0)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.see-more-button:hover",
+      "context": "base",
+      "selector": ".see-more-button:hover",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 304,
+          "context": "base",
+          "selector": ".see-more-button:hover",
+          "decls": {
+            "background": "linear-gradient(135deg, #db2777 0%, #c026d3 100%)",
+            "box-shadow": "0 4px 8px rgba(236, 72, 153, 0.3)",
+            "transform": "translateY(-1px)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 1107,
+          "context": "base",
+          "selector": ".see-more-button:hover",
+          "decls": {
+            "transform": "translateY(-2px)",
+            "box-shadow": "0 6px 16px rgba(236, 72, 153, 0.4)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.selected-assets-chips",
+      "context": "base",
+      "selector": ".selected-assets-chips",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/asset-picker.css",
+          "line": 4,
+          "context": "base",
+          "selector": ".selected-assets-chips",
+          "decls": {
+            "display": "flex",
+            "flex-wrap": "wrap",
+            "gap": "var(--space-md)",
+            "margin-bottom": "1.25rem",
+            "min-height": "2.5rem",
+            "align-items": "center",
+            "justify-content": "space-around"
+          }
+        },
+        {
+          "file": "src/styles/transaction-creator.css",
+          "line": 240,
+          "context": "base",
+          "selector": ".selected-assets-chips",
+          "decls": {
+            "display": "flex",
+            "flex-wrap": "wrap",
+            "gap": "var(--space-md)",
+            "margin-bottom": "1.25rem",
+            "min-height": "2.5rem",
+            "align-items": "center",
+            "justify-content": "flex-start"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-date",
+      "context": "base",
+      "selector": ".transaction-date",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 68,
+          "context": "base",
+          "selector": ".transaction-date",
+          "decls": {
+            "font-weight": "var(--font-weight-medium)",
+            "font-size": "var(--font-size-sm)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 855,
+          "context": "base",
+          "selector": ".transaction-date",
+          "decls": {
+            "text-align": "center",
+            "display": "table-cell"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-history",
+      "context": "base",
+      "selector": ".transaction-history",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 4,
+          "context": "base",
+          "selector": ".transaction-history",
+          "decls": {
+            "width": "100%",
+            "background": "var(--color-bg-primary)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 780,
+          "context": "base",
+          "selector": ".transaction-history",
+          "decls": {
+            "width": "100%",
+            "max-width": "1200px",
+            "margin": "0 auto",
+            "padding": "var(--space-xl)",
+            "background": "#3a3a3c",
+            "border-radius": "var(--radius-xl)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-history-empty",
+      "context": "base",
+      "selector": ".transaction-history-empty",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 393,
+          "context": "base",
+          "selector": ".transaction-history-empty",
+          "decls": {
+            "width": "100%",
+            "padding": "var(--space-2xl)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 1117,
+          "context": "base",
+          "selector": ".transaction-history-empty",
+          "decls": {
+            "background": "#3a3a3c",
+            "border-radius": "var(--radius-xl)",
+            "padding": "var(--space-xl)",
+            "min-height": "400px",
+            "display": "flex",
+            "align-items": "center",
+            "justify-content": "center"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-history-error",
+      "context": "base",
+      "selector": ".transaction-history-error",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 356,
+          "context": "base",
+          "selector": ".transaction-history-error",
+          "decls": {
+            "width": "100%",
+            "padding": "var(--space-2xl)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 1117,
+          "context": "base",
+          "selector": ".transaction-history-error",
+          "decls": {
+            "background": "#3a3a3c",
+            "border-radius": "var(--radius-xl)",
+            "padding": "var(--space-xl)",
+            "min-height": "400px",
+            "display": "flex",
+            "align-items": "center",
+            "justify-content": "center"
+          }
+        }
+      ]
+    },
+    {
+      "key": "@media (prefers-color-scheme: dark)::.transaction-history-error .error-state",
+      "context": "@media (prefers-color-scheme: dark)",
+      "selector": ".transaction-history-error .error-state",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 523,
+          "context": "@media (prefers-color-scheme: dark)",
+          "selector": ".transaction-history-error .error-state",
+          "decls": {
+            "background": "#1f2937"
+          }
+        },
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 544,
+          "context": "@media (prefers-color-scheme: dark)",
+          "selector": ".transaction-history-error .error-state",
+          "decls": {
+            "border-color": "#7f1d1d"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-history-footer",
+      "context": "base",
+      "selector": ".transaction-history-footer",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 285,
+          "context": "base",
+          "selector": ".transaction-history-footer",
+          "decls": {
+            "display": "flex",
+            "justify-content": "center",
+            "padding": "var(--space-lg) 0"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 1089,
+          "context": "base",
+          "selector": ".transaction-history-footer",
+          "decls": {
+            "text-align": "center",
+            "margin-top": "var(--space-lg)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-history-header",
+      "context": "base",
+      "selector": ".transaction-history-header",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 9,
+          "context": "base",
+          "selector": ".transaction-history-header",
+          "decls": {
+            "padding": "var(--space-lg) 0"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 789,
+          "context": "base",
+          "selector": ".transaction-history-header",
+          "decls": {
+            "text-align": "center",
+            "margin-bottom": "var(--space-xl)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-history-header h2",
+      "context": "base",
+      "selector": ".transaction-history-header h2",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 13,
+          "context": "base",
+          "selector": ".transaction-history-header h2",
+          "decls": {
+            "font-size": "var(--font-size-xl)",
+            "font-weight": "var(--font-weight-semibold)",
+            "color": "var(--color-text-primary)",
+            "margin": "0"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 794,
+          "context": "base",
+          "selector": ".transaction-history-header h2",
+          "decls": {
+            "font-size": "24px",
+            "font-weight": "600",
+            "color": "white",
+            "margin": "0",
+            "letter-spacing": "-0.3px"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-history-loading",
+      "context": "base",
+      "selector": ".transaction-history-loading",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 315,
+          "context": "base",
+          "selector": ".transaction-history-loading",
+          "decls": {
+            "width": "100%",
+            "padding": "var(--space-2xl)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 1117,
+          "context": "base",
+          "selector": ".transaction-history-loading",
+          "decls": {
+            "background": "#3a3a3c",
+            "border-radius": "var(--radius-xl)",
+            "padding": "var(--space-xl)",
+            "min-height": "400px",
+            "display": "flex",
+            "align-items": "center",
+            "justify-content": "center"
+          }
+        }
+      ]
+    },
+    {
+      "key": "@media (max-width: 768px)::.transaction-history-table",
+      "context": "@media (max-width: 768px)",
+      "selector": ".transaction-history-table",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 430,
+          "context": "@media (max-width: 768px)",
+          "selector": ".transaction-history-table",
+          "decls": {
+            "font-size": "var(--font-size-xs)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 1181,
+          "context": "@media (max-width: 768px)",
+          "selector": ".transaction-history-table",
+          "decls": {
+            "min-width": "600px"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-history-table",
+      "context": "base",
+      "selector": ".transaction-history-table",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 28,
+          "context": "base",
+          "selector": ".transaction-history-table",
+          "decls": {
+            "width": "100%",
+            "border-collapse": "collapse",
+            "font-size": "var(--font-size-sm)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 810,
+          "context": "base",
+          "selector": ".transaction-history-table",
+          "decls": {
+            "width": "100%",
+            "border-collapse": "collapse"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-history-table tbody tr",
+      "context": "base",
+      "selector": ".transaction-history-table tbody tr",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 49,
+          "context": "base",
+          "selector": ".transaction-history-table tbody tr",
+          "decls": {
+            "border-bottom": "1px solid var(--color-border-primary)",
+            "transition": "background-color var(--transition-fast)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 836,
+          "context": "base",
+          "selector": ".transaction-history-table tbody tr",
+          "decls": {
+            "border-bottom": "1px solid #f3f4f6"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-history-table tbody tr:last-child",
+      "context": "base",
+      "selector": ".transaction-history-table tbody tr:last-child",
+      "count": 2,
+      "identicalDecls": true,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 54,
+          "context": "base",
+          "selector": ".transaction-history-table tbody tr:last-child",
+          "decls": {
+            "border-bottom": "none"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 840,
+          "context": "base",
+          "selector": ".transaction-history-table tbody tr:last-child",
+          "decls": {
+            "border-bottom": "none"
+          }
+        }
+      ]
+    },
+    {
+      "key": "@media (max-width: 480px)::.transaction-history-table td",
+      "context": "@media (max-width: 480px)",
+      "selector": ".transaction-history-table td",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 462,
+          "context": "@media (max-width: 480px)",
+          "selector": ".transaction-history-table td",
+          "decls": {
+            "display": "block",
+            "width": "100%"
+          }
+        },
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 477,
+          "context": "@media (max-width: 480px)",
+          "selector": ".transaction-history-table td",
+          "decls": {
+            "padding": "var(--space-xs) 0",
+            "border": "none"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-history-table td",
+      "context": "base",
+      "selector": ".transaction-history-table td",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 62,
+          "context": "base",
+          "selector": ".transaction-history-table td",
+          "decls": {
+            "padding": "var(--space-lg)",
+            "vertical-align": "middle"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 844,
+          "context": "base",
+          "selector": ".transaction-history-table td",
+          "decls": {
+            "padding": "20px 12px",
+            "vertical-align": "middle"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-history-table th",
+      "context": "base",
+      "selector": ".transaction-history-table th",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 40,
+          "context": "base",
+          "selector": ".transaction-history-table th",
+          "decls": {
+            "padding": "var(--space-md) var(--space-lg)",
+            "text-align": "left",
+            "font-weight": "var(--font-weight-semibold)",
+            "color": "#6b7280",
+            "font-size": "var(--font-size-sm)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 819,
+          "context": "base",
+          "selector": ".transaction-history-table th",
+          "decls": {
+            "padding": "16px 12px",
+            "text-align": "left",
+            "font-size": "14px",
+            "font-weight": "600",
+            "color": "#374151",
+            "text-transform": "capitalize"
+          }
+        }
+      ]
+    },
+    {
+      "key": "@media (max-width: 480px)::.transaction-history-table tr",
+      "context": "@media (max-width: 480px)",
+      "selector": ".transaction-history-table tr",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 462,
+          "context": "@media (max-width: 480px)",
+          "selector": ".transaction-history-table tr",
+          "decls": {
+            "display": "block",
+            "width": "100%"
+          }
+        },
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 470,
+          "context": "@media (max-width: 480px)",
+          "selector": ".transaction-history-table tr",
+          "decls": {
+            "margin-bottom": "var(--space-lg)",
+            "border": "1px solid var(--color-border-primary)",
+            "border-radius": "var(--radius-md)",
+            "padding": "var(--space-md)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-history-table-container",
+      "context": "base",
+      "selector": ".transaction-history-table-container",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 21,
+          "context": "base",
+          "selector": ".transaction-history-table-container",
+          "decls": {
+            "background": "white",
+            "border-radius": "var(--radius-lg)",
+            "overflow": "hidden",
+            "box-shadow": "0 1px 3px rgba(0, 0, 0, 0.1)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 802,
+          "context": "base",
+          "selector": ".transaction-history-table-container",
+          "decls": {
+            "background": "white",
+            "border-radius": "12px",
+            "padding": "var(--space-lg)",
+            "overflow-x": "auto",
+            "margin-bottom": "var(--space-lg)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-icon",
+      "context": "base",
+      "selector": ".transaction-icon",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 92,
+          "context": "base",
+          "selector": ".transaction-icon",
+          "decls": {
+            "font-size": "var(--font-size-lg)",
+            "display": "flex",
+            "align-items": "center",
+            "justify-content": "center",
+            "width": "32px",
+            "height": "32px",
+            "border-radius": "var(--radius-sm)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 889,
+          "context": "base",
+          "selector": ".transaction-icon",
+          "decls": {
+            "font-size": "24px",
+            "width": "32px",
+            "height": "32px",
+            "display": "flex",
+            "align-items": "center",
+            "justify-content": "center"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-label",
+      "context": "base",
+      "selector": ".transaction-label",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 114,
+          "context": "base",
+          "selector": ".transaction-label",
+          "decls": {
+            "font-weight": "var(--font-weight-medium)",
+            "font-size": "var(--font-size-sm)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 906,
+          "context": "base",
+          "selector": ".transaction-label",
+          "decls": {
+            "font-size": "14px",
+            "font-weight": "500"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-link-content",
+      "context": "base",
+      "selector": ".transaction-link-content",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 242,
+          "context": "base",
+          "selector": ".transaction-link-content",
+          "decls": {
+            "display": "flex",
+            "align-items": "center",
+            "justify-content": "space-between",
+            "gap": "var(--space-md)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 1047,
+          "context": "base",
+          "selector": ".transaction-link-content",
+          "decls": {
+            "justify-content": "center",
+            "gap": "12px"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-received-icon",
+      "context": "base",
+      "selector": ".transaction-received-icon",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 106,
+          "context": "base",
+          "selector": ".transaction-received-icon",
+          "decls": {
+            "filter": "hue-rotate(0deg)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 902,
+          "context": "base",
+          "selector": ".transaction-received-icon",
+          "decls": {
+            "filter": "grayscale(100%) brightness(0) saturate(100%) invert(61%) sepia(77%) saturate(433%) hue-rotate(93deg) brightness(98%) contrast(89%)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-sent-icon",
+      "context": "base",
+      "selector": ".transaction-sent-icon",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 102,
+          "context": "base",
+          "selector": ".transaction-sent-icon",
+          "decls": {
+            "filter": "hue-rotate(0deg)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 898,
+          "context": "base",
+          "selector": ".transaction-sent-icon",
+          "decls": {
+            "filter": "grayscale(100%) brightness(0) saturate(100%) invert(31%) sepia(89%) saturate(4276%) hue-rotate(345deg) brightness(95%) contrast(91%)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-token",
+      "context": "base",
+      "selector": ".transaction-token",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 179,
+          "context": "base",
+          "selector": ".transaction-token",
+          "decls": {
+            "display": "inline-flex"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 969,
+          "context": "base",
+          "selector": ".transaction-token",
+          "decls": {
+            "padding": "0",
+            "border": "none",
+            "background": "none"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-token .token-element",
+      "context": "base",
+      "selector": ".transaction-token .token-element",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 184,
+          "context": "base",
+          "selector": ".transaction-token .token-element",
+          "decls": {
+            "display": "flex",
+            "align-items": "center",
+            "gap": "var(--space-xs)",
+            "padding": "0"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 979,
+          "context": "base",
+          "selector": ".transaction-token .token-element",
+          "decls": {
+            "padding": "0",
+            "border": "none",
+            "background": "none",
+            "display": "flex",
+            "align-items": "center",
+            "gap": "8px",
+            "cursor": "default"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-token .token-element-amount",
+      "context": "base",
+      "selector": ".transaction-token .token-element-amount",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 228,
+          "context": "base",
+          "selector": ".transaction-token .token-element-amount",
+          "decls": {
+            "font-size": "var(--font-size-xs)",
+            "font-weight": "var(--font-weight-semibold)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 1025,
+          "context": "base",
+          "selector": ".transaction-token .token-element-amount",
+          "decls": {
+            "font-size": "14px",
+            "font-weight": "500",
+            "color": "#1f2937",
+            "display": "inline-block"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-token .token-element-amount.negative",
+      "context": "base",
+      "selector": ".transaction-token .token-element-amount.negative",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 237,
+          "context": "base",
+          "selector": ".transaction-token .token-element-amount.negative",
+          "decls": {
+            "color": "#ef4444"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 1036,
+          "context": "base",
+          "selector": ".transaction-token .token-element-amount.negative",
+          "decls": {
+            "color": "#1f2937"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-token .token-element-amount.positive",
+      "context": "base",
+      "selector": ".transaction-token .token-element-amount.positive",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 233,
+          "context": "base",
+          "selector": ".transaction-token .token-element-amount.positive",
+          "decls": {
+            "color": "#10b981"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 1032,
+          "context": "base",
+          "selector": ".transaction-token .token-element-amount.positive",
+          "decls": {
+            "color": "#1f2937"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-token .token-element-name",
+      "context": "base",
+      "selector": ".transaction-token .token-element-name",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 222,
+          "context": "base",
+          "selector": ".transaction-token .token-element-name",
+          "decls": {
+            "font-size": "var(--font-size-xs)",
+            "font-weight": "var(--font-weight-medium)",
+            "color": "var(--color-text-primary)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 1021,
+          "context": "base",
+          "selector": ".transaction-token .token-element-name",
+          "decls": {
+            "display": "none"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-token .token-placeholder",
+      "context": "base",
+      "selector": ".transaction-token .token-placeholder",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 201,
+          "context": "base",
+          "selector": ".transaction-token .token-placeholder",
+          "decls": {
+            "width": "36px",
+            "height": "36px",
+            "border-radius": "50%",
+            "flex-shrink": "0",
+            "box-shadow": "0 2px 6px rgba(15, 23, 42, 0.12)",
+            "display": "flex",
+            "align-items": "center",
+            "justify-content": "center",
+            "font-size": "13px",
+            "font-weight": "600",
+            "letter-spacing": "0.02em",
+            "color": "#fff"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 1005,
+          "context": "base",
+          "selector": ".transaction-token .token-placeholder",
+          "decls": {
+            "width": "36px",
+            "height": "36px",
+            "min-width": "36px",
+            "border-radius": "50%",
+            "margin-right": "0",
+            "box-shadow": "0 2px 6px rgba(15, 23, 42, 0.12)",
+            "display": "flex",
+            "align-items": "center",
+            "justify-content": "center",
+            "font-size": "13px",
+            "font-weight": "600",
+            "letter-spacing": "0.02em",
+            "color": "#fff"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-token .token-thumbnail",
+      "context": "base",
+      "selector": ".transaction-token .token-thumbnail",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 191,
+          "context": "base",
+          "selector": ".transaction-token .token-thumbnail",
+          "decls": {
+            "width": "36px",
+            "height": "36px",
+            "border-radius": "50%",
+            "object-fit": "cover",
+            "flex-shrink": "0",
+            "box-shadow": "0 2px 6px rgba(15, 23, 42, 0.12)",
+            "display": "block"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 994,
+          "context": "base",
+          "selector": ".transaction-token .token-thumbnail",
+          "decls": {
+            "width": "36px",
+            "height": "36px",
+            "min-width": "36px",
+            "border-radius": "50%",
+            "margin-right": "0",
+            "box-shadow": "0 2px 6px rgba(15, 23, 42, 0.12)",
+            "object-fit": "cover",
+            "display": "block"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-type",
+      "context": "base",
+      "selector": ".transaction-type",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transactions.css",
+          "line": 43,
+          "context": "base",
+          "selector": ".transaction-type",
+          "decls": {
+            "font-weight": "var(--font-weight-semibold)",
+            "color": "var(--color-text-primary)",
+            "margin-bottom": "var(--space-xs)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 880,
+          "context": "base",
+          "selector": ".transaction-type",
+          "decls": {
+            "vertical-align": "middle",
+            "display": "table-cell"
+          }
+        }
+      ]
+    },
+    {
+      "key": "base::.transaction-type-content",
+      "context": "base",
+      "selector": ".transaction-type-content",
+      "count": 2,
+      "identicalDecls": false,
+      "occurrences": [
+        {
+          "file": "src/styles/transaction-history.css",
+          "line": 86,
+          "context": "base",
+          "selector": ".transaction-type-content",
+          "decls": {
+            "display": "flex",
+            "align-items": "center",
+            "gap": "var(--space-sm)"
+          }
+        },
+        {
+          "file": "src/styles/wallet-components.css",
+          "line": 885,
+          "context": "base",
+          "selector": ".transaction-type-content",
+          "decls": {
+            "gap": "10px"
+          }
+        }
+      ]
+    }
+  ]
+}

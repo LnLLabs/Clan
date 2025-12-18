@@ -5,7 +5,7 @@
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  background: var(--color-overview-bg, #36393F);
+  background: var(--color-overview-bg);
   border-radius: var(--radius-3xl);
   min-height: 500px;
   font-family: var(--font-family-base);
@@ -14,58 +14,49 @@
 /* ===== TABS ===== */
 .delegation-tabs {
   display: flex;
+  position: relative;
+  z-index: 1;
   gap: 0;
   margin-bottom: 0;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+  border-bottom: none;
 }
 
 .delegation-tab {
-  padding: 12px 32px;
-  background: rgba(255, 255, 255, 0.03);
+  padding: var(--space-md) 1.75rem;
+  background: var(--color-overview-tab-inactive);
   border: none;
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 15px;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  color: var(--color-text-dark-primary);
+  font-size: 0.95rem;
   font-weight: var(--font-weight-medium);
   cursor: pointer;
   transition: all var(--transition-base);
-  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   position: relative;
-  margin-right: 4px;
 }
 
-.delegation-tab:first-child {
-  border-radius: var(--radius-xl) 0 0 0;
-}
-
-.delegation-tab:last-child {
-  border-radius: 0 var(--radius-xl) 0 0;
-  margin-right: 0;
+.delegation-tab:hover {
+  background: var(--color-overview-tab-hover);
 }
 
 .delegation-tab.active {
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.95);
-  border-bottom: 2px solid var(--color-accent-violet, #8b5cf6);
-  z-index: 2;
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-dark-primary);
+  box-shadow: var(--shadow-xl);
 }
 
-.delegation-tab:hover:not(.active) {
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.7);
-}
 
 /* ===== CONTENT VIEWS ===== */
 .delegation-status-view,
 .delegation-delegate-view {
   padding: 32px 24px;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--color-bg-secondary);
   min-height: 500px;
 }
 
 .delegation-title {
   font-size: 28px;
   font-weight: var(--font-weight-semibold);
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--color-text-primary);
   text-align: center;
   margin: 0 0 32px 0;
   letter-spacing: -0.5px;
@@ -77,8 +68,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 24px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--color-surface-subtle-2);
+  border: 1px solid var(--color-tooltip-border);
   border-radius: var(--radius-2xl);
   margin-bottom: 32px;
 }
@@ -91,14 +82,14 @@
 
 .delegation-rewards-label {
   font-size: var(--font-size-sm);
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-text-muted);
   font-weight: var(--font-weight-medium);
 }
 
 .delegation-rewards-amount {
   font-size: 36px;
   font-weight: var(--font-weight-bold);
-  color: var(--color-success, #22c55e);
+  color: var(--color-status-claimable);
   font-family: var(--font-family-mono);
   letter-spacing: -1px;
 }
@@ -113,8 +104,8 @@
 
 /* ===== PANEL ===== */
 .delegation-panel {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--color-surface-subtle-2);
+  border: 1px solid var(--color-tooltip-border);
   border-radius: var(--radius-2xl);
   padding: 20px;
 }
@@ -125,7 +116,7 @@
   justify-content: space-between;
   margin-bottom: 16px;
   padding-bottom: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--color-tooltip-border);
 }
 
 .delegation-panel-title {
@@ -134,7 +125,7 @@
   gap: 10px;
   font-size: 16px;
   font-weight: var(--font-weight-semibold);
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--color-text-primary);
 }
 
 .delegation-panel-icon {
@@ -145,10 +136,10 @@
 .delegation-search-input {
   width: 100%;
   padding: 12px 16px;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-tooltip-border);
   border-radius: var(--radius-lg);
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   margin-bottom: 16px;
   transition: all var(--transition-base);
@@ -156,13 +147,13 @@
 }
 
 .delegation-search-input:focus {
-  border-color: var(--color-accent-violet, #8b5cf6);
-  background: rgba(0, 0, 0, 0.3);
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+  border-color: var(--color-border-strong);
+  background: var(--color-bg-secondary);
+  box-shadow: var(--color-focus-ring);
 }
 
 .delegation-search-input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--color-text-muted);
 }
 
 /* ===== OPTIONS LIST ===== */

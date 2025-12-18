@@ -37,8 +37,6 @@
 /* ===== TABS ===== */
 .overview-tabs-container {
   display: flex;
-  gap: var(--space-sm);
-  margin-bottom: -1px;
   position: relative;
   z-index: 1;
 }
@@ -61,7 +59,7 @@
 }
 
 .overview-tab-button.active {
-  background: var(--color-overview-card-dark);
+  background-color: var(--color-bg-secondary);
   color: var(--color-text-dark-primary);
   box-shadow: var(--shadow-xl);
 }
@@ -297,7 +295,7 @@
 
 /* ===== NFTS CARD ===== */
 .overview-nfts-card {
-  background: var(--color-overview-bg);
+  background-color: var(--color-bg-secondary);
   border-radius: 0 var(--radius-3xl) var(--radius-3xl) var(--radius-3xl);
   padding: var(--space-2xl);
   box-shadow: var(--shadow-xl);

@@ -1,0 +1,70 @@
+/* Clan Framework Components - GenWealth Dark Theme
+ *
+ * IMPORTANT:
+ * - This file is allowed to contain literal colors and gradients.
+ * - Outside of theme files, component styles must use CSS variables only.
+ */
+
+:root {
+  /* Core surfaces */
+  --theme-bg-primary: #343a40;
+  --theme-bg-secondary: #40464b;
+  --theme-bg-tertiary: #53575d;
+
+  --theme-surface-1: #40464b;
+  --theme-surface-2: #564566;
+
+  /* Text */
+  --theme-text-primary: #ffffff;
+  --theme-text-muted: #989a9e;
+  --theme-text-accent: #c900ff;
+
+  /* Borders */
+  --theme-border-primary: #7a7d82;
+  --theme-border-strong: #989a9e;
+
+  /* Buttons */
+  --theme-button-primary-solid-bg: #720876;
+  --theme-button-primary-solid-text: #ffffff;
+  --theme-button-primary-gradient-bg: linear-gradient(#cd1c64, #8e0f71 42.47%);
+  --theme-button-unhovered-gradient-bg: linear-gradient(#888b8f, #474b4f 25.17%);
+
+  /* Tabs */
+  --theme-tab-readable-bg: #484d53;
+  --theme-tab-unreadable-bg: #6d7175;
+
+  /* Token / asset selector */
+  --theme-asset-surface: #53575d;
+  --theme-asset-border-selected: #cd1c64;
+  --theme-asset-border-active: #989a9e;
+  --theme-asset-name: #ffffff;
+  --theme-asset-amount-muted: #989a9e;
+  --theme-asset-remove-icon: #86888c;
+
+  /* Status */
+  --theme-status-unclaimable: #ff0000;
+  --theme-status-claimable: #19ff00;
+
+  /* Overlays / tooltips / shadows */
+  --theme-overlay-backdrop: rgba(0, 0, 0, 0.5);
+  --theme-tooltip-bg: rgba(15, 23, 42, 0.95);
+  --theme-tooltip-border: rgba(255, 255, 255, 0.15);
+  --theme-focus-ring: rgba(205, 28, 100, 0.35);
+  --theme-link: #c900ff;
+  --theme-link-hover: #c900ff;
+
+  --theme-shadow-tooltip: 0 12px 24px rgba(15, 23, 42, 0.35);
+  --theme-shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.3);
+  --theme-shadow-token: 0 2px 6px rgba(15, 23, 42, 0.12);
+
+  /* Wallet / delegation subtle surfaces */
+  --theme-surface-subtle: rgba(255, 255, 255, 0.02);
+  --theme-surface-subtle-2: rgba(255, 255, 255, 0.03);
+  --theme-surface-hover: rgba(255, 255, 255, 0.06);
+  --theme-surface-selected: rgba(205, 28, 100, 0.12);
+
+  /* Embedded select chevron (used as background-image) */
+  --theme-image-select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='rgba(255,255,255,0.5)' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+}
+
+

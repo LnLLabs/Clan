@@ -3,9 +3,9 @@
   flex-direction: column;
   align-items: center;
   padding: 2rem;
-  background: #2a2a2a;
+  background: var(--color-bg-primary);
   border-radius: 12px;
-  color: #e0e0e0;
+  color: var(--color-text-primary);
   width: 100%;
   margin: 0;
 }
@@ -13,7 +13,7 @@
 .receive-instruction {
   text-align: center;
   font-size: 0.95rem;
-  color: #d0d0d0;
+  color: var(--color-text-muted);
   margin: 0 0 1.5rem 0;
   line-height: 1.5;
 }
@@ -27,12 +27,12 @@
 
 .receive-qr-code {
   border-radius: 4px;
-  background: white;
+  background: var(--color-bg-secondary);
   padding: 0.5rem;
 }
 
 .receive-address {
-  color: #9b59d0;
+  color: var(--color-text-accent);
   font-size: 1rem;
   font-weight: 500;
   text-align: center;
@@ -59,8 +59,8 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background: #3a3a3a;
-  color: #e0e0e0;
+  background: var(--color-button-unhovered-gradient-bg);
+  color: var(--color-text-primary);
   border: none;
   border-radius: 24px;
   font-size: 0.95rem;
@@ -70,7 +70,7 @@
 }
 
 .receive-button:hover {
-  background: #4a4a4a;
+  background: var(--color-button-primary-gradient-bg);
   transform: translateY(-1px);
 }
 
