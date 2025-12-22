@@ -264,6 +264,31 @@
   padding-top: 16px;
 }
 
+
+.delegation-action-button-cancel {
+  background: var(--action-gradient-disabled);
+  color: var(--color-text-dark-primary);
+  width: fit-content;
+}
+
+.delegation-actions button {
+  border-radius: 50px;
+  background: var(--action-gradient);
+  padding: var(--space-sm) var(--space-lg);
+  color: var(--color-text-dark-primary);
+  width: fit-content;
+  font-weight:bolder;
+  font-size: var(--font-size-sm);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.delegation-actions button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(236, 72, 153, 0.4);
+}
+
 /* ===== POOL CARD ===== */
 .pool-card {
   background: rgba(255, 255, 255, 0.03);
@@ -281,13 +306,11 @@
 }
 
 .pool-card.selected {
-  border-color: var(--color-accent-violet, #8b5cf6);
   background: rgba(139, 92, 246, 0.1);
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
 }
 
 .pool-card.current {
-  border-color: var(--color-primary, #3b82f6);
   background: rgba(59, 130, 246, 0.1);
 }
 
@@ -427,13 +450,11 @@
 }
 
 .drep-card.selected {
-  border-color: var(--color-accent-violet, #8b5cf6);
   background: rgba(139, 92, 246, 0.1);
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
 }
 
 .drep-card.current {
-  border-color: var(--color-primary, #3b82f6);
   background: rgba(59, 130, 246, 0.1);
 }
 
@@ -579,10 +600,6 @@
 
   .delegation-actions {
     flex-direction: column;
-  }
-
-  .delegation-actions button {
-    width: 100%;
   }
 
   .pool-card-stats,

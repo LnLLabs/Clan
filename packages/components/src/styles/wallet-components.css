@@ -626,7 +626,6 @@
 
 .pool-card {
   background: var(--color-surface-subtle-2);
-  border: 1.5px solid var(--color-tooltip-border);
   border-radius: 12px;
   padding: 20px;
   transition: all 0.2s ease;
@@ -634,7 +633,6 @@
 }
 
 .pool-card.selected {
-  border-color: var(--color-asset-border-selected);
   background: var(--color-surface-selected);
   box-shadow: var(--color-focus-ring);
 }

@@ -54,14 +54,15 @@ export const Modal: React.FC<ModalProps> = ({
       <div className="flex min-h-screen items-center justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         {/* Background overlay */}
         <div
-          className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+          className="fixed inset-0 transition-opacity"
+          style={{ backgroundColor: 'var(--color-overlay-backdrop)' }}
           onClick={closeOnOverlayClick ? onClose : undefined}
         />
 
         {/* Modal panel */}
         <div
           className={clsx(
-            'inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:align-middle',
+            'relative inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:align-middle',
             sizeClasses[size],
             'w-full',
             className

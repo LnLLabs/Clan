@@ -22,8 +22,10 @@
 
   --color-border-primary: var(--theme-border-primary);
   --color-border-strong: var(--theme-border-strong);
-
+  --color-modal-background: var(--theme-modal-background);
   /* Opacity tokens (non-color) */
+  /* DEPRECATED: Use rgba() in background-color instead of CSS opacity property
+     to avoid affecting child elements. Use --color-overlay-backdrop for modal backdrops. */
   --opacity-overlay: 0.85;
 
   /* Overlays / tooltips / shadows (values come from theme files) */

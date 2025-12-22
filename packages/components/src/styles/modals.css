@@ -6,8 +6,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: var(--color-bg-primary);
-  opacity: var(--opacity-overlay);
+  background-color: var(--color-overlay-backdrop);
   display: flex;
   align-items: center;
   justify-content: center;

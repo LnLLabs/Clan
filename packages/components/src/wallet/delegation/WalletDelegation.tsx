@@ -502,7 +502,6 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
 
           <div className="delegation-actions">
             <Button
-              variant="secondary"
               onClick={() => setActiveTab('delegate')}
             >
               Change Delegation
@@ -669,8 +668,7 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
           )}
 
           <div className="delegation-actions">
-            <Button
-              variant="secondary"
+            <Button className="delegation-action-button-cancel"
               onClick={() => {
                 setSelectedPool(delegationInfo?.delegatedPool || null);
                 setSelectedDRep(delegationInfo?.delegatedDRep || null);
@@ -680,7 +678,6 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
               Cancel
             </Button>
             <Button
-              variant="primary"
               onClick={handleDelegate}
               disabled={!hasChanges || isDelegating || (!selectedPool && !selectedDRep)}
             >

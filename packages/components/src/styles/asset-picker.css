@@ -92,6 +92,7 @@
 
 /* ===== ASSET PICKER MODAL ===== */
 .asset-picker-modal {
+  background: var(--color-modal-background);
   position: fixed;
   top: 0;
   left: 0;
@@ -110,12 +111,12 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--color-overlay-backdrop, rgba(0, 0, 0, 0.7));
 }
 
 .asset-picker-container {
   position: relative;
-  background: var(--color-dark-card);
+  background: var(--color-modal-background);
   border-radius: var(--space-lg);
   max-width: 800px;
   width: 100%;
@@ -251,7 +252,7 @@
 }
 
 .asset-tab.active {
-  background: var(--color-accent-pink);
+  background: var(--color-button-primary-solid-bg);
   color: var(--color-text-dark-primary);
   z-index: 3;
 }
@@ -270,7 +271,7 @@
 
 /* ===== ASSET CARD ===== */
 .asset-card {
-  background: var(--color-bg-dark-tertiary);
+  background: var(--theme-bg-tertiary);
   border: 1px solid var(--color-border-dark-secondary);
   border-radius: var(--radius-2xl);
   padding: var(--space-lg);
@@ -289,7 +290,6 @@
 }
 
 .asset-card.selected {
-  border-color: var(--color-accent-pink);
   background: #3f3f59;
 }
 
@@ -466,23 +466,20 @@
 
 .reset-button,
 .add-all-button {
-  background: var(--color-secondary);
+  background: var(--action-gradient-disabled);
   color: var(--color-text-dark-primary);
 }
 
 .reset-button:hover,
 .add-all-button:hover {
-  background: var(--color-secondary-hover);
+  background: var(--action-gradient);
 }
 
 .confirm-button {
-  background: var(--color-accent-pink);
+  background: var(--action-gradient);
   color: var(--color-text-dark-primary);
 }
 
-.confirm-button:hover {
-  background: var(--color-accent-pink-hover);
-}
 
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {

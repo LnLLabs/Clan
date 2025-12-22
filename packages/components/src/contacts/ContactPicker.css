@@ -18,7 +18,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(124, 58, 237, 0.95);
+  background: var(--color-overlay-backdrop);
   z-index: -1;
 }
 
