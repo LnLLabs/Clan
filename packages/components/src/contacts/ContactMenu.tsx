@@ -334,7 +334,9 @@ export const ContactsMenu = ({
                     className="btn-edit"
                     onClick={() => startEditing(contact)}
                   >
-                    ✏️ Edit
+                    <svg className="edit-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <path d="M18.5 2.5C18.8978 2.10217 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10217 21.5 2.5C21.8978 2.89782 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10217 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                   </button>
                   {actions.length === 1 ? (
                     <button
@@ -470,12 +472,20 @@ export const ContactsMenu = ({
         )}
 
         {!isAddingContact && !editingContactId && (
+          <div className="add-contact-button-container">
           <button
             className="btn-add-contact"
             onClick={() => setIsAddingContact(true)}
           >
-            👤 Add New Contact
+            <svg className="add-user-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M6 20C6 17.34 8.34 15 11 15H13C15.66 15 18 17.34 18 20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M16 12H20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              <path d="M18 10V14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+            Add New Contact
           </button>
+          </div>
         )}
       </div>
     </div>

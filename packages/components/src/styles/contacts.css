@@ -191,12 +191,11 @@
   margin-left: auto;
 }
 
-.btn-edit,
 .btn-actions,
 .btn-delete {
   padding: var(--space-sm) var(--space-lg);
   border: none;
-  border-radius: 6px;
+  border-radius: 30px;
   font-size: var(--font-size-sm);
   cursor: pointer;
   transition: all var(--transition-base);
@@ -204,13 +203,28 @@
 
 .btn-edit {
   background: var(--color-accent-purple);
-  color: var(--color-text-dark-primary);
+  color: #fff;
+  border: none;
+  height: 35px;
+  width: 35px;
   font-weight: var(--font-weight-medium);
+  display: flex;
+  border-radius: 50px;
+  align-items: center;
+  cursor: pointer;
+  align-content: center;
+  gap: var(--space-xs);
 }
 
-.btn-edit:hover {
-  background: var(--color-accent-purple-hover);
+.edit-icon {
+  width: 28px;
+  align-self: center;
+  position: relative;
+  top: 2px;  height: 28px;
+  flex-shrink: 0;
+  color: white;
 }
+
 
 .btn-actions {
   background: var(--color-accent-purple);
@@ -417,13 +431,19 @@
 }
 
 /* ===== ADD CONTACT BUTTON ===== */
-.btn-add-contact {
+.add-contact-button-container {
+  display: flex;
+  justify-content: center;
   width: 100%;
+}
+
+.btn-add-contact {
+  width: fit-content;
   padding: var(--space-lg);
-  background: var(--color-accent-purple);
-  color: var(--color-text-dark-primary);
+  background: linear-gradient(180deg, #ff6b9d 0%, #c44569 100%);
+  color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 50px;
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   cursor: pointer;
@@ -432,12 +452,20 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-sm);
+  box-shadow: 0 2px 8px rgba(255, 107, 157, 0.3);
+}
+
+.add-user-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: white;
 }
 
 .btn-add-contact:hover {
-  background: var(--color-accent-purple-hover);
+  background: linear-gradient(180deg, #ff7ba8 0%, #d4567a 100%);
   transform: translateY(-1px);
-  box-shadow: var(--shadow-button-hover);
+  box-shadow: 0 4px 12px rgba(255, 107, 157, 0.4);
 }
 
 /* ===== SCROLLBAR STYLING ===== */
