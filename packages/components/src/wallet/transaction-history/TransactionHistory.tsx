@@ -239,7 +239,7 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
   };
 
   const handleTransactionLinkClick = (transaction: TransactionHistoryItem) => {
-    onTransactionLinkClick?.(transaction);
+    window.open(transaction.transactionLink, '_blank');
   };
 
   if (loading) {
