@@ -8,6 +8,7 @@ import { AssetPicker, UIAsset, SelectedAsset } from '../asset-picker/AssetPicker
 import { useMetadataProvider } from '@clan/framework-providers';
 import { getTokenInfo, TokenInfo, decodeAssetName as decodeAssetNameHelper } from '@clan/framework-helpers';
 import { TokenElement } from '../token/TokenElement';
+import { normalizeNumberString } from '../../utils/number';
 
 export interface TransactionRecipient {
   address: string;
@@ -139,6 +140,7 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
   const [previewOptions, setPreviewOptions] = useState<TransactionBuildOptions | null>(null);
   const [showContactPicker, setShowContactPicker] = useState<number | null>(null);
   const [addressErrors, setAddressErrors] = useState<{ [key: number]: string }>({});
+  const [adaInputValues, setAdaInputValues] = useState<Record<number, string>>({});
   const [showAssetPicker, setShowAssetPicker] = useState<number | null>(null);
   const [assetsForPicker, setAssetsForPicker] = useState<UIAsset[]>([]);
   const [assetsLoading, setAssetsLoading] = useState(false);
@@ -455,6 +457,7 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
   // Add a new recipient
   const addRecipient = () => {
     setRecipients([...recipients, { address: '', assets: { 'lovelace': 0n } }]);
+    setAdaInputValues((prev) => ({ ...prev, [recipients.length]: '' }));
   };
 
   // Remove a recipient
@@ -462,6 +465,15 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
     if (recipients.length > 1) {
       const newRecipients = recipients.filter((_, i) => i !== index);
       setRecipients(newRecipients);
+      setAdaInputValues((prev) => {
+        const updated: Record<number, string> = {};
+        Object.entries(prev).forEach(([key, value]) => {
+          const currentIndex = Number(key);
+          if (currentIndex === index) return;
+          updated[currentIndex > index ? currentIndex - 1 : currentIndex] = value;
+        });
+        return updated;
+      });
     }
   };
 
@@ -588,11 +600,12 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
                 <label>Recipient Address</label>
                 <div className="address-input-wrapper">
                   <input
+                    
                     type="text"
                     value={recipient.address}
                     onChange={(e) => updateRecipientAddress(index, e.target.value)}
                     placeholder="addr1..."
-                    className={addressErrors[index] ? 'error' : ''}
+                    className={addressErrors[index] ? 'address-input-base error' : 'address-input-base'}
                   />
                   <button
                     type="button"
@@ -615,11 +628,29 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
                     </svg>
                   </button>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="[0-9]*[.]?[0-9]*"
                     className="ada-amount-input"
-                    value={Number(recipient.assets['lovelace'] || 0n) / 1000000}
+                    value={adaInputValues[index] ?? (Number(recipient.assets['lovelace'] || 0n) / 1000000).toString()}
                     onChange={(e) => {
-                      const numAmount = parseFloat(e.target.value);
+                      const normalized = normalizeNumberString(e.target.value);
+                      setAdaInputValues((prev) => ({ ...prev, [index]: normalized }));
+
+                      if (normalized === '') {
+                        const newRecipients = [...recipients];
+                        newRecipients[index] = {
+                          ...newRecipients[index],
+                          assets: {
+                            ...newRecipients[index].assets,
+                            'lovelace': 0n
+                          }
+                        };
+                        setRecipients(newRecipients);
+                        return;
+                      }
+
+                      const numAmount = parseFloat(normalized);
                       if (!isNaN(numAmount) && numAmount >= 0) {
                         const newRecipients = [...recipients];
                         newRecipients[index] = {
@@ -633,8 +664,6 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
                       }
                     }}
                     placeholder="0"
-                    step="0.001"
-                    min="0"
                   />
                   <button
                     type="button"
@@ -653,6 +682,10 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
                         }
                       };
                       setRecipients(newRecipients);
+                      setAdaInputValues((prev) => ({
+                        ...prev,
+                        [index]: (Number(totalLovelace) / 1000000).toString()
+                      }));
                     }}
                     title="Send maximum ADA"
                   >

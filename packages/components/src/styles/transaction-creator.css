@@ -1,4 +1,16 @@
 /* BroClan Framework - Transaction Creator Component Styles */
+.ada-amount-input {
+  width: 100px;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-text-tertiary);
+  border-radius: var(--radius-lg);
+  background: #ffffff;
+  font-size: var(--font-size-sm);
+  text-align: center;
+  font-family: var(--font-family-mono);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-fast);
+}
 
 .transaction-creator {
   max-width: 1200px;
@@ -121,7 +133,7 @@
   gap: var(--space-sm);
 }
 
-.address-input-wrapper > input[type="text"] {
+.address-input-base {
   flex: 1;
   padding: 0.625rem 0.875rem;
   border: 1px solid var(--color-border-dark-secondary);
@@ -155,19 +167,7 @@
 }
 
 /* ===== ADA AMOUNT INPUT ===== */
-.ada-amount-input {
-  width: 100px;
-  padding: var(--space-sm) var(--space-md);
-  border: 1px solid var(--color-text-tertiary);
-  border-radius: var(--radius-lg);
-  background: #ffffff;
-  color: var(--color-text-dark-primary);
-  font-size: var(--font-size-sm);
-  text-align: center;
-  font-family: var(--font-family-mono);
-  font-weight: var(--font-weight-medium);
-  transition: all var(--transition-fast);
-}
+
 
 .ada-amount-input::placeholder {
   color: var(--color-text-quaternary);

@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Assets } from '@clan/framework-core';
+import { normalizeNumberString } from '../../utils/number';
 
 /**
  * UI-focused asset model with optional metadata for display purposes.
@@ -176,9 +177,15 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
   };
 
   const handleAmountChange = (assetId: string, value: string, asset: UIAsset) => {
-    setEditingAmounts({ ...editingAmounts, [assetId]: value });
+    const normalized = normalizeNumberString(value);
+    setEditingAmounts({ ...editingAmounts, [assetId]: normalized });
     
-    const numValue = parseFloat(value);
+    if (normalized === '') {
+      updateAssetAmount(assetId, 0n);
+      return;
+    }
+
+    const numValue = parseFloat(normalized);
     if (!isNaN(numValue) && numValue >= 0) {
       const decimals = hasMetadataProvider ? getAssetDecimals(asset) : (asset.decimals ?? 0);
       const amount = BigInt(Math.floor(numValue * Math.pow(10, decimals)));
@@ -348,7 +355,9 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
                   ) : (
                     <div className="asset-input-section">
                       <input
-                        type="number"
+                        type="text"
+                        inputMode="decimal"
+                        pattern="[0-9]*[.]?[0-9]*"
                         min="0"
                         max={maxAmount}
                         step={decimals > 0 ? (Math.pow(10, -decimals)).toString() : "1"}
