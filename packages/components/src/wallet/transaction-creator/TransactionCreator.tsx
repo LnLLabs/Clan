@@ -9,6 +9,7 @@ import { useMetadataProvider } from '@clan/framework-providers';
 import { getTokenInfo, TokenInfo, decodeAssetName as decodeAssetNameHelper } from '@clan/framework-helpers';
 import { TokenElement } from '../token/TokenElement';
 import { normalizeNumberString } from '../../utils/number';
+import { useWalletBalance, useWalletUtxos } from '@clan/react';
 
 export interface TransactionRecipient {
   address: string;
@@ -32,90 +33,6 @@ export interface TransactionCreatorProps {
    */
   availableAssets?: UIAsset[];
 }
-
-const useWalletSnapshot = (
-  wallet: WalletInterface
-): {
-  balance: Assets | null;
-  utxos: UTxO[];
-  balanceLoading: boolean;
-  utxosLoading: boolean;
-  balanceError: string | null;
-  utxosError: string | null;
-} => {
-  const [balance, setBalance] = useState<Assets | null>(null);
-  const [utxos, setUtxos] = useState<UTxO[]>([]);
-  const [balanceLoading, setBalanceLoading] = useState(true);
-  const [utxosLoading, setUtxosLoading] = useState(true);
-  const [balanceError, setBalanceError] = useState<string | null>(null);
-  const [utxosError, setUtxosError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchWalletData = async () => {
-      setBalanceLoading(true);
-      setBalanceError(null);
-      setUtxosLoading(true);
-      setUtxosError(null);
-
-      try {
-        const [balanceResult, utxosResult] = await Promise.allSettled([
-          wallet.getBalance(),
-          wallet.getUtxos()
-        ]);
-
-        if (!isMounted) {
-          return;
-        }
-
-        if (balanceResult.status === 'fulfilled') {
-          setBalance(balanceResult.value);
-        } else {
-          setBalance(null);
-          const reason = balanceResult.reason;
-          setBalanceError(reason instanceof Error ? reason.message : String(reason));
-        }
-
-        if (utxosResult.status === 'fulfilled') {
-          setUtxos(utxosResult.value);
-        } else {
-          setUtxos([]);
-          const reason = utxosResult.reason;
-          setUtxosError(reason instanceof Error ? reason.message : String(reason));
-        }
-      } catch (error) {
-        if (!isMounted) {
-          return;
-        }
-        setBalance(null);
-        setUtxos([]);
-        setBalanceError(error instanceof Error ? error.message : String(error));
-        setUtxosError(error instanceof Error ? error.message : String(error));
-      } finally {
-        if (isMounted) {
-          setBalanceLoading(false);
-          setUtxosLoading(false);
-        }
-      }
-    };
-
-    fetchWalletData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [wallet]);
-
-  return {
-    balance,
-    utxos,
-    balanceLoading,
-    utxosLoading,
-    balanceError,
-    utxosError
-  };
-};
 
 export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
   wallet,
@@ -148,16 +65,18 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
   const [hasMetadataForPicker, setHasMetadataForPicker] = useState(false);
 
   const {
-    balance: walletBalance,
-    utxos: walletUtxos,
-    balanceLoading,
-    utxosLoading,
-    balanceError,
-    utxosError
-  } = useWalletSnapshot(wallet);
+    data: walletBalance,
+    isLoading: balanceLoading,
+    error: balanceQueryError,
+  } = useWalletBalance(wallet);
+  const {
+    data: walletUtxos,
+    isLoading: utxosLoading,
+    error: utxosQueryError,
+  } = useWalletUtxos(wallet);
   const usingDeprecatedUtxos = Boolean(availableUtxos && availableUtxos.length > 0);
   const usingDeprecatedAssets = Boolean(availableAssets && availableAssets.length > 0);
-  const resolvedUtxos = usingDeprecatedUtxos ? (availableUtxos ?? []) : walletUtxos;
+  const resolvedUtxos = usingDeprecatedUtxos ? (availableUtxos ?? []) : (walletUtxos ?? []);
 
   useEffect(() => {
     if (availableUtxos && availableUtxos.length > 0) {
@@ -501,7 +420,6 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
   // Create transaction
   const createTransaction = async () => {
     if (isCreating) return;
-
     setIsCreating(true);
     try {
       const options: TransactionBuildOptions = {
@@ -537,8 +455,8 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
     );
   }
 
-  const criticalBalanceError = !usingDeprecatedAssets && balanceError;
-  const criticalUtxosError = !usingDeprecatedUtxos && utxosError;
+  const criticalBalanceError = !usingDeprecatedAssets && (balanceQueryError ? balanceQueryError.message : null);
+  const criticalUtxosError = !usingDeprecatedUtxos && (utxosQueryError ? utxosQueryError.message : null);
 
   if (criticalBalanceError || criticalUtxosError) {
     return (

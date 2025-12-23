@@ -22,7 +22,6 @@ export default defineConfig({
       copyDtsFiles: false,
       staticImport: true,
       rollupTypes: true,
-      skipDiagnostics: true,
     })
   ],
   css: {
@@ -42,6 +41,7 @@ export default defineConfig({
         'react',
         'react-dom',
         'react/jsx-runtime',
+        '@clan/react',
         '@clan/framework-core',
         '@clan/framework-providers',
         '@clan/framework-helpers'

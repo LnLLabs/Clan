@@ -5,6 +5,7 @@ export { DRepCard } from './DRepCard';
 export type { 
   WalletDelegationProps, 
   WalletDelegationInfo, 
+  WalletDelegationInfo as DelegationInfo,
   DelegationProviderConfig,
   DelegationOption,
   DelegationOptionType,

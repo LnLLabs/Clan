@@ -71,7 +71,6 @@ export const WalletDelegationWithData: React.FC<WalletDelegationWithDataProps> =
     delegatedPool: delegationInfo.delegatedPool,
     delegatedDRep: (delegationInfo as any).delegatedDRep, // May not exist in older core types
     rewards: delegationInfo.rewards,
-    activeEpoch: delegationInfo.activeEpoch,
     nextRewardEpoch: delegationInfo.nextRewardEpoch
   } : undefined;
 

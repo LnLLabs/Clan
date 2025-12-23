@@ -34,7 +34,7 @@ const Q = (e, i = {}) => {
       s == null || s(n);
     }
   });
-}, p = (e, i = {}) => {
+}, T = (e, i = {}) => {
   const { onSuccess: t, onError: s } = i, a = e.getName(), r = y();
   return h({
     mutationFn: async ({ poolId: n }) => {
@@ -50,7 +50,7 @@ const Q = (e, i = {}) => {
       s == null || s(n);
     }
   });
-}, T = (e, i = {}) => {
+}, W = (e, i = {}) => {
   const { refetchInterval: t = 3e4, enabled: s = !0 } = i, a = e.getName();
   return w({
     queryKey: ["wallet", a, "delegation"],
@@ -61,7 +61,7 @@ const Q = (e, i = {}) => {
     refetchInterval: t,
     enabled: s
   });
-}, W = (e, i = {}) => {
+}, p = (e, i = {}) => {
   const { onSuccess: t, onError: s } = i, a = e.getName(), r = y();
   return h({
     mutationFn: async () => {
@@ -94,17 +94,17 @@ const Q = (e, i = {}) => {
   onError: t,
   className: s
 }) => {
-  const { data: a, isLoading: r } = T(e, {
+  const { data: a, isLoading: r } = W(e, {
     refetchInterval: 3e4,
     enabled: !0
-  }), { mutateAsync: n, isPending: l } = p(e, {
+  }), { mutateAsync: n, isPending: l } = T(e, {
     onSuccess: (o) => {
       console.log("Delegation successful:", o), i == null || i("delegate", o);
     },
     onError: (o) => {
       console.error("Delegation failed:", o), t == null || t(o);
     }
-  }), { mutateAsync: d, isPending: c } = W(e, {
+  }), { mutateAsync: d, isPending: c } = p(e, {
     onSuccess: (o) => {
       console.log("Withdrawal successful:", o), i == null || i("withdraw", o);
     },
@@ -117,7 +117,6 @@ const Q = (e, i = {}) => {
     delegatedDRep: a.delegatedDRep,
     // May not exist in older core types
     rewards: a.rewards,
-    activeEpoch: a.activeEpoch,
     nextRewardEpoch: a.nextRewardEpoch
   } : void 0, f = async (o, q) => {
     o && await n({ poolId: o }), console.log("Delegation requested - Pool:", o, "dRep:", q);
@@ -143,11 +142,11 @@ const Q = (e, i = {}) => {
 export {
   C as TransactionCreatorWithData,
   F as WalletDelegationWithData,
-  p as useDelegateStake,
+  T as useDelegateStake,
   N as useSendTransaction,
   Q as useWalletBalance,
-  T as useWalletDelegation,
+  W as useWalletDelegation,
   R as useWalletUtxos,
-  W as useWithdrawRewards
+  p as useWithdrawRewards
 };
 //# sourceMappingURL=index.mjs.map

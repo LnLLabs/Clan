@@ -139,7 +139,7 @@
   border: 1px solid var(--color-border-dark-secondary);
   border-radius: var(--radius-lg);
   background: #ffffff;
-  color: var(--color-text-dark-primary);
+
   font-size: var(--font-size-sm);
   transition: border-color var(--transition-fast);
 }
