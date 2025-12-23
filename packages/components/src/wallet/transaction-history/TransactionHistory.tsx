@@ -207,7 +207,7 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
       case 'sent':
         return '📤'; // Hand with upward arrow
       case 'received':
-        return '🐷'; // Piggy bank
+        return '📥'; // Inbox for received
       case 'withdrawal':
         return '💰'; // Coins/wallet
       default:
