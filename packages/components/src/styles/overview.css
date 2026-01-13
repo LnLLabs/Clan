@@ -330,7 +330,7 @@
 }
 
 .overview-nft-image {
-  width: 100%;
+  width: 67%;
   aspect-ratio: 1;
   border-radius: var(--radius-2xl);
   object-fit: cover;

@@ -50,6 +50,11 @@ export interface WalletDelegationProps {
 export type DelegationOptionType = 'pool' | 'drep';
 export type DelegationOption = PoolDisplayInfo | DRepDisplayInfo;
 
+// Type aliases for backward compatibility
+export type DelegationInfo = WalletDelegationInfo;
+export type PoolOption = PoolDisplayInfo;
+export type PoolInfo = PoolDisplayInfo;
+
 // Special dRep options
 const SPECIAL_DREPS: DRepDisplayInfo[] = [
   {

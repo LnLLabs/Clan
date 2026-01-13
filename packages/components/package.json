@@ -8,23 +8,19 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
     },
-    "./styles": {
-      "import": "./dist/styles/index.css",
-      "require": "./dist/styles/index.css",
-      "default": "./dist/styles/index.css"
-    },
-    "./themes/dark.css": "./dist/themes/dark.css",
-    "./themes/light.css": "./dist/themes/light.css",
-    "./styles/index.css": "./dist/styles/index.css",
-    "./dist/styles/index.css": "./dist/styles/index.css"
+    "./styles": "./dist/styles/index.css"
   },
-  "style": "./dist/styles/index.css",
   "scripts": {
-    "build": "vite build && node scripts/copy-themes.mjs",
+    "build": "vite build",
     "dev": "vite build --watch",
     "clean": "rimraf dist",
     "preview": "vite preview",

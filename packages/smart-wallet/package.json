@@ -1,0 +1,23 @@
+{
+  "name": "@clan/smart-wallet",
+  "version": "1.0.0",
+  "description": "Smart wallet framework for Clan",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rimraf dist",
+    "test": "echo \"No tests specified\""
+  },
+  "dependencies": {
+    "@clan/framework-core": "*",
+    "@clan/framework-helpers": "*"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1",
+    "typescript": "^5.0.0"
+  },
+  "author": "BroClan Team",
+  "license": "MPL-2.0"
+}
