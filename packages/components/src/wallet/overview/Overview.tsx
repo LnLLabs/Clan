@@ -286,6 +286,11 @@ export const Overview: React.FC<OverviewProps> = ({
     loadWalletData();
   }, [wallet, initialSelectedAddress]);
 
+  // Reset visible count when search changes
+  useEffect(() => {
+    setVisibleCount(5);
+  }, [search, filter]);
+
   useEffect(() => {
     let isMounted = true;
     const tokenIds = Object.keys(balance);
@@ -399,10 +404,43 @@ export const Overview: React.FC<OverviewProps> = ({
   const filteredTokens = Object.keys(balance)
     .filter(tokenId => {
       if (search && search.trim() !== '') {
-        const searchLower = search.toLowerCase();
-        if (!tokenId.toLowerCase().includes(searchLower)) {
-          return false;
+        const searchLower = search.toLowerCase().trim();
+        const metadata = tokenMetadataMap[tokenId];
+        
+        // Search by token ID
+        if (tokenId.toLowerCase().includes(searchLower)) {
+          return true;
         }
+        
+        // Search by policy ID
+        const { policyId } = splitTokenId(tokenId);
+        if (policyId.toLowerCase().includes(searchLower)) {
+          return true;
+        }
+        
+        // Search by asset name (from token ID)
+        const { assetName } = splitTokenId(tokenId);
+        if (assetName && assetName.toLowerCase().includes(searchLower)) {
+          return true;
+        }
+        
+        // Search by metadata name
+        if (metadata?.name && metadata.name.toLowerCase().includes(searchLower)) {
+          return true;
+        }
+        
+        // Search by ticker
+        if (metadata?.ticker && metadata.ticker.toLowerCase().includes(searchLower)) {
+          return true;
+        }
+        
+        // For ADA, check if search matches "ada" or "cardano"
+        if ((tokenId === 'lovelace' || tokenId === 'ADA') && 
+            (searchLower === 'ada' || searchLower === 'cardano')) {
+          return true;
+        }
+        
+        return false;
       }
       return true;
     })
@@ -448,13 +486,7 @@ export const Overview: React.FC<OverviewProps> = ({
   return (
     <div className={`overview-container ${className}`}>
       <div className="overview-search-container">
-        <input
-          type="text"
-          placeholder="Search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="overview-search-input"
-        />
+
       </div>
 
       <div className="overview-tabs-container">
@@ -474,6 +506,30 @@ export const Overview: React.FC<OverviewProps> = ({
 
       {filter === 'Tokens' ? (
         <div className="overview-tokens-card">
+                  <div className="overview-search-wrapper">
+          <svg className="overview-search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7.33333 12.6667C10.2789 12.6667 12.6667 10.2789 12.6667 7.33333C12.6667 4.38781 10.2789 2 7.33333 2C4.38781 2 2 4.38781 2 7.33333C2 10.2789 4.38781 12.6667 7.33333 12.6667Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M14 14L11.1 11.1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          <input
+            type="text"
+            placeholder="Search for assets by name or policy"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="overview-search-input"
+          />
+          {search && (
+            <button
+              className="overview-search-clear"
+              onClick={() => setSearch('')}
+              aria-label="Clear search"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          )}
+        </div>
           <div className="overview-table-header">
             <div className="overview-header-asset">Asset</div>
             <div className="overview-header-quantity">Quantity</div>
