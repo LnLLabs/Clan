@@ -71,12 +71,14 @@
 }
 
 .add-assets-button {
-  background: var(--color-secondary);
+  background: var(--action-gradient);
+  height: 3.5rem;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-medium);
   color: var(--color-text-dark-primary);
 }
 
 .add-assets-button:hover {
-  background: var(--color-secondary-hover);
   transform: translateY(-1px);
 }
 

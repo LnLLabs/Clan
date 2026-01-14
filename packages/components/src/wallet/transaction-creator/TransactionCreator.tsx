@@ -31,6 +31,7 @@ export interface TransactionCreatorProps {
    * @deprecated TransactionCreator now derives available assets from the wallet balance.
    */
   availableAssets?: UIAsset[];
+  title?: string;
 }
 
 const useWalletSnapshot = (
@@ -124,7 +125,8 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
   onCancel,
   className = '',
   availableUtxos,
-  availableAssets = []
+  availableAssets = [],
+  title = 'Create Transaction'
 }) => {
   const metadataProviderFromContext = useMetadataProvider();
   const effectiveMetadataProvider = metadataProvider ?? metadataProviderFromContext;
@@ -568,7 +570,7 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
   return (
     <div className={`transaction-creator ${className}`}>
       <div className="creator-header">
-        <h2>Create Transaction</h2>
+        <h2>{title}</h2>
         {onCancel && (
           <button className="cancel-button" onClick={onCancel}>
             ✕
@@ -597,14 +599,13 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
 
               {/* Address Input with ADA Amount */}
               <div className="address-input">
-                <label>Recipient Address</label>
                 <div className="address-input-wrapper">
                   <input
                     
                     type="text"
                     value={recipient.address}
                     onChange={(e) => updateRecipientAddress(index, e.target.value)}
-                    placeholder="addr1..."
+                    placeholder="Recipient Address"
                     className={addressErrors[index] ? 'address-input-base error' : 'address-input-base'}
                   />
                   <button
@@ -699,7 +700,6 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
 
               {/* Assets Section */}
               <div className="assets-section">
-                <label>Assets</label>
 
                 {assetsLoading && (
                   <div className="assets-loading" style={{ fontSize: '0.85rem', color: '#6b7280', marginBottom: '0.5rem' }}>

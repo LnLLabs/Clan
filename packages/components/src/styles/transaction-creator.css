@@ -15,6 +15,7 @@
 .transaction-creator {
   max-width: 1200px;
   margin: 0 auto;
+  border-radius: var(--radius-2xl);
   padding: var(--space-xl);
   background: var(--color-bg-dark-secondary);
   color: var(--color-text-dark-primary);
@@ -400,10 +401,12 @@
 /* ===== ADD RECIPIENT BUTTON ===== */
 .add-recipient-button {
   width: fit-content;
-  padding: var(--space-lg);
+  padding: var(--space-md);
+  padding-left: var(--space-2xl);
+  padding-right: var(--space-2xl);
   background: transparent;
-  border: 2px solid var(--color-accent-pink);
-  border-radius: var(--radius-pill);
+  border: 2px solid var(--color-accent-purple);
+  border-radius: var(--radius-pill) ;
   color: var(--color-text-dark-primary);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
@@ -491,7 +494,7 @@
   margin-top: var(--space-lg);
 }
 
-.asset-actions .add-assets-button,
+
 .asset-actions .remove-all-button {
   padding: 0.625rem var(--space-xl);
   border: none;
@@ -504,7 +507,7 @@
   color: var(--color-text-dark-primary);
 }
 
-.asset-actions .add-assets-button:hover,
+
 .asset-actions .remove-all-button:hover {
   background: var(--color-border-dark-tertiary);
   transform: translateY(-1px);
@@ -521,7 +524,7 @@
 .creator-actions button {
   padding: var(--space-lg) var(--space-2xl);
   border: none;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-pill ) ;
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
