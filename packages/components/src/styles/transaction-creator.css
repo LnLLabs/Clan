@@ -1,7 +1,12 @@
 /* BroClan Framework - Transaction Creator Component Styles */
+.ada-amount-input-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
 .ada-amount-input {
-  width: 100px;
-  padding: var(--space-sm) var(--space-md);
+  width: 150px;
+  padding: var(--space-sm) 3.5rem var(--space-sm) var(--space-md);
   border: 1px solid var(--color-text-tertiary);
   border-radius: var(--radius-lg);
   background: #ffffff;
@@ -182,11 +187,14 @@
 }
 
 .max-ada-button {
-  padding: var(--space-sm) 0.875rem;
-  background: var(--color-bg-dark-tertiary);
-  border: 1px solid var(--color-border-dark-secondary);
-  border-radius: var(--radius-lg);
-  color: var(--color-text-dark-primary);
+  position: absolute;
+  right: 0.25rem;
+  top: 50%;
+  border: none;
+  background: transparent;
+  transform: translateY(-50%);
+  padding: var(--space-xs) 0.625rem;
+  border-radius: var(--radius-md);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
@@ -194,12 +202,15 @@
   white-space: nowrap;
   text-transform: uppercase;
   letter-spacing: 0.025em;
-  min-width: 50px;
+  min-width: 40px;
+  height: calc(100% - 0.5rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .max-ada-button:hover {
-  background: var(--color-border-dark-tertiary);
-  transform: translateY(-1px);
+  transform: translateY(-50%);
   box-shadow: var(--shadow-button);
 }
 
@@ -730,6 +741,7 @@
 
   .max-ada-button:hover {
     background: var(--color-border-dark-tertiary);
+    transform: translateY(-50%);
   }
 
   .asset-input {

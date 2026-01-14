@@ -605,7 +605,7 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
                     type="text"
                     value={recipient.address}
                     onChange={(e) => updateRecipientAddress(index, e.target.value)}
-                    placeholder="Recipient Address"
+                    placeholder="Recipient address"
                     className={addressErrors[index] ? 'address-input-base error' : 'address-input-base'}
                   />
                   <button
@@ -628,70 +628,72 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
                       <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
                     </svg>
                   </button>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    pattern="[0-9]*[.]?[0-9]*"
-                    className="ada-amount-input"
-                    value={adaInputValues[index] ?? (Number(recipient.assets['lovelace'] || 0n) / 1000000).toString()}
-                    onChange={(e) => {
-                      const normalized = normalizeNumberString(e.target.value);
-                      setAdaInputValues((prev) => ({ ...prev, [index]: normalized }));
+                  <div className="ada-amount-input-wrapper">
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      pattern="[0-9]*[.]?[0-9]*"
+                      className="ada-amount-input"
+                      value={adaInputValues[index] ?? (Number(recipient.assets['lovelace'] || 0n) / 1000000).toString()}
+                      onChange={(e) => {
+                        const normalized = normalizeNumberString(e.target.value);
+                        setAdaInputValues((prev) => ({ ...prev, [index]: normalized }));
 
-                      if (normalized === '') {
-                        const newRecipients = [...recipients];
-                        newRecipients[index] = {
-                          ...newRecipients[index],
-                          assets: {
-                            ...newRecipients[index].assets,
-                            'lovelace': 0n
-                          }
-                        };
-                        setRecipients(newRecipients);
-                        return;
-                      }
-
-                      const numAmount = parseFloat(normalized);
-                      if (!isNaN(numAmount) && numAmount >= 0) {
-                        const newRecipients = [...recipients];
-                        newRecipients[index] = {
-                          ...newRecipients[index],
-                          assets: {
-                            ...newRecipients[index].assets,
-                            'lovelace': BigInt(Math.floor(numAmount * 1000000))
-                          }
-                        };
-                        setRecipients(newRecipients);
-                      }
-                    }}
-                    placeholder="0"
-                  />
-                  <button
-                    type="button"
-                    className="max-ada-button"
-                    onClick={() => {
-                      // Get total available ADA from wallet
-                      const totalLovelace = resolvedUtxos.reduce((sum, utxo) =>
-                        sum + (utxo.assets['lovelace'] || 0n), 0n
-                      );
-                      const newRecipients = [...recipients];
-                      newRecipients[index] = {
-                        ...newRecipients[index],
-                        assets: {
-                          ...newRecipients[index].assets,
-                          'lovelace': totalLovelace
+                        if (normalized === '') {
+                          const newRecipients = [...recipients];
+                          newRecipients[index] = {
+                            ...newRecipients[index],
+                            assets: {
+                              ...newRecipients[index].assets,
+                              'lovelace': 0n
+                            }
+                          };
+                          setRecipients(newRecipients);
+                          return;
                         }
-                      };
-                      setRecipients(newRecipients);
-                      setAdaInputValues((prev) => ({
-                        ...prev,
-                        [index]: (Number(totalLovelace) / 1000000).toString()
-                      }));
-                    }}
-                    title="Send maximum ADA"
-                  >
-                    Max
-                  </button>
+
+                        const numAmount = parseFloat(normalized);
+                        if (!isNaN(numAmount) && numAmount >= 0) {
+                          const newRecipients = [...recipients];
+                          newRecipients[index] = {
+                            ...newRecipients[index],
+                            assets: {
+                              ...newRecipients[index].assets,
+                              'lovelace': BigInt(Math.floor(numAmount * 1000000))
+                            }
+                          };
+                          setRecipients(newRecipients);
+                        }
+                      }}
+                      placeholder="0"
+                    />
+                    <button
+                      type="button"
+                      className="max-ada-button"
+                      onClick={() => {
+                        // Get total available ADA from wallet
+                        const totalLovelace = resolvedUtxos.reduce((sum, utxo) =>
+                          sum + (utxo.assets['lovelace'] || 0n), 0n
+                        );
+                        const newRecipients = [...recipients];
+                        newRecipients[index] = {
+                          ...newRecipients[index],
+                          assets: {
+                            ...newRecipients[index].assets,
+                            'lovelace': totalLovelace
+                          }
+                        };
+                        setRecipients(newRecipients);
+                        setAdaInputValues((prev) => ({
+                          ...prev,
+                          [index]: (Number(totalLovelace) / 1000000).toString()
+                        }));
+                      }}
+                      title="Send maximum ADA"
+                    >
+                      Max
+                    </button>
+                  </div>
                 </div>
                 {addressErrors[index] && (
                   <span className="address-error">{addressErrors[index]}</span>
