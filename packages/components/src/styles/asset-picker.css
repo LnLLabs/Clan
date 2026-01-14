@@ -282,7 +282,7 @@
   text-align: center;
   gap: var(--space-md);
   transition: all var(--transition-fast);
-  min-width: 200px;
+  min-width: 150px;
   flex: 0 1 auto;
 }
 
