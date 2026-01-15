@@ -90,10 +90,11 @@
 }
 
 .contacts-search-input {
-  width: 100%;
+  width: calc(100% - 1.75rem);
   padding: var(--space-md) var(--space-lg);
+  margin: 0.875rem;
+  border: none;
   background: var(--color-bg-dark-tertiary);
-  border: 1px solid var(--color-border-dark-secondary);
   border-radius: 6px;
   color: var(--color-text-dark-primary);
   font-size: var(--font-size-sm);
@@ -106,7 +107,7 @@
 }
 
 .contacts-search-input:focus {
-  border-color: var(--color-accent-purple);
+  border: 1px solid var(--color-border-dark-secondary);
   background: var(--color-dark-card);
 }
 
@@ -465,7 +466,6 @@
 .btn-add-contact:hover {
   background: linear-gradient(180deg, #ff7ba8 0%, #d4567a 100%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 107, 157, 0.4);
 }
 
 /* ===== SCROLLBAR STYLING ===== */
