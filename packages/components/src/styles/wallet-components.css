@@ -627,6 +627,7 @@
 .pool-card {
   background: var(--color-surface-subtle-2);
   border-radius: 12px;
+      height: 150px;
   padding: 20px;
   transition: all 0.2s ease;
   cursor: pointer;

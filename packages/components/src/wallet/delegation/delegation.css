@@ -128,9 +128,6 @@
   color: var(--color-text-primary);
 }
 
-.delegation-panel-icon {
-  font-size: 22px;
-}
 
 /* ===== SEARCH INPUT ===== */
 .delegation-search-input {
@@ -439,6 +436,7 @@
   border: 2px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-xl);
   padding: 16px;
+  height: 150px;
   cursor: pointer;
   transition: all var(--transition-base);
 }

@@ -437,7 +437,7 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
             <div className="delegation-panel">
               <div className="delegation-panel-header">
                 <div className="delegation-panel-title">
-                  <span className="delegation-panel-icon">🏊</span>
+     
                   Stake Pool
                 </div>
               </div>
@@ -472,7 +472,6 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
             <div className="delegation-panel">
               <div className="delegation-panel-header">
                 <div className="delegation-panel-title">
-                  <span className="delegation-panel-icon">🏛️</span>
                   dRep
                 </div>
               </div>
@@ -525,7 +524,6 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
             <div className="delegation-panel">
               <div className="delegation-panel-header">
                 <div className="delegation-panel-title">
-                  <span className="delegation-panel-icon">🏊</span>
                   Stake Pool
                 </div>
               </div>
@@ -580,7 +578,6 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
             <div className="delegation-panel">
               <div className="delegation-panel-header">
                 <div className="delegation-panel-title">
-                  <span className="delegation-panel-icon">🏛️</span>
                   dRep (Governance)
                 </div>
               </div>
