@@ -359,7 +359,7 @@ export const ContactsMenu = ({
                   ) : actions.length > 1 ? (
                     <div className="actions-dropdown">
                       <button
-                        className="btn-actions"
+                        className={expandedActionsId === contact.id ? "btn-actions btn-actions-active" : "btn-actions"}
                         onClick={() => toggleActionsMenu(contact.id)}
                       >
                         <span className="actions-chevron">▼</span> Actions
