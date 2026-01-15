@@ -130,27 +130,68 @@
 
 
 /* ===== SEARCH INPUT ===== */
-.delegation-search-input {
+.delegation-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
   width: 100%;
-  padding: 12px 16px;
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-tooltip-border);
-  border-radius: var(--radius-lg);
-  color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
+  max-width: 100%;
   margin-bottom: 16px;
-  transition: all var(--transition-base);
-  outline: none;
 }
 
-.delegation-search-input:focus {
-  border-color: var(--color-border-strong);
-  background: var(--color-bg-secondary);
-  box-shadow: var(--color-focus-ring);
+.delegation-search-icon {
+  position: absolute;
+  left: var(--space-md);
+  color: var(--color-text-dark-quaternary);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.delegation-search-input {
+  width: 100%;
+  padding: var(--space-sm) var(--space-lg);
+  padding-left: calc(var(--space-md) + 16px + var(--space-sm));
+  padding-right: calc(var(--space-md) + 16px + var(--space-sm));
+  border: none;
+  border-bottom: 1px solid var(--color-border-dark-secondary);
+  border-radius: 0px;
+  background: var(--color-dark-card);
+  color: var(--color-text-dark-primary);
+  font-size: var(--font-size-sm);
+  outline: none;
+  transition: border-color var(--transition-base);
 }
 
 .delegation-search-input::placeholder {
-  color: var(--color-text-muted);
+  color: var(--color-text-dark-quaternary);
+}
+
+.delegation-search-input:focus {
+  border-color: var(--color-accent-purple);
+}
+
+.delegation-search-clear {
+  position: absolute;
+  right: var(--space-md);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-dark-quaternary);
+  transition: color var(--transition-base);
+  z-index: 1;
+}
+
+.delegation-search-clear:hover {
+  color: var(--color-text-dark-primary);
+}
+
+.delegation-search-clear svg {
+  width: 16px;
+  height: 16px;
 }
 
 /* ===== OPTIONS LIST ===== */
