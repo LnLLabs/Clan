@@ -322,9 +322,18 @@
   transition: all var(--transition-base);
 }
 
+.delegation-actions-cancel {
+  background: var(--action-gradient-disabled) !important; 
+}
+
+.delegation-actions-cancel:hover {
+  background: var(--action-gradient) !important;
+}
+
 .delegation-actions button:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(236, 72, 153, 0.4);
+  padding: var(--space-sm) var(--space-lg);
 }
 
 /* ===== POOL CARD ===== */

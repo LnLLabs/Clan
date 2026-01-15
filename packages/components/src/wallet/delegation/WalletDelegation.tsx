@@ -716,8 +716,8 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
             </div>
           )}
 
-          <div className="delegation-actions">
-            <Button className="delegation-action-button-cancel"
+          <div className="delegation-actions ">
+            <Button className="delegation-action-button-cancel delegation-actions-cancel"
               onClick={() => {
                 setSelectedPool(delegationInfo?.delegatedPool || null);
                 setSelectedDRep(delegationInfo?.delegatedDRep || null);
