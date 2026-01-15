@@ -378,12 +378,25 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
     }
   };
 
+  const handleUndelegate = async () => {
+    if (isUndelegating || !onUndelegate) return;
+
+    try {
+      await onUndelegate();
+      setActiveTab('status');
+    } catch (error) {
+      console.error('Error undelegating:', error);
+    }
+  };
+
   const formatRewards = (rewards: bigint): string => {
     return (Number(rewards) / 1000000).toFixed(3);
   };
 
   const isCurrentPool = (poolId: string) => delegationInfo?.delegatedPool === poolId;
   const isCurrentDRep = (drepId: string) => delegationInfo?.delegatedDRep === drepId;
+
+  const hasActiveDelegation = delegationInfo?.delegatedPool || delegationInfo?.delegatedDRep;
 
   const hasChanges = 
     (selectedPool !== delegationInfo?.delegatedPool) || 
@@ -713,6 +726,15 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
             >
               Cancel
             </Button>
+            {hasActiveDelegation && (
+              <Button
+                variant="secondary"
+                onClick={handleUndelegate}
+                disabled={isUndelegating || isDelegating}
+              >
+                {isUndelegating ? 'Undelegating...' : 'Undelegate'}
+              </Button>
+            )}
             <Button
               onClick={handleDelegate}
               disabled={!hasChanges || isDelegating || (!selectedPool && !selectedDRep)}
