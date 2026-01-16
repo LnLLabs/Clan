@@ -82,6 +82,8 @@ export const Receive: React.FC<ReceiveProps> = ({
 
   return (
     <div className={`receive-container ${className}`}>
+      <h2 className="receive-title">Receive Funds</h2>
+      <div className="receive-box-container">
       <p className="receive-instruction">
         Send funds from one of your other wallets to the address bellow:
       </p>
@@ -107,7 +109,8 @@ export const Receive: React.FC<ReceiveProps> = ({
             <span className="receive-button-icon">{action.icon}</span>
             {action.label}
           </button>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -3,7 +3,8 @@
   flex-direction: column;
   align-items: center;
   padding: 2rem;
-  background: var(--color-bg-primary);
+  background-color: var(--color-bg-secondary);
+  background-color: var(--color-bg-secondary);
   border-radius: 12px;
   color: var(--color-text-primary);
   width: 100%;
@@ -12,8 +13,9 @@
 
 .receive-instruction {
   text-align: center;
+  background-color: var(--color-bg-secondary);
   font-size: 0.95rem;
-  color: var(--color-text-muted);
+  color: var(--color-text-primary);
   margin: 0 0 1.5rem 0;
   line-height: 1.5;
 }
@@ -51,12 +53,14 @@
   gap: 1rem;
   width: 100%;
   max-width: 600px;
-  justify-content: center;
+  justify-content: space-around;
 }
 
 .receive-button {
   display: flex;
+  width: 180px;
   align-items: center;
+  justify-content:center; 
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
   background: var(--color-button-unhovered-gradient-bg);
@@ -93,14 +97,6 @@
   fill: currentColor;
 }
 
-.receive-button-copy {
-  flex: 1;
-}
-
-.receive-button:not(.receive-button-copy) {
-  flex: 1;
-}
-
 /* Responsive styles */
 @media (max-width: 500px) {
   .receive-container {
@@ -111,8 +107,6 @@
     flex-direction: column;
   }
 
-  .receive-button {
-    width: 100%;
-  }
+
 }
 
