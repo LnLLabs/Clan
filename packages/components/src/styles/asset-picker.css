@@ -68,27 +68,21 @@
   font-weight: var(--font-weight-medium);
   cursor: pointer;
   transition: all var(--transition-fast);
-}
-
-.add-assets-button {
-  background: var(--action-gradient);
-  height: 3.5rem;
-  font-size: var(--font-size-2xl);
+  background: var(--action-gradient-disabled);
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-dark-primary);
 }
 
 .add-assets-button:hover {
   transform: translateY(-1px);
+  background: var(--action-gradient);
 }
 
-.remove-all-button {
-  background: var(--color-secondary);
-  color: var(--color-text-dark-primary);
-}
+
 
 .remove-all-button:hover {
-  background: var(--color-secondary-hover);
+  background: var(--action-gradient);
   transform: translateY(-1px);
 }
 

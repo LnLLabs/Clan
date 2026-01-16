@@ -507,23 +507,7 @@
 }
 
 
-.asset-actions .remove-all-button {
-  padding: 0.625rem var(--space-xl);
-  border: none;
-  border-radius: var(--radius-lg);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  background: var(--color-bg-dark-tertiary);
-  color: var(--color-text-dark-primary);
-}
 
-
-.asset-actions .remove-all-button:hover {
-  background: var(--color-border-dark-tertiary);
-  transform: translateY(-1px);
-}
 
 /* ===== CREATOR ACTIONS ===== */
 .creator-actions {
