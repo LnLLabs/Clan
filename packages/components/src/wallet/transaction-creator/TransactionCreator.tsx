@@ -32,6 +32,12 @@ export interface TransactionCreatorProps {
    */
   availableAssets?: UIAsset[];
   title?: string;
+  /**
+   * Optional initial recipients to prefill the transaction form.
+   * If provided, these will be used to initialize the recipients state on first render.
+   * Assets default to { lovelace: 0n } if not provided.
+   */
+  initialRecipients?: { address: string; assets?: Assets; datum?: string; datumHash?: string }[];
 }
 
 const useWalletSnapshot = (
@@ -126,14 +132,24 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
   className = '',
   availableUtxos,
   availableAssets = [],
-  title = 'Create Transaction'
+  title = 'Create Transaction',
+  initialRecipients = [],
 }) => {
   const metadataProviderFromContext = useMetadataProvider();
   const effectiveMetadataProvider = metadataProvider ?? metadataProviderFromContext;
 
-  const [recipients, setRecipients] = useState<TransactionRecipient[]>([
-    { address: '', assets: { 'lovelace': 0n } }
-  ]);
+  // Lazy initialization: only initialize from initialRecipients on first render
+  const [recipients, setRecipients] = useState<TransactionRecipient[]>(() => {
+    if (initialRecipients && initialRecipients.length > 0) {
+      return initialRecipients.map(recipient => ({
+        address: recipient.address,
+        assets: recipient.assets ?? { 'lovelace': 0n },
+        datum: recipient.datum,
+        datumHash: recipient.datumHash
+      }));
+    }
+    return [{ address: '', assets: { 'lovelace': 0n } }];
+  });
   const [selectedUtxos, setSelectedUtxos] = useState<UTxO[]>([]);
   const [estimatedFee, setEstimatedFee] = useState<bigint>(0n);
   const [isCalculating, setIsCalculating] = useState(false);
