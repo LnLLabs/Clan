@@ -101,8 +101,8 @@
 
 .remove-recipient-x {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 8px;
+  right: 4px;
   background: none;
   border: none;
   cursor: pointer;
@@ -417,7 +417,7 @@
   padding-left: var(--space-2xl);
   padding-right: var(--space-2xl);
   background: transparent;
-  border: 2px solid var(--color-accent-purple);
+  border: 2px solid var(--theme-asset-border-selected);
   border-radius: var(--radius-pill) ;
   color: var(--color-text-dark-primary);
   font-size: var(--font-size-base);
@@ -522,18 +522,17 @@
   border: none;
   border-radius: var(--radius-pill ) ;
   font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
   transition: all var(--transition-fast);
-  background: linear-gradient(135deg, #ec4899, #d946ef);
+  background: var(--action-gradient-disabled);
   color: #ffffff;
   min-width: 200px;
 }
 
 .creator-actions button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #db2777, #c026d3);
+  background: var(--action-gradient);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.4);
 }
 
 .creator-actions button:disabled {
