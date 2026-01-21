@@ -245,10 +245,47 @@
 
 /* ===== NO RESULTS ===== */
 .delegation-no-results {
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-xl);
+  padding: 16px;
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-base);
+}
+
+.delegation-no-results-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.delegation-no-results-text {
   text-align: center;
-  padding: 40px 20px;
   color: rgba(255, 255, 255, 0.5);
   font-size: var(--font-size-sm);
+}
+
+.delegation-no-results-content button {
+  border-radius: 50px;
+  background: var(--action-gradient);
+  padding: var(--space-sm) var(--space-lg);
+  color: var(--color-text-dark-primary);
+  width: fit-content;
+  font-weight: bolder;
+  font-size: var(--font-size-sm);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.delegation-no-results-content button:hover {
+  transform: translateY(-2px);
 }
 
 /* ===== SELECTION SUMMARY ===== */

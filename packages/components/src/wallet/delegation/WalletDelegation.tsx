@@ -477,7 +477,15 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
                 </div>
               ) : (
                 <div className="delegation-no-results">
-                  No stake pool delegation
+                  <div className="delegation-no-results-content">
+                    <div className="delegation-no-results-text">No stake pool delegation</div>
+                    <Button
+                      onClick={() => setActiveTab('delegate')}
+                      size="sm"
+                    >
+                      Delegate
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
@@ -511,7 +519,15 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
                 </div>
               ) : (
                 <div className="delegation-no-results">
-                  No dRep delegation
+                  <div className="delegation-no-results-content">
+                    <div className="delegation-no-results-text">No dRep delegation</div>
+                    <Button
+                      onClick={() => setActiveTab('delegate')}
+                      size="sm"
+                    >
+                      Delegate
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
@@ -588,7 +604,11 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
                 )}
                 {filteredPools.length === 0 && !isLoadingPools && !currentPoolInfo ? (
                   <div className="delegation-no-results">
-                    {poolSearch ? 'No pools found' : 'No pools available'}
+                    <div className="delegation-no-results-content">
+                      <div className="delegation-no-results-text">
+                        {poolSearch ? 'No pools found' : 'No pools available'}
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   filteredPools.map(pool => (
@@ -660,7 +680,11 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
                 )}
                 {filteredDreps.length === 0 && !isLoadingDreps && !currentDRepInfo ? (
                   <div className="delegation-no-results">
-                    {drepSearch ? 'No dReps found' : 'No dReps available'}
+                    <div className="delegation-no-results-content">
+                      <div className="delegation-no-results-text">
+                        {drepSearch ? 'No dReps found' : 'No dReps available'}
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   filteredDreps.map(drep => (
