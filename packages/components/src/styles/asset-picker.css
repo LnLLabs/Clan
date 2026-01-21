@@ -64,7 +64,6 @@
   padding: 0.625rem var(--space-xl);
   border: none;
   border-radius: var(--radius-pill);
-  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -297,7 +296,7 @@
 }
 
 .asset-card.selected {
-  background: #3f3f59;
+  background: var( --theme-bg-secondary);
 }
 
 .asset-icon {
