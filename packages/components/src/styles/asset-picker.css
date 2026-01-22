@@ -420,7 +420,7 @@
 
 .asset-input-section input:focus {
   outline: none;
-  border-color: #f472b6;
+  border-color: var(--theme-asset-border-selected);
 }
 
 .max-button {
@@ -429,7 +429,7 @@
   padding: var(--space-xs) var(--space-md);
   background: none;
   border: none;
-  color: #f472b6;
+  color: var(--theme-asset-border-selected);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   cursor: pointer;

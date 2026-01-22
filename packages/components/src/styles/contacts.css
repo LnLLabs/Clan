@@ -318,7 +318,7 @@
 .btn-actions-active {
   border-radius: 16px 16px 0px 0px;
   background: #888b8f;
-  opacity: 0.85;
+  opacity: 1;
 }
 
 .actions-menu .action-item {
@@ -427,9 +427,7 @@
   color: var(--color-text-dark-primary);
 }
 
-.btn-save:hover {
-  background: var(--color-accent-purple-hover);
-}
+
 
 .btn-cancel {
   background: var(--color-border-dark-secondary);
