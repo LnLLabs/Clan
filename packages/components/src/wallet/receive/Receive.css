@@ -52,7 +52,6 @@
   display: flex;
   gap: 1rem;
   width: 100%;
-  max-width: 600px;
   justify-content: space-around;
 }
 
