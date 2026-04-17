@@ -3,7 +3,7 @@ import { NetworkConfig, NETWORKS } from '@clan/framework-core';
 import { setStorageItem, getStorageItem } from '@clan/framework-helpers';
 
 // Provider types
-export type ProviderType = 'Blockfrost' | 'Kupmios' | 'MWallet' | 'Maestro' | 'None';
+export type ProviderType = 'Blockfrost' | 'Kupmios' | 'MWallet' | 'Maestro' | 'MeshOffline' | 'None';
 
 // Provider configuration interfaces
 export interface BlockfrostConfig {
@@ -25,6 +25,11 @@ export interface MaestroConfig {
   apiKey: string;
 }
 
+export interface MeshOfflineConfig {
+  network: 'testnet' | 'mainnet';
+  datasetPath: string;
+}
+
 export interface NoneConfig {
   // No configuration needed
 }
@@ -35,6 +40,7 @@ export type ProviderConfig =
   | { type: 'Kupmios'; config: KupmiosConfig }
   | { type: 'MWallet'; config: MWalletConfig }
   | { type: 'Maestro'; config: MaestroConfig }
+  | { type: 'MeshOffline'; config: MeshOfflineConfig }
   | { type: 'None'; config: NoneConfig };
 
 // Provider capabilities
@@ -69,6 +75,12 @@ export const PROVIDER_DEFINITIONS: Record<ProviderType, ProviderCapabilities> = 
     canBeProvider: true,
     canBeMetadataProvider: true,
     requiredFields: ['apiKey'],
+    optionalFields: []
+  },
+  MeshOffline: {
+    canBeProvider: true,
+    canBeMetadataProvider: false,
+    requiredFields: ['network', 'datasetPath'],
     optionalFields: []
   },
   None: {
@@ -157,6 +169,14 @@ export const createDefaultProviderConfig = (type: ProviderType, network: Network
         type: 'Maestro',
         config: {
           apiKey: ''
+        }
+      };
+    case 'MeshOffline':
+      return {
+        type: 'MeshOffline',
+        config: {
+          network: network.name === 'mainnet' ? 'mainnet' : 'testnet',
+          datasetPath: 'src/sim/offline/defaultDataset.json'
         }
       };
     case 'None':

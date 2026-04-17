@@ -13,6 +13,7 @@ export type {
   KupmiosConfig,
   MWalletConfig,
   MaestroConfig,
+  MeshOfflineConfig,
   NoneConfig,
   ProviderCapabilities
 } from './SettingsProvider';
