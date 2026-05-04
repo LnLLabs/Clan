@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Transaction, UTxO, Assets } from '@clan/framework-core';
+import { Transaction, Assets, meshUtxoToAssets } from '@clan/framework-core';
 import { TokenElement } from '../token/TokenElement';
 import { formatAddress, copyToClipboard, showInfo } from '@clan/framework-helpers';
 
@@ -41,11 +41,12 @@ export const TransactionDetails: React.FC<TransactionDetailsProps> = ({
 
     // Calculate total amounts (simplified)
     const totalInputAda = transaction.inputs?.reduce((sum, input) => {
-      return sum + (input.assets['lovelace'] ? Number(input.assets['lovelace']) / 1000000 : 0);
+      const ada = meshUtxoToAssets(input)['lovelace'];
+      return sum + (ada ? Number(ada) / 1000000 : 0);
     }, 0) || 0;
 
     const totalOutputAda = transaction.outputs?.reduce((sum, output) => {
-      const amount = formatAmount(output.assets);
+      const amount = formatAmount(meshUtxoToAssets(output));
       return sum + amount.ada;
     }, 0) || 0;
 
@@ -102,24 +103,28 @@ export const TransactionDetails: React.FC<TransactionDetailsProps> = ({
     return (
       <div className="transaction-inputs">
         {transaction.inputs.map((input, index) => {
-          const amount = formatAmount(input.assets);
+          const assets = meshUtxoToAssets(input);
+          const amount = formatAmount(assets);
+          const addr = input.output.address;
+          const txHash = input.input.txHash;
+          const outputIndex = input.input.outputIndex;
 
           return (
-            <div key={`${input.txHash}-${input.outputIndex}`} className="input-item">
+            <div key={`${txHash}-${outputIndex}`} className="input-item">
               <div className="input-header">
                 <span className="input-index">Input #{index + 1}</span>
-                <span className={`address-type ${isAddressMine(input.address) ? 'mine' : 'external'}`}>
-                  {isAddressMine(input.address) ? 'Mine' : 'External'}
+                <span className={`address-type ${isAddressMine(addr) ? 'mine' : 'external'}`}>
+                  {isAddressMine(addr) ? 'Mine' : 'External'}
                 </span>
               </div>
 
               <div className="input-address">
                 <span className="address-label">Address:</span>
                 <div className="address-display">
-                  <span className="address-text">{formatAddress(input.address)}</span>
+                  <span className="address-text">{formatAddress(addr)}</span>
                   <button
                     className="copy-btn"
-                    onClick={() => copyToClipboardHandler(input.address, 'Address')}
+                    onClick={() => copyToClipboardHandler(addr, 'Address')}
                   >
                     📋
                   </button>
@@ -130,11 +135,11 @@ export const TransactionDetails: React.FC<TransactionDetailsProps> = ({
                 <span className="ref-label">Reference:</span>
                 <div className="reference-display">
                   <span className="ref-text">
-                    {input.txHash.slice(0, 16)}...#{input.outputIndex}
+                    {txHash.slice(0, 16)}...#{outputIndex}
                   </span>
                   <button
                     className="copy-btn"
-                    onClick={() => copyToClipboardHandler(input.txHash, 'Transaction hash')}
+                    onClick={() => copyToClipboardHandler(txHash, 'Transaction hash')}
                   >
                     📋
                   </button>
@@ -159,14 +164,14 @@ export const TransactionDetails: React.FC<TransactionDetailsProps> = ({
                 )}
               </div>
 
-              {input.datum && (
+              {input.output.plutusData && (
                 <div className="input-datum">
                   <details>
                     <summary>Datum</summary>
                     <pre className="datum-content">
-                      {typeof input.datum === 'string'
-                        ? input.datum
-                        : JSON.stringify(input.datum, null, 2)
+                      {typeof input.output.plutusData === 'string'
+                        ? input.output.plutusData
+                        : JSON.stringify(input.output.plutusData, null, 2)
                       }
                     </pre>
                   </details>
@@ -187,24 +192,26 @@ export const TransactionDetails: React.FC<TransactionDetailsProps> = ({
     return (
       <div className="transaction-outputs">
         {transaction.outputs.map((output, index) => {
-          const amount = formatAmount(output.assets);
+          const assets = meshUtxoToAssets(output);
+          const amount = formatAmount(assets);
+          const addr = output.output.address;
 
           return (
             <div key={index} className="output-item">
               <div className="output-header">
                 <span className="output-index">Output #{index + 1}</span>
-                <span className={`address-type ${isAddressMine(output.address) ? 'mine' : 'external'}`}>
-                  {isAddressMine(output.address) ? 'Mine' : 'External'}
+                <span className={`address-type ${isAddressMine(addr) ? 'mine' : 'external'}`}>
+                  {isAddressMine(addr) ? 'Mine' : 'External'}
                 </span>
               </div>
 
               <div className="output-address">
                 <span className="address-label">Address:</span>
                 <div className="address-display">
-                  <span className="address-text">{formatAddress(output.address)}</span>
+                  <span className="address-text">{formatAddress(addr)}</span>
                   <button
                     className="copy-btn"
-                    onClick={() => copyToClipboardHandler(output.address, 'Address')}
+                    onClick={() => copyToClipboardHandler(addr, 'Address')}
                   >
                     📋
                   </button>
@@ -229,28 +236,28 @@ export const TransactionDetails: React.FC<TransactionDetailsProps> = ({
                 )}
               </div>
 
-              {output.datum && (
+              {output.output.plutusData && (
                 <div className="output-datum">
                   <details>
                     <summary>Datum</summary>
                     <pre className="datum-content">
-                      {typeof output.datum === 'string'
-                        ? output.datum
-                        : JSON.stringify(output.datum, null, 2)
+                      {typeof output.output.plutusData === 'string'
+                        ? output.output.plutusData
+                        : JSON.stringify(output.output.plutusData, null, 2)
                       }
                     </pre>
                   </details>
                 </div>
               )}
 
-              {output.datumHash && (
+              {output.output.dataHash && (
                 <div className="output-datum-hash">
                   <span className="datum-hash-label">Datum Hash:</span>
                   <div className="datum-hash-display">
-                    <span className="datum-hash-text">{output.datumHash}</span>
+                    <span className="datum-hash-text">{output.output.dataHash}</span>
                     <button
                       className="copy-btn"
-                      onClick={() => copyToClipboardHandler(output.datumHash!, 'Datum hash')}
+                      onClick={() => copyToClipboardHandler(output.output.dataHash!, 'Datum hash')}
                     >
                       📋
                     </button>

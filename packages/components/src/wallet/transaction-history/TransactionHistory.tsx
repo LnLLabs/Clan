@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Assets, WalletInterface, MetadataProvider, Transaction, BlockchainExplorer } from '@clan/framework-core';
+import { Assets, WalletInterface, MetadataProvider, Transaction, BlockchainExplorer, meshUtxoToAssets } from '@clan/framework-core';
 import { TokenElement } from '../token/TokenElement';
 import { createDefaultExplorer } from './default-explorer';
 import { CardanoLogo } from '../../assets';
@@ -71,9 +71,10 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
           // Sum all inputs from wallet address (what was spent)
           const inputAssets: Assets = {};
           tx.inputs.forEach(input => {
-            if (input.address === walletAddress) {
-              Object.entries(input.assets).forEach(([assetId, amount]) => {
-                inputAssets[assetId] = (inputAssets[assetId] || BigInt(0)) + amount;
+            if (input.output.address === walletAddress) {
+              const utxoAssets = meshUtxoToAssets(input);
+              Object.entries(utxoAssets).forEach(([assetId, amount]) => {
+                inputAssets[assetId] = (inputAssets[assetId] || BigInt(0)) + BigInt(amount);
               });
             }
           });
@@ -81,9 +82,10 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
           // Sum all outputs to wallet address (what was received)
           const outputAssets: Assets = {};
           tx.outputs.forEach(output => {
-            if (output.address === walletAddress) {
-              Object.entries(output.assets).forEach(([assetId, amount]) => {
-                outputAssets[assetId] = (outputAssets[assetId] || BigInt(0)) + amount;
+            if (output.output.address === walletAddress) {
+              const utxoAssets = meshUtxoToAssets(output);
+              Object.entries(utxoAssets).forEach(([assetId, amount]) => {
+                outputAssets[assetId] = (outputAssets[assetId] || BigInt(0)) + BigInt(amount);
               });
             }
           });

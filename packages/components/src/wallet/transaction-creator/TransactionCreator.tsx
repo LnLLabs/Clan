@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Assets, UTxO, WalletInterface, TransactionBuildOptions, MetadataProvider } from '@clan/framework-core';
-import { coinSelect } from '@clan/framework-core';
+import {
+  Assets,
+  UTxO,
+  WalletInterface,
+  TransactionBuildOptions,
+  MetadataProvider,
+  meshUtxoLovelace,
+  coinSelect
+} from '@clan/framework-core';
 import { Button } from '../../ui/buttons/Button';
 import { Modal } from '../../ui/modals/Modal';
 import { ContactPicker } from '../../contacts/ContactPicker';
@@ -676,8 +683,9 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
                       className="max-ada-button"
                       onClick={() => {
                         // Get total available ADA from wallet
-                        const totalLovelace = resolvedUtxos.reduce((sum, utxo) =>
-                          sum + (utxo.assets['lovelace'] || 0n), 0n
+                        const totalLovelace = resolvedUtxos.reduce(
+                          (sum, utxo) => sum + meshUtxoLovelace(utxo),
+                          0n
                         );
                         const newRecipients = [...recipients];
                         newRecipients[index] = {

@@ -1,7 +1,7 @@
-import { UTxO, Assets } from '../types';
+import { meshUtxoToAssets, meshUtxosEqual } from '../mesh-utxo';
+import type { Assets, UTxO } from '../types';
 
 const UPPERBOUND: number = 10;
-const MAX_EXTRA: number = 5;
 
 /**
  * Coin selection algorithm for UTXO selection
@@ -25,49 +25,43 @@ export function coinSelect(value: Assets, utxos: UTxO[]): UTxO[] {
    * Sort UTXOs by how well they match the remaining value requirements
    * Prioritizes UTXOs that contain more of the needed assets
    */
-  function sortByLeft(utxos: UTxO[], value: Assets): UTxO[] {
-    const targetAssets: string[] = Object.keys(value).filter(asset => value[asset] > 0n);
+  function sortByLeft(utxoList: UTxO[], value_: Assets): UTxO[] {
+    const targetAssets: string[] = Object.keys(value_).filter(asset => value_[asset] > 0n);
 
-    const sortedUtxos = utxos.sort((a, b) => {
-      // Sort by the total amount of target assets available
-      const aLeft = targetAssets.reduce((acc, asset) => acc + BigInt(a.assets[asset as keyof Assets] || 0), 0n);
-      const bLeft = targetAssets.reduce((acc, asset) => acc + BigInt(b.assets[asset as keyof Assets] || 0), 0n);
+    return [...utxoList].sort((a, b) => {
+      const assetsA = meshUtxoToAssets(a);
+      const assetsB = meshUtxoToAssets(b);
+      const aLeft = targetAssets.reduce((acc, asset) => acc + BigInt(assetsA[asset as keyof Assets] || 0), 0n);
+      const bLeft = targetAssets.reduce((acc, asset) => acc + BigInt(assetsB[asset as keyof Assets] || 0), 0n);
       return Number(bLeft - aLeft);
     });
-    return sortedUtxos;
   }
 
-  // Sort UTXOs in descending order of lovelace value as fallback
   let availableUtxos = utxos;
   let selectedUtxos: UTxO[] = [];
   let totalRemaining: Assets = { ...value };
 
-  // Initialize totalRemaining with required values
   for (const asset in value) {
     if (!totalRemaining[asset]) {
       totalRemaining[asset] = value[asset];
     }
   }
 
-  // Iterate through sorted UTXOs
   while (availableUtxos.length > 0 && !isEnoughValue(totalRemaining)) {
-    let sortedUtxos = sortByLeft(availableUtxos, totalRemaining);
+    const sortedUtxos = sortByLeft(availableUtxos, totalRemaining);
     const selectedUtxo = sortedUtxos[0];
 
     selectedUtxos.push(selectedUtxo);
 
-    // Remove selected UTXO from available pool
-    availableUtxos = availableUtxos.filter(utxo =>
-      !(utxo.txHash === selectedUtxo.txHash && utxo.outputIndex === selectedUtxo.outputIndex)
-    );
+    availableUtxos = availableUtxos.filter(utxo => !meshUtxosEqual(utxo, selectedUtxo));
 
-    // Subtract all assets from the selected UTXO from remaining requirements
-    for (const asset in selectedUtxo.assets) {
+    const selectedAssets = meshUtxoToAssets(selectedUtxo);
+    for (const asset in selectedAssets) {
       if (!totalRemaining[asset]) {
         totalRemaining[asset] = 0n;
       }
 
-      const utxoAmount = BigInt(selectedUtxo.assets[asset] || 0);
+      const utxoAmount = BigInt(selectedAssets[asset] || 0);
       const remaining = totalRemaining[asset];
 
       if (utxoAmount >= remaining) {
@@ -78,7 +72,6 @@ export function coinSelect(value: Assets, utxos: UTxO[]): UTxO[] {
     }
   }
 
-  // Check if we have enough value after selection
   if (!isEnoughValue(totalRemaining)) {
     throw new Error('Insufficient funds: Not enough UTXOs to cover the required amount');
   }
@@ -92,19 +85,18 @@ export function coinSelect(value: Assets, utxos: UTxO[]): UTxO[] {
  */
 export function coinSelectOptimized(value: Assets, utxos: UTxO[], maxUtxos: number = UPPERBOUND): UTxO[] {
   try {
-    // First try with optimized selection
     const selected = coinSelect(value, utxos);
 
-    // If we have too many UTXOs, try to optimize
     if (selected.length > maxUtxos) {
-      // Sort by largest first and try to cover with fewer UTXOs
-      const largeUtxos = utxos
+      const largeUtxos = [...utxos]
         .sort((a, b) => {
-          const aTotal = Object.values(a.assets).reduce((sum, amt) => sum + BigInt(amt), 0n);
-          const bTotal = Object.values(b.assets).reduce((sum, amt) => sum + BigInt(amt), 0n);
+          const sumAssets = (u: UTxO) =>
+            Object.values(meshUtxoToAssets(u)).reduce((sum, amt) => sum + BigInt(amt), 0n);
+          const aTotal = sumAssets(a);
+          const bTotal = sumAssets(b);
           return Number(bTotal - aTotal);
         })
-        .slice(0, maxUtxos * 2); // Try with double the limit
+        .slice(0, maxUtxos * 2);
 
       try {
         const optimized = coinSelect(value, largeUtxos);
@@ -117,12 +109,13 @@ export function coinSelectOptimized(value: Assets, utxos: UTxO[], maxUtxos: numb
     }
 
     return selected;
-  } catch (error) {
-    // If optimized selection fails, fall back to largest-first approach
-    const largestFirst = utxos
+  } catch {
+    const largestFirst = [...utxos]
       .sort((a, b) => {
-        const aTotal = Object.values(a.assets).reduce((sum, amt) => sum + BigInt(amt), 0n);
-        const bTotal = Object.values(b.assets).reduce((sum, amt) => sum + BigInt(amt), 0n);
+        const sumAssets = (u: UTxO) =>
+          Object.values(meshUtxoToAssets(u)).reduce((sum, amt) => sum + BigInt(amt), 0n);
+        const aTotal = sumAssets(a);
+        const bTotal = sumAssets(b);
         return Number(bTotal - aTotal);
       })
       .slice(0, Math.min(maxUtxos, utxos.length));
@@ -138,7 +131,7 @@ export function calculateUtxoTotal(utxos: UTxO[]): Assets {
   const total: Assets = {};
 
   for (const utxo of utxos) {
-    for (const [asset, amount] of Object.entries(utxo.assets)) {
+    for (const [asset, amount] of Object.entries(meshUtxoToAssets(utxo))) {
       if (!total[asset]) {
         total[asset] = 0n;
       }
@@ -189,7 +182,7 @@ export function validateCoinSelection(selectedUtxos: UTxO[], requiredValue: Asse
  */
 export function filterDustUtxos(utxos: UTxO[], minAdaValue: bigint = 1000000n): UTxO[] {
   return utxos.filter(utxo => {
-    const adaAmount = BigInt(utxo.assets['lovelace'] || 0);
+    const adaAmount = BigInt(meshUtxoToAssets(utxo)['lovelace'] || 0);
     return adaAmount >= minAdaValue;
   });
 }
@@ -212,4 +205,3 @@ export function getUtxoSelectionStats(selectedUtxos: UTxO[], requiredValue: Asse
     isValid: validateCoinSelection(selectedUtxos, requiredValue)
   };
 }
-

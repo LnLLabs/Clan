@@ -1,9 +1,7 @@
 /node_modules
-/packages/components/dist
-/packages/helpers/dist
-/packages/providers/dist
-/packages/core/dist
+# Build outputs
+**/dist/
+
 /packages/components/node_modules
 packages/providers/node_modules/@types/react/canary.d.ts
 /packages/providers/node_modules
-packages/react/dist

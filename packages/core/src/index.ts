@@ -1,5 +1,12 @@
 // Core types and interfaces
 export * from './types';
+export {
+  meshAmountArrayToAssets,
+  meshUtxoToAssets,
+  meshUtxoLovelace,
+  meshUtxoOutRefKey,
+  meshUtxosEqual
+} from './mesh-utxo';
 export * from './wallet-interface';
 export * from './transaction-types';
 export * from './network-config';

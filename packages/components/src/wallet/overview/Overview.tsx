@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { WalletInterface, Assets, MetadataProvider } from '@clan/framework-core';
+import { useWalletBalance, useWalletUtxos } from '@clan/react';
 import { useMetadataProvider } from '@clan/framework-providers';
 import { getTokenInfo, getNFTDisplayInfo, TokenInfo } from '@clan/framework-helpers';
 import { CardanoLogo } from '../../assets';
@@ -258,28 +259,31 @@ export const Overview: React.FC<OverviewProps> = ({
   const [fundedAddresses, setFundedAddresses] = useState<string[]>([]);
   const [filter, setFilter] = useState<'Tokens' | 'NFTs'>('Tokens');
   const [search, setSearch] = useState('');
-  const [balance, setBalance] = useState<Assets>({});
+  const { data: balanceData } = useWalletBalance(wallet, { refetchInterval: 10000 });
+  useWalletUtxos(wallet, { refetchInterval: 10000 });
+  const balance: Assets = balanceData ?? {};
   const [visibleCount, setVisibleCount] = useState(5);
   const [tokenMetadataMap, setTokenMetadataMap] = useState<Record<string, TokenInfo | null>>({});
 
   useEffect(() => {
     const loadWalletData = async () => {
-      try {
-        if (wallet.getDefaultAddress && !initialSelectedAddress) {
+      if (wallet.getDefaultAddress && !initialSelectedAddress) {
+        try {
           const defaultAddr = await wallet.getDefaultAddress();
           setDefaultAddress(defaultAddr);
           setSelectedAddress(defaultAddr);
+        } catch (error) {
+          console.error('Failed to load default address:', error);
         }
+      }
 
-        if (wallet.getFundedAddress) {
+      if (wallet.getFundedAddress) {
+        try {
           const addresses = await wallet.getFundedAddress();
           setFundedAddresses(addresses);
+        } catch (error) {
+          console.error('Failed to load funded addresses:', error);
         }
-
-        const bal = await wallet.getBalance();
-        setBalance(bal);
-      } catch (error) {
-        console.error('Failed to load wallet data:', error);
       }
     };
 

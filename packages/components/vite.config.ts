@@ -21,7 +21,7 @@ export default defineConfig({
       exclude: ['src/**/*.test.ts', 'src/**/*.test.tsx', 'node_modules/**', 'src/**/*.css'],
       copyDtsFiles: false,
       staticImport: true,
-      rollupTypes: true,
+      rollupTypes: false,
     })
   ],
   css: {
@@ -42,6 +42,7 @@ export default defineConfig({
         'react-dom',
         'react/jsx-runtime',
         '@clan/react',
+        '@tanstack/react-query',
         '@clan/framework-core',
         '@clan/framework-providers',
         '@clan/framework-helpers'

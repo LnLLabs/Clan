@@ -1,5 +1,9 @@
 // Generic blockchain types that can be used across different implementations
 
+import type { UTxO } from '@meshsdk/common';
+
+export type { UTxO };
+
 export type Address = string;
 export type Hash = string;
 export type PolicyId = string;
@@ -14,15 +18,6 @@ export interface Asset {
 
 export interface Assets {
   [assetId: string]: bigint;
-}
-
-export interface UTxO {
-  txHash: Hash;
-  outputIndex: number;
-  address: Address;
-  assets: Assets;
-  datum?: string;
-  datumHash?: Hash;
 }
 
 export interface Transaction {

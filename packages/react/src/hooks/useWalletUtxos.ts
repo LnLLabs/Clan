@@ -1,4 +1,5 @@
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import { WalletInterface, UTxO } from '@clan/framework-core';
 
 export interface UseWalletUtxosOptions {
@@ -17,9 +18,10 @@ export const useWalletUtxos = (
   options: UseWalletUtxosOptions = {}
 ): UseQueryResult<UTxO[], Error> => {
   const { refetchInterval = 10000, enabled = true } = options;
+  const queryClient = useQueryClient();
   const walletId = wallet.getName(); // Derive from wallet
 
-  return useQuery({
+  const result = useQuery({
     queryKey: ['wallet', walletId, 'utxos'],
     queryFn: async () => {
       return await wallet.getUtxos();
@@ -27,5 +29,14 @@ export const useWalletUtxos = (
     refetchInterval,
     enabled,
   });
+
+  useEffect(() => {
+    if (!result.isSuccess) {
+      return;
+    }
+    void queryClient.invalidateQueries({ queryKey: ['wallet', walletId, 'balance'] });
+  }, [queryClient, result.dataUpdatedAt, result.isSuccess, walletId]);
+
+  return result;
 };
 

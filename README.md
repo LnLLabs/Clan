@@ -147,9 +147,28 @@ function WalletDashboard() {
 
 ## 📚 API Reference
 
+### Breaking changes (UTxO shape)
+
+`UTxO` is now [Mesh](https://meshjs.dev/)’s type from `@meshsdk/common` (re-exported as `UTxO` from `@clan/framework-core`). It uses nested `input` / `output` and token amounts as `output.amount` with string quantities instead of a flat `assets` map.
+
+Implementations of `WalletInterface` must return this shape from `getUtxos()`, collateral helpers, and any APIs that expose `UTxO[]`. Use helpers such as `meshUtxoToAssets` and `meshUtxoLovelace` from `@clan/framework-core` when you need Clan-style `Assets`.
+
 ### Core Types
 
 ```typescript
+/** Mirrors Mesh SDK — see @meshsdk/common */
+type UTxO = {
+  input: { txHash: string; outputIndex: number };
+  output: {
+    address: string;
+    amount: { unit: string; quantity: string }[];
+    dataHash?: string;
+    plutusData?: string;
+    scriptRef?: string;
+    scriptHash?: string;
+  };
+};
+
 interface WalletInterface {
   getName(): string;
   getAddress(): string;
