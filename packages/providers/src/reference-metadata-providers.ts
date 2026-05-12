@@ -1,247 +1,32 @@
-import { 
-  MetadataProvider, 
-  TokenMetadata, 
-  TokenSearchResult,
-  NoOpMetadataProvider 
+import {
+  MetadataProvider,
+  NoOpMetadataProvider,
+  MeshAssetMetadataFetcher
 } from '@clan/framework-core';
+import {
+  MeshMetadataProvider,
+  MeshMetadataProviderOptions,
+  createMeshMetadataProvider
+} from './mesh-metadata-provider';
+
+type BlockfrostFetcher = MeshAssetMetadataFetcher;
+type MaestroFetcher = MeshAssetMetadataFetcher;
 
 /**
- * Reference implementation: Blockfrost Metadata Provider
- * Fetches token metadata from Blockfrost API
+ * Backward-compatible Blockfrost provider that delegates normalization to MeshMetadataProvider.
  */
-export class BlockfrostMetadataProvider implements MetadataProvider {
-  private baseUrl: string;
-  private projectId: string;
-  private cache: Map<string, TokenMetadata> = new Map();
-
-  constructor(baseUrl: string, projectId: string) {
-    this.baseUrl = baseUrl.replace(/\/$/, ''); // Remove trailing slash
-    this.projectId = projectId;
-  }
-
-  async getTokenMetadata(policyId: string, assetName: string): Promise<TokenMetadata | undefined> {
-    const assetId = policyId + assetName;
-    
-    // Check cache first
-    if (this.cache.has(assetId)) {
-      return this.cache.get(assetId);
-    }
-
-    try {
-      const response = await fetch(`${this.baseUrl}/assets/${assetId}`, {
-        headers: {
-          'project_id': this.projectId
-        }
-      });
-
-      if (!response.ok) {
-        if (response.status === 404) return undefined;
-        throw new Error(`Blockfrost API error: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      
-      const name = data.onchain_metadata?.name || data.asset_name || '';
-      const ticker = data.onchain_metadata?.ticker || '';
-      const decimals = typeof data.onchain_metadata?.decimals === 'number' 
-        ? data.onchain_metadata.decimals 
-        : 0;
-      
-      const metadata: TokenMetadata = {
-        policyId,
-        assetName,
-        name,
-        ticker,
-        description: data.onchain_metadata?.description,
-        decimals,
-        logo: this.processImageUrl(data.onchain_metadata?.logo || data.onchain_metadata?.image),
-        url: data.onchain_metadata?.url,
-        isNft: this.detectIsNft(data.onchain_metadata, decimals, ticker),
-        // Include raw metadata
-        raw: data.onchain_metadata
-      };
-
-      // Cache the result
-      this.cache.set(assetId, metadata);
-      
-      return metadata;
-    } catch (error) {
-      console.warn(`Failed to fetch metadata for ${assetId}:`, error);
-      return undefined;
-    }
-  }
-
-  async searchTokens(query: string, limit: number = 10): Promise<TokenSearchResult[]> {
-    // Blockfrost doesn't have a direct search endpoint
-    // This would require a custom indexer or database
-    return [];
-  }
-
-  async batchGetTokenMetadata(
-    tokens: Array<{ policyId: string; assetName: string }>
-  ): Promise<(TokenMetadata | undefined)[]> {
-    // Fetch in parallel with rate limiting
-    const results = await Promise.all(
-      tokens.map(({ policyId, assetName }) => 
-        this.getTokenMetadata(policyId, assetName)
-      )
-    );
-    return results;
-  }
-
-  private processImageUrl(imageUrl?: string): string {
-    if (!imageUrl) return '';
-    
-    // Handle IPFS URLs
-    if (imageUrl.startsWith('ipfs://')) {
-      return imageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
-    }
-    
-    // Handle already processed URLs
-    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-      return imageUrl;
-    }
-    
-    return imageUrl;
-  }
-
-  private detectIsNft(data: any, decimals?: number, ticker?: string): boolean {
-    // Check explicit flag
-    if (typeof data?.isNft === 'boolean') {
-      return data.isNft;
-    }
-
-    // Check assetType
-    if (typeof data?.assetType === 'string') {
-      return data.assetType.toLowerCase().includes('nft');
-    }
-
-    // Check tags
-    if (Array.isArray(data?.tags)) {
-      if (data.tags.some((tag: any) => String(tag).toLowerCase().includes('nft'))) {
-        return true;
-      }
-    }
-
-    // Heuristic: decimals === 0 and no ticker suggests NFT
-    if (typeof decimals === 'number' && decimals === 0 && !ticker) {
-      return true;
-    }
-
-    return false;
+export class BlockfrostMetadataProvider extends MeshMetadataProvider {
+  constructor(baseUrl: string, projectId: string, options?: MeshMetadataProviderOptions) {
+    super(createBlockfrostFetcher(baseUrl, projectId), options);
   }
 }
 
 /**
- * Reference implementation: Maestro Metadata Provider
- * Fetches token metadata from Maestro API
+ * Backward-compatible Maestro provider that delegates normalization to MeshMetadataProvider.
  */
-export class MaestroMetadataProvider implements MetadataProvider {
-  private apiKey: string;
-  private network: string;
-  private cache: Map<string, TokenMetadata> = new Map();
-
-  constructor(apiKey: string, network: string = 'mainnet') {
-    this.apiKey = apiKey;
-    this.network = network;
-  }
-
-  async getTokenMetadata(policyId: string, assetName: string): Promise<TokenMetadata | undefined> {
-    const assetId = policyId + assetName;
-    
-    // Check cache first
-    if (this.cache.has(assetId)) {
-      return this.cache.get(assetId);
-    }
-
-    try {
-      const response = await fetch(
-        `https://${this.network}.gomaestro-api.org/v1/assets/${assetId}`,
-        {
-          headers: {
-            'api-key': this.apiKey
-          }
-        }
-      );
-
-      if (!response.ok) {
-        if (response.status === 404) return undefined;
-        throw new Error(`Maestro API error: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      
-      const name = data.asset_name || data.token_registry_metadata?.name || '';
-      const ticker = data.token_registry_metadata?.ticker || '';
-      const decimals = typeof data.token_registry_metadata?.decimals === 'number'
-        ? data.token_registry_metadata.decimals
-        : 0;
-      const logo = data.token_registry_metadata?.logo || '';
-      
-      const metadata: TokenMetadata = {
-        policyId,
-        assetName,
-        name,
-        ticker,
-        description: data.token_registry_metadata?.description,
-        decimals,
-        logo,
-        url: data.token_registry_metadata?.url,
-        isNft: this.detectIsNft(data.token_registry_metadata || data, decimals, ticker),
-        // Include raw metadata
-        raw: data
-      };
-
-      // Cache the result
-      this.cache.set(assetId, metadata);
-      
-      return metadata;
-    } catch (error) {
-      console.warn(`Failed to fetch metadata for ${assetId}:`, error);
-      return undefined;
-    }
-  }
-
-  async searchTokens(query: string, limit: number = 10): Promise<TokenSearchResult[]> {
-    // Maestro may have search capabilities - implement if available
-    return [];
-  }
-
-  async batchGetTokenMetadata(
-    tokens: Array<{ policyId: string; assetName: string }>
-  ): Promise<(TokenMetadata | undefined)[]> {
-    const results = await Promise.all(
-      tokens.map(({ policyId, assetName }) => 
-        this.getTokenMetadata(policyId, assetName)
-      )
-    );
-    return results;
-  }
-
-  private detectIsNft(data: any, decimals?: number, ticker?: string): boolean {
-    // Check explicit flag
-    if (typeof data?.isNft === 'boolean') {
-      return data.isNft;
-    }
-
-    // Check assetType
-    if (typeof data?.assetType === 'string') {
-      return data.assetType.toLowerCase().includes('nft');
-    }
-
-    // Check tags
-    if (Array.isArray(data?.tags)) {
-      if (data.tags.some((tag: any) => String(tag).toLowerCase().includes('nft'))) {
-        return true;
-      }
-    }
-
-    // Heuristic: decimals === 0 and no ticker suggests NFT
-    if (typeof decimals === 'number' && decimals === 0 && !ticker) {
-      return true;
-    }
-
-    return false;
+export class MaestroMetadataProvider extends MeshMetadataProvider {
+  constructor(apiKey: string, network: string = 'mainnet', options?: MeshMetadataProviderOptions) {
+    super(createMaestroFetcher(apiKey, network), options);
   }
 }
 
@@ -273,6 +58,48 @@ export function createMetadataProvider(config: {
     default:
       return new NoOpMetadataProvider();
   }
+}
+
+export { MeshMetadataProvider, createMeshMetadataProvider };
+export type { MeshMetadataProviderOptions };
+
+function createBlockfrostFetcher(baseUrl: string, projectId: string): BlockfrostFetcher {
+  const normalizedBaseUrl = baseUrl.replace(/\/$/, '');
+  return {
+    async fetchAssetMetadata(assetId: string): Promise<unknown> {
+      const response = await fetch(`${normalizedBaseUrl}/assets/${assetId}`, {
+        headers: { project_id: projectId }
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          return undefined;
+        }
+        throw new Error(`Blockfrost API error: ${response.statusText}`);
+      }
+
+      return response.json();
+    }
+  };
+}
+
+function createMaestroFetcher(apiKey: string, network: string): MaestroFetcher {
+  return {
+    async fetchAssetMetadata(assetId: string): Promise<unknown> {
+      const response = await fetch(`https://${network}.gomaestro-api.org/v1/assets/${assetId}`, {
+        headers: { 'api-key': apiKey }
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          return undefined;
+        }
+        throw new Error(`Maestro API error: ${response.statusText}`);
+      }
+
+      return response.json();
+    }
+  };
 }
 
 

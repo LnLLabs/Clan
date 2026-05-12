@@ -3,6 +3,8 @@
 import type { UTxO } from '@meshsdk/common';
 
 export type { UTxO };
+/** Mesh transaction bundle (`unit` + string `quantity`), e.g. for `MeshTxBuilder.txOut`. */
+export type { Asset as MeshAsset } from '@meshsdk/common';
 
 export type Address = string;
 export type Hash = string;
@@ -10,6 +12,7 @@ export type PolicyId = string;
 export type AssetName = string;
 export type AssetId = string;
 
+/** Policy/name split balance row (UI / helpers); not the Mesh tx `Asset` shape. */
 export interface Asset {
   policyId: PolicyId;
   assetName: AssetName;

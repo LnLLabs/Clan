@@ -190,6 +190,24 @@ function TokenDisplay({ tokenId }: { tokenId: string }) {
 
 Clan provides reference implementations for common providers:
 
+### Mesh Fetcher Adapter (Recommended)
+
+If you already have a Mesh fetcher provider instance, wrap it directly:
+
+```typescript
+import { createMeshMetadataProvider } from '@clan/framework-providers';
+import { KoiosProvider } from '@meshsdk/core';
+
+const fetcher = new KoiosProvider('preprod', process.env.KOIOS_API_KEY);
+const provider = createMeshMetadataProvider(fetcher);
+```
+
+This works with Mesh providers that implement `fetchAssetMetadata(assetId)`, such as
+Blockfrost, Maestro, Koios, UTxORPC/U5C, Yaci, and OfflineFetcher.
+
+`Ogmios` is submit/evaluate-only and does not expose token metadata fetch methods, so it
+cannot be used as a standalone metadata source.
+
 ### Blockfrost
 
 ```typescript
@@ -222,6 +240,14 @@ const provider = createMetadataProvider({
   blockfrostUrl: 'https://cardano-mainnet.blockfrost.io/api/v0',
   blockfrostProjectId: 'your-project-id'
 });
+```
+
+### Mesh Factory Helper
+
+```typescript
+import { createMeshMetadataProvider } from '@clan/framework-providers';
+
+const provider = createMeshMetadataProvider(meshFetcherInstance);
 ```
 
 ### No-Op (No Metadata)

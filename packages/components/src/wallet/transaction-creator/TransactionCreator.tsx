@@ -6,7 +6,8 @@ import {
   TransactionBuildOptions,
   MetadataProvider,
   meshUtxoLovelace,
-  coinSelect
+  coinSelect,
+  assetsMapToMeshAssets,
 } from '@clan/framework-core';
 import { Button } from '../../ui/buttons/Button';
 import { Modal } from '../../ui/modals/Modal';
@@ -514,7 +515,10 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
   const previewTransactionCreation = async () => {
     try {
       const options: TransactionBuildOptions = {
-        outputs: recipients.map(r => ({ address: r.address, assets: r.assets }))
+        outputs: recipients.map((r) => ({
+          address: r.address,
+          amount: assetsMapToMeshAssets(r.assets),
+        })),
       };
       setPreviewOptions(options);
       setShowPreview(true);
@@ -530,7 +534,10 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
     setIsCreating(true);
     try {
       const options: TransactionBuildOptions = {
-        outputs: recipients.map(r => ({ address: r.address, assets: r.assets }))
+        outputs: recipients.map((r) => ({
+          address: r.address,
+          amount: assetsMapToMeshAssets(r.assets),
+        })),
       };
 
       onTransactionCreated?.(options);

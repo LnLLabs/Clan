@@ -1,8 +1,12 @@
 import { useMutation, useQueryClient, UseMutationResult } from '@tanstack/react-query';
-import { WalletInterface } from '@clan/framework-core';
+import {
+  WalletInterface,
+  assetsMapToMeshAssets,
+} from '@clan/framework-core';
 
 export interface SendTransactionParams {
   recipientAddress: string;
+  /** Mesh-style bundle; converted into `{ address, amount }` for `createTransaction`. */
   assets: Record<string, bigint>;
   options?: any;
 }
@@ -37,7 +41,7 @@ export const useSendTransaction = (
     mutationFn: async ({ recipientAddress, assets, options: txOptions }: SendTransactionParams) => {
       // Create transaction draft
       const draft = await wallet.createTransaction(
-        [{ address: recipientAddress, assets }],
+        [{ address: recipientAddress, amount: assetsMapToMeshAssets(assets) }],
         txOptions
       );
 

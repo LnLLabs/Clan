@@ -1,7 +1,8 @@
 import {
   Address,
-  Hash,
   Assets,
+  MeshAsset,
+  Hash,
   UTxO,
   Transaction,
   NetworkConfig,
@@ -34,11 +35,11 @@ export interface WalletInterface {
 
   // Transaction management
   createTransaction(
-    outputs: { address: Address; assets: Assets }[],
+    outputs: { address: Address; amount: MeshAsset[] }[],
     options?: TransactionOptions
   ): Promise<TransactionDraft>;
 
-  buildTransaction(options: TransactionBuildOptions): Promise<TransactionDraft>;
+  buildTransaction(options: TransactionBuildOptions): Promise<string>;
   signTransaction(draft: TransactionDraft): Promise<SignedTransaction>;
   submitTransaction(signedTx: SignedTransaction): Promise<Hash>;
 
@@ -77,7 +78,7 @@ export interface TransactionOptions {
 
 // Transaction build options
 export interface TransactionBuildOptions {
-  outputs: { address: Address; assets: Assets }[];
+  outputs: { address: Address; amount: MeshAsset[] }[];
   options?: TransactionOptions;
 }
 

@@ -1,4 +1,13 @@
+import type { Asset as MeshAsset } from '@meshsdk/common';
 import type { Assets, UTxO } from './types';
+
+/** Expand Clan balance-style map into Mesh {@link MeshAsset}[] for transaction outputs. */
+export function assetsMapToMeshAssets(assets: Assets): MeshAsset[] {
+  return Object.entries(assets).map(([unit, quantity]) => ({
+    unit,
+    quantity: quantity.toString(),
+  }));
+}
 
 /** Collapse Mesh `output.amount` into Clan {@link Assets} (bigint quantities). */
 export function meshAmountArrayToAssets(

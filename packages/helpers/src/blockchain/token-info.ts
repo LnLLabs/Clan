@@ -5,7 +5,7 @@
  * It uses the MetadataProvider interface for dependency injection.
  */
 
-import { MetadataProvider, TokenMetadata } from '@clan/framework-core';
+import { MetadataProvider, TokenMetadata, parseAssetId } from '@clan/framework-core';
 
 export interface TokenInfo {
   name: string;
@@ -88,15 +88,7 @@ async function fetchTokenDataWithProvider(
  * Parse tokenId into policyId and assetName
  */
 function parseTokenId(tokenId: string): { policyId: string; assetName: string } {
-  if (tokenId.length <= 56) {
-    // Assume entire string is policy ID with no asset name
-    return { policyId: tokenId, assetName: '' };
-  }
-  
-  return {
-    policyId: tokenId.slice(0, 56),
-    assetName: tokenId.slice(56)
-  };
+  return parseAssetId(tokenId);
 }
 
 /**

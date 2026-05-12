@@ -34,8 +34,12 @@ export {
 export { 
   BlockfrostMetadataProvider,
   MaestroMetadataProvider,
+  MeshMetadataProvider,
+  createMeshMetadataProvider,
   createMetadataProvider
 } from './reference-metadata-providers';
+export type { MeshMetadataProviderOptions } from './reference-metadata-providers';
+export { hasAssetMetadataFetcher } from '@clan/framework-core';
 
 // Blockchain Explorer System
 export {

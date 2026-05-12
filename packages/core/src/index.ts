@@ -5,18 +5,21 @@ export {
   meshUtxoToAssets,
   meshUtxoLovelace,
   meshUtxoOutRefKey,
-  meshUtxosEqual
+  meshUtxosEqual,
+  assetsMapToMeshAssets
 } from './mesh-utxo';
 export * from './wallet-interface';
 export * from './transaction-types';
 export * from './network-config';
 export * from './coin-select';
+export * from './metadata';
 
 // Re-export commonly used types
 export type {
   Address,
   Hash,
   Asset,
+  MeshAsset,
   Assets,
   UTxO,
   Transaction,
