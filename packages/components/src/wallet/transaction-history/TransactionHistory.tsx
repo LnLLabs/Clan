@@ -1,10 +1,41 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Assets, WalletInterface, MetadataProvider, Transaction, BlockchainExplorer, meshUtxoToAssets } from '@clan/framework-core';
+import {
+  Assets,
+  WalletInterface,
+  MetadataProvider,
+  Transaction,
+  BlockchainExplorer,
+  meshUtxoToAssets,
+  parseAssetId
+} from '@clan/framework-core';
+import { useMetadataProvider } from '@clan/framework-providers';
 import { TokenElement } from '../token/TokenElement';
 import { createDefaultExplorer } from './default-explorer';
 import { CardanoLogo } from '../../assets';
 
 export type TransactionType = 'sent' | 'received' | 'withdrawal';
+
+const formatAbsoluteAmount = (amount: bigint, decimals: number = 0): string => {
+  if (decimals <= 0) {
+    return amount.toLocaleString();
+  }
+
+  const divisor = 10n ** BigInt(decimals);
+  const whole = amount / divisor;
+  const fraction = (amount % divisor)
+    .toString()
+    .padStart(decimals, '0')
+    .replace(/0+$/g, '');
+
+  const wholeText = whole.toLocaleString();
+  return fraction ? `${wholeText}.${fraction}` : wholeText;
+};
+
+const formatSignedAmount = (amount: bigint, decimals: number = 0): string => {
+  const isPositive = amount >= 0n;
+  const absoluteAmount = isPositive ? amount : -amount;
+  return `${isPositive ? '+' : '-'}${formatAbsoluteAmount(absoluteAmount, decimals)}`;
+};
 
 export interface TransactionHistoryItem {
   date: string; // Format: DD-MM-YYYY
@@ -41,6 +72,8 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>(undefined);
   const walletAddress = wallet.getAddress();
+  const metadataProviderFromContext = useMetadataProvider();
+  const effectiveMetadataProvider = metadataProvider ?? metadataProviderFromContext;
 
   // Create a default explorer if none provided - uses CExplorer with network auto-detection
   const effectiveExplorer = useMemo(() => {
@@ -49,15 +82,32 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
   }, [explorer, wallet]);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchTransactionHistory = async () => {
       try {
         setLoading(true);
         setError(undefined);
 
+        const ownedAddresses = new Set<string>([walletAddress]);
+        const addressResults = await Promise.allSettled([
+          wallet.getDefaultAddress?.(),
+          wallet.getFundedAddress?.()
+        ]);
+
+        const [defaultAddressResult, fundedAddressResult] = addressResults;
+        if (defaultAddressResult.status === 'fulfilled' && defaultAddressResult.value) {
+          ownedAddresses.add(defaultAddressResult.value);
+        }
+
+        if (fundedAddressResult.status === 'fulfilled' && fundedAddressResult.value) {
+          fundedAddressResult.value.forEach(address => ownedAddresses.add(address));
+        }
+
         // Try to fetch from wallet's getTransactionHistory method
         let rawTransactions: Transaction[] = [];
-        if (metadataProvider?.getTransactionHistory) {
-          rawTransactions = await metadataProvider.getTransactionHistory(walletAddress, limit);
+        if (effectiveMetadataProvider?.getTransactionHistory) {
+          rawTransactions = await effectiveMetadataProvider.getTransactionHistory(walletAddress, limit);
         }
 
         // Transform Transaction to TransactionHistoryItem
@@ -71,7 +121,7 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
           // Sum all inputs from wallet address (what was spent)
           const inputAssets: Assets = {};
           tx.inputs.forEach(input => {
-            if (input.output.address === walletAddress) {
+            if (ownedAddresses.has(input.output.address)) {
               const utxoAssets = meshUtxoToAssets(input);
               Object.entries(utxoAssets).forEach(([assetId, amount]) => {
                 inputAssets[assetId] = (inputAssets[assetId] || BigInt(0)) + BigInt(amount);
@@ -82,7 +132,7 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
           // Sum all outputs to wallet address (what was received)
           const outputAssets: Assets = {};
           tx.outputs.forEach(output => {
-            if (output.output.address === walletAddress) {
+            if (ownedAddresses.has(output.output.address)) {
               const utxoAssets = meshUtxoToAssets(output);
               Object.entries(utxoAssets).forEach(([assetId, amount]) => {
                 outputAssets[assetId] = (outputAssets[assetId] || BigInt(0)) + BigInt(amount);
@@ -159,45 +209,43 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
           };
         });
 
+        if (!isMounted) {
+          return;
+        }
+
         setTransactions(historyItems);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching transaction history:', err);
+        if (!isMounted) {
+          return;
+        }
+
         setError(err instanceof Error ? err.message : 'Failed to fetch transaction history');
         setLoading(false);
       }
     };
 
     fetchTransactionHistory();
-  }, [wallet, walletAddress, limit, effectiveExplorer]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [wallet, walletAddress, limit, effectiveExplorer, effectiveMetadataProvider]);
 
   const visibleTransactions = maxVisibleTransactions
     ? transactions.slice(0, maxVisibleTransactions)
     : transactions;
 
   const splitTokenId = (tokenId: string): { policyId: string; assetName: string } => {
-    if (!tokenId || tokenId === 'lovelace') {
-      return { policyId: '', assetName: '' };
-    }
-
-    if (tokenId.length <= 56) {
-      return { policyId: tokenId, assetName: '' };
-    }
-
-    return {
-      policyId: tokenId.slice(0, 56),
-      assetName: tokenId.slice(56)
-    };
+    return parseAssetId(tokenId);
   };
 
   const handleTokenClick = (tokenId: string) => {
     if (!tokenId || tokenId === 'lovelace') return;
 
     const { policyId, assetName } = splitTokenId(tokenId);
-    const mainnetBaseUrl = 'https://cexplorer.io';
-    const tokenLink = assetName && assetName !== ''
-      ? `${mainnetBaseUrl}/asset/${policyId}${assetName}`
-      : `${mainnetBaseUrl}/policy/${policyId}`;
+    const tokenLink = effectiveExplorer.getTokenLink(policyId, assetName || undefined);
 
     if (tokenLink && typeof window !== 'undefined') {
       window.open(tokenLink, '_blank', 'noopener');
@@ -330,22 +378,20 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
                             </div>
                           </div>
                           <span className="asset-amount">
-                            {transaction.type === 'sent' ? '-' : '+'}
-                            {(Math.abs(Number(lovelaceEntry[1])) / 1000000).toFixed(2)}
+                            {formatSignedAmount(lovelaceEntry[1], 6)}
                           </span>
                         </div>
                       )}
                       
                       {otherAssets.map(([assetId, amount], assetIndex) => {
-                        const numAmount = Number(amount);
                         return (
                           <div key={assetIndex} className="asset-item token-asset">
                             <TokenElement
                               tokenId={assetId}
-                              amount={numAmount}
+                              amount={amount}
                               className="transaction-token"
-                              metadataProvider={metadataProvider}
-                            onClick={handleTokenClick}
+                              metadataProvider={effectiveMetadataProvider}
+                              onClick={handleTokenClick}
                             />
                           </div>
                         );

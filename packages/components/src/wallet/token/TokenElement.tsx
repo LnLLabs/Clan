@@ -5,7 +5,7 @@ import { getTokenInfo, TokenInfo } from '@clan/framework-helpers';
 
 export interface TokenElementProps {
   tokenId: string;
-  amount: number;
+  amount: number | bigint;
   filter?: 'FTs' | 'NFTs';
   search?: string;
   className?: string;
@@ -38,6 +38,35 @@ const decodeHexToAscii = (hex: string): string => {
 };
 
 const DEFAULT_TICKER = 'TOKEN';
+
+const formatAbsoluteBigIntAmount = (amount: bigint, decimals: number): string => {
+  const normalizedDecimals = Math.max(0, decimals);
+  if (normalizedDecimals === 0) {
+    return amount.toLocaleString();
+  }
+
+  const divisor = 10n ** BigInt(normalizedDecimals);
+  const whole = amount / divisor;
+  const fraction = (amount % divisor)
+    .toString()
+    .padStart(normalizedDecimals, '0')
+    .replace(/0+$/g, '');
+
+  const wholeText = whole.toLocaleString();
+  return fraction ? `${wholeText}.${fraction}` : wholeText;
+};
+
+const formatSignedAmount = (amount: number | bigint, decimals: number): string => {
+  if (typeof amount === 'bigint') {
+    const isPositive = amount >= 0n;
+    const absoluteAmount = isPositive ? amount : -amount;
+    return `${isPositive ? '+' : '-'}${formatAbsoluteBigIntAmount(absoluteAmount, decimals)}`;
+  }
+
+  const displayAmount = decimals ? amount / Math.pow(10, decimals) : amount;
+  const absoluteAmount = Math.abs(displayAmount);
+  return `${amount >= 0 ? '+' : '-'}${absoluteAmount.toLocaleString()}`;
+};
 
 export const TokenElement: React.FC<TokenElementProps> = ({
   tokenId,
@@ -239,10 +268,6 @@ export const TokenElement: React.FC<TokenElementProps> = ({
     );
   }
 
-  const displayAmount = tokenInfo?.decimals
-    ? amount / Math.pow(10, tokenInfo.decimals)
-    : amount;
-
   const tooltipInfo = (
     <div className="token-tooltip">
       <div className="token-tooltip-row token-tooltip-title">
@@ -283,13 +308,11 @@ export const TokenElement: React.FC<TokenElementProps> = ({
   );
 
   const isLongName = displayInfo.name.length > 20;
-  const isPositiveAmount = amount > 0;
+  const isPositiveAmount = typeof amount === 'bigint' ? amount > 0n : amount > 0;
   const placeholderInitial = displayInfo.ticker.charAt(0).toUpperCase();
   
   // Format amount with sign for display
-  const formattedAmount = isPositiveAmount 
-    ? `+${Math.abs(displayAmount).toLocaleString()}`
-    : `-${Math.abs(displayAmount).toLocaleString()}`;
+  const formattedAmount = formatSignedAmount(amount, tokenInfo?.decimals ?? 0);
 
   const handleImageError = () => {
     setImageError(true);
