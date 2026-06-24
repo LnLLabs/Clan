@@ -8,7 +8,7 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "clean": "rimraf dist",
-    "test": "echo \"No tests specified\""
+    "test": "tsx src/historyPaymentScript.test.ts"
   },
   "files": [
     "dist"
@@ -23,10 +23,12 @@
   "author": "BroClan Team",
   "license": "MPL-2.0",
   "dependencies": {
-    "@meshsdk/common": "1.9.0-beta.102"
+    "@meshsdk/common": "1.9.0-beta.102",
+    "@meshsdk/core-cst": "1.9.0-beta.102"
   },
   "devDependencies": {
     "rimraf": "^6.0.1",
+    "tsx": "^4.19.0",
     "typescript": "^5.0.0"
   }
 }

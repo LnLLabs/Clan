@@ -2,6 +2,7 @@ import React from 'react';
 import { WalletDelegation, DelegationInfo as ComponentDelegationInfo } from '@clan/framework-components';
 import { WalletInterface } from '@clan/framework-core';
 import { useDelegateStake } from '../hooks/useDelegateStake';
+import { useUnregisterStake } from '../hooks/useUnregisterStake';
 import { useWalletDelegation } from '../hooks/useWalletDelegation';
 import { useWithdrawRewards } from '../hooks/useWithdrawRewards';
 
@@ -66,30 +67,33 @@ export const WalletDelegationWithData: React.FC<WalletDelegationWithDataProps> =
   });
 
   // Convert DelegationInfo from core to component format
-  const componentDelegationInfo: ComponentDelegationInfo | undefined = delegationInfo ? {
-    stakeAddress: delegationInfo.stakeAddress,
-    delegatedPool: delegationInfo.delegatedPool,
-    rewards: delegationInfo.rewards,
-    nextRewardEpoch: delegationInfo.nextRewardEpoch
-  } : undefined;
+  const componentDelegationInfo: ComponentDelegationInfo | undefined = delegationInfo
+    ? {
+        stakeAddress: delegationInfo.stakeAddress,
+        delegatedPool: delegationInfo.delegatedPool,
+        delegatedDRep: delegationInfo.delegatedDRep,
+        rewards: delegationInfo.rewards,
+        nextRewardEpoch: delegationInfo.nextRewardEpoch,
+      }
+    : undefined;
 
-  // Handle delegation
+  const { mutateAsync: unregisterStake, isPending: isUndelegating } = useUnregisterStake(wallet, {
+    onSuccess: (data) => onSuccess?.('undelegate', data),
+    onError,
+  });
+
   const handleDelegate = async (poolId: string | null, drepId: string | null) => {
-    if (poolId) {
-      await delegateStake({ poolId });
+    if (!poolId && !drepId) {
+      throw new Error('Select a stake pool and/or dRep to delegate.');
     }
-    // TODO: Handle dRep delegation when implemented
-    if (drepId) {
-      console.log('dRep delegation not yet implemented');
-    }
+    await delegateStake({
+      poolId: poolId ?? undefined,
+      drepId: drepId ?? undefined,
+    });
   };
 
-  // Handle undelegation (delegate to null pool or use specific undelegate method if available)
   const handleUndelegate = async () => {
-    // Note: Implement based on your blockchain's undelegation mechanism
-    // For Cardano, you might need a specific undelegate transaction
-    console.log('Undelegate not yet implemented');
-    onError?.(new Error('Undelegate functionality not yet implemented'));
+    await unregisterStake();
   };
 
   // Handle reward withdrawal
@@ -109,6 +113,7 @@ export const WalletDelegationWithData: React.FC<WalletDelegationWithDataProps> =
       onUndelegate={handleUndelegate}
       onWithdrawRewards={handleWithdrawRewards}
       isDelegating={isDelegating}
+      isUndelegating={isUndelegating}
       isWithdrawing={isWithdrawing}
       className={className}
     />

@@ -29,6 +29,10 @@ export interface Transaction {
   outputs: UTxO[];
   withdrawals: { [credential: string]: bigint };
   fee: bigint;
+  /** Optional provider-supplied semantic type used for history labeling. */
+  transactionType?: string;
+  /** Optional net vault ADA delta for history display (negative = cost). */
+  historyLovelaceDelta?: bigint;
   metadata?: any;
   timestamp?: number;
 }

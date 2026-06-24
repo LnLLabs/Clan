@@ -6,7 +6,9 @@ import {
   Transaction,
   BlockchainExplorer,
   meshUtxoToAssets,
-  parseAssetId
+  parseAssetId,
+  paymentScriptHashFromAddress,
+  utxoMatchesPaymentScriptHash
 } from '@clan/framework-core';
 import { useMetadataProvider } from '@clan/framework-providers';
 import { TokenElement } from '../token/TokenElement';
@@ -37,9 +39,53 @@ const formatSignedAmount = (amount: bigint, decimals: number = 0): string => {
   return `${isPositive ? '+' : '-'}${formatAbsoluteAmount(absoluteAmount, decimals)}`;
 };
 
+const inferTransactionType = (
+  inputAssets: Assets,
+  outputAssets: Assets
+): TransactionType => {
+  const hasInputs = Object.keys(inputAssets).length > 0;
+  const hasOutputs = Object.keys(outputAssets).length > 0;
+
+  if (!hasInputs && hasOutputs) {
+    return 'received';
+  }
+
+  if (hasInputs && !hasOutputs) {
+    return 'sent';
+  }
+
+  if (hasInputs && hasOutputs) {
+    const totalChange = (outputAssets.lovelace ?? 0n) - (inputAssets.lovelace ?? 0n);
+
+    if (totalChange > 0n) {
+      return 'received';
+    }
+
+    if (totalChange < 0n) {
+      return 'sent';
+    }
+  }
+
+  return 'withdrawal';
+};
+
+const formatTransactionTypeLabel = (type: string): string => {
+  const normalizedType = type.trim();
+  if (!normalizedType) {
+    return 'Withdrawal';
+  }
+
+  const humanized = normalizedType
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/[_-]+/g, ' ');
+
+  return humanized.charAt(0).toUpperCase() + humanized.slice(1);
+};
+
 export interface TransactionHistoryItem {
   date: string; // Format: DD-MM-YYYY
   type: TransactionType;
+  transactionType?: string;
   assets: Assets;
   transactionLink: string;
   hash?: string;
@@ -90,19 +136,37 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
         setError(undefined);
 
         const ownedAddresses = new Set<string>([walletAddress]);
-        const addressResults = await Promise.allSettled([
-          wallet.getDefaultAddress?.(),
-          wallet.getFundedAddress?.()
-        ]);
-
-        const [defaultAddressResult, fundedAddressResult] = addressResults;
-        if (defaultAddressResult.status === 'fulfilled' && defaultAddressResult.value) {
-          ownedAddresses.add(defaultAddressResult.value);
+        let defaultAddress = walletAddress;
+        try {
+          const resolvedDefaultAddress = await wallet.getDefaultAddress?.();
+          if (resolvedDefaultAddress) {
+            defaultAddress = resolvedDefaultAddress;
+          }
+        } catch {
+          // keep walletAddress
         }
 
-        if (fundedAddressResult.status === 'fulfilled' && fundedAddressResult.value) {
-          fundedAddressResult.value.forEach(address => ownedAddresses.add(address));
+        const paymentScriptHash = paymentScriptHashFromAddress(defaultAddress);
+        const usePaymentScriptHashFilter = Boolean(paymentScriptHash);
+
+        if (!usePaymentScriptHashFilter) {
+          ownedAddresses.add(defaultAddress);
+
+          const fundedAddressResult = await Promise.allSettled([
+            wallet.getFundedAddress?.(),
+          ]).then((results) => results[0]);
+
+          if (fundedAddressResult.status === 'fulfilled' && fundedAddressResult.value) {
+            fundedAddressResult.value.forEach(address => ownedAddresses.add(address));
+          }
         }
+
+        const utxoBelongsToWallet = (utxo: Transaction['inputs'][number]): boolean => {
+          if (usePaymentScriptHashFilter && paymentScriptHash) {
+            return utxoMatchesPaymentScriptHash(utxo, paymentScriptHash);
+          }
+          return ownedAddresses.has(utxo.output.address);
+        };
 
         // Try to fetch from wallet's getTransactionHistory method
         let rawTransactions: Transaction[] = [];
@@ -115,13 +179,20 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
           // Calculate balance changes correctly:
           // Balance change = received (own address outputs) - spent (own address inputs)
           // This properly accounts for change coming back to the wallet
-          let type: TransactionType = 'withdrawal';
           let assets: Assets = {};
+
+          if (
+            !usePaymentScriptHashFilter &&
+            tx.historyLovelaceDelta !== undefined &&
+            tx.historyLovelaceDelta !== 0n
+          ) {
+            assets = { lovelace: tx.historyLovelaceDelta };
+          }
 
           // Sum all inputs from wallet address (what was spent)
           const inputAssets: Assets = {};
           tx.inputs.forEach(input => {
-            if (ownedAddresses.has(input.output.address)) {
+            if (utxoBelongsToWallet(input)) {
               const utxoAssets = meshUtxoToAssets(input);
               Object.entries(utxoAssets).forEach(([assetId, amount]) => {
                 inputAssets[assetId] = (inputAssets[assetId] || BigInt(0)) + BigInt(amount);
@@ -132,7 +203,7 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
           // Sum all outputs to wallet address (what was received)
           const outputAssets: Assets = {};
           tx.outputs.forEach(output => {
-            if (ownedAddresses.has(output.output.address)) {
+            if (utxoBelongsToWallet(output)) {
               const utxoAssets = meshUtxoToAssets(output);
               Object.entries(utxoAssets).forEach(([assetId, amount]) => {
                 outputAssets[assetId] = (outputAssets[assetId] || BigInt(0)) + BigInt(amount);
@@ -146,43 +217,23 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
             ...Object.keys(outputAssets)
           ]);
 
-          let totalChange = BigInt(0);
-          allAssetIds.forEach(assetId => {
-            const spent = inputAssets[assetId] || BigInt(0);
-            const received = outputAssets[assetId] || BigInt(0);
-            const netChange = received - spent;
-            
-            if (netChange !== BigInt(0)) {
-              assets[assetId] = netChange;
-            }
-            
-            // Track total change (use lovelace for determining tx type if present)
-            if (assetId === 'lovelace') {
-              totalChange = netChange;
-            }
-          });
+          if (Object.keys(assets).length === 0) {
+            allAssetIds.forEach(assetId => {
+              const spent = inputAssets[assetId] || BigInt(0);
+              const received = outputAssets[assetId] || BigInt(0);
+              const netChange = received - spent;
 
-          // Determine transaction type based on net change
-          const hasInputs = Object.keys(inputAssets).length > 0;
-          const hasOutputs = Object.keys(outputAssets).length > 0;
-
-          if (!hasInputs && hasOutputs) {
-            // Only receiving, no spending
-            type = 'received';
-          } else if (hasInputs && !hasOutputs) {
-            // Only spending, no receiving
-            type = 'sent';
-          } else if (hasInputs && hasOutputs) {
-            // Both - determine by net lovelace change
-            if (totalChange > BigInt(0)) {
-              type = 'received';
-            } else if (totalChange < BigInt(0)) {
-              type = 'sent';
-            } else {
-              // No net change in lovelace, could be token-only or contract interaction
-              type = 'withdrawal';
-            }
+              if (netChange !== BigInt(0)) {
+                assets[assetId] = netChange;
+              }
+            });
           }
+
+          const type = inferTransactionType(inputAssets, outputAssets);
+          const transactionType =
+            typeof tx.transactionType === 'string' && tx.transactionType.trim()
+              ? tx.transactionType.trim()
+              : undefined;
 
           // Format date
           const date = tx.timestamp 
@@ -203,6 +254,7 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
           return {
             date,
             type,
+            transactionType,
             assets,
             transactionLink,
             hash: tx.hash
@@ -363,7 +415,7 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
                         {getTransactionIcon(transaction.type)}
                       </span>
                       <span className={`transaction-label ${transactionClass}-label`}>
-                        {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}
+                        {formatTransactionTypeLabel(transaction.transactionType ?? transaction.type)}
                       </span>
                     </div>
                   </td>

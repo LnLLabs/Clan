@@ -44,7 +44,19 @@ export const PoolCard: React.FC<PoolCardProps> = ({
   ].filter(Boolean).join(' ');
 
   return (
-    <div className={cardClasses} onClick={onClick}>
+    <div
+      className={cardClasses}
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={(e) => {
+        if (!onClick) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+    >
       <div className="pool-card-header">
         <div className="pool-card-icon">
           {pool.logo ? (

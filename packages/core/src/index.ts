@@ -8,6 +8,10 @@ export {
   meshUtxosEqual,
   assetsMapToMeshAssets
 } from './mesh-utxo';
+export {
+  paymentScriptHashFromAddress,
+  utxoMatchesPaymentScriptHash,
+} from './historyPaymentScript';
 export * from './wallet-interface';
 export * from './transaction-types';
 export * from './network-config';
@@ -44,6 +48,8 @@ export type {
   TransactionDraft,
   TransactionOptions,
   TransactionBuildOptions,
+  CreateDelegationOptions,
+  DelegationInfo,
   WalletEvent,
   WalletEventType
 } from './wallet-interface';

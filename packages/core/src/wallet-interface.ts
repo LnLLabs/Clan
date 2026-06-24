@@ -53,15 +53,22 @@ export interface WalletInterface {
   getStakingAddress?(): Address;
 
   // Staking / Delegation methods
-  createDelegationTransaction?(poolId: string): Promise<TransactionDraft>;
+  createDelegationTransaction?(options: CreateDelegationOptions): Promise<TransactionDraft>;
   withdrawRewards?(): Promise<TransactionDraft>;
   getDelegationInfo?(): Promise<DelegationInfo>;
+}
+
+/** Pool and/or dRep targets for {@link WalletInterface.createDelegationTransaction}. */
+export interface CreateDelegationOptions {
+  poolId?: string;
+  drepId?: string;
 }
 
 // Delegation information
 export interface DelegationInfo {
   stakeAddress: string;
   delegatedPool?: string;
+  delegatedDRep?: string;
   rewards: bigint;
   activeEpoch: number;
   nextRewardEpoch?: number;

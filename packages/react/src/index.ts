@@ -2,7 +2,12 @@
 export { useWalletBalance } from './hooks/useWalletBalance';
 export { useWalletUtxos } from './hooks/useWalletUtxos';
 export { useSendTransaction } from './hooks/useSendTransaction';
-export { useDelegateStake } from './hooks/useDelegateStake';
+export {
+  useDelegateStake,
+  delegateStakeWithWallet,
+  executeDelegateStakeSequential,
+} from './hooks/useDelegateStake';
+export { useUnregisterStake } from './hooks/useUnregisterStake';
 export { useWalletDelegation } from './hooks/useWalletDelegation';
 export { useWithdrawRewards } from './hooks/useWithdrawRewards';
 
@@ -19,6 +24,10 @@ export type {
   DelegateStakeResult,
   UseDelegateStakeOptions
 } from './hooks/useDelegateStake';
+export type {
+  UnregisterStakeResult,
+  UseUnregisterStakeOptions
+} from './hooks/useUnregisterStake';
 export type {
   UseWalletDelegationOptions
 } from './hooks/useWalletDelegation';
