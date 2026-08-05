@@ -11,6 +11,7 @@ export {
 export {
   paymentScriptHashFromAddress,
   utxoMatchesPaymentScriptHash,
+  resolvePaymentScriptHashFromAddresses,
 } from './historyPaymentScript';
 export * from './wallet-interface';
 export * from './transaction-types';
