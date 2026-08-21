@@ -1,3 +1,3 @@
 export { Overview } from './Overview';
-export type { OverviewProps } from './Overview';
+export type { OverviewProps, OverviewTokenUsd } from './Overview';
 

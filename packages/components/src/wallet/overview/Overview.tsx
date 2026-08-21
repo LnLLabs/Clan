@@ -15,7 +15,16 @@ export interface OverviewProps {
   onChangeAddressName?: (address: string, name: string) => void;
   metadataProvider?: MetadataProvider;
   className?: string;
+  tokenUsdById?: Record<string, OverviewTokenUsd | undefined>;
+  portfolioTotalUsd?: number | null;
 }
+
+export type OverviewTokenUsd = {
+  status: 'ok' | 'stale' | 'unavailable';
+  display: string;
+  valueUsd: number | null;
+  asOf?: string | null;
+};
 
 // Helper component for token row
 interface TokenRowProps {
@@ -25,6 +34,7 @@ interface TokenRowProps {
   onClick: () => void;
   metadataProvider?: MetadataProvider;
   prefetchedTokenInfo?: TokenInfo | null;
+  usd?: OverviewTokenUsd;
 }
 
 const useOverviewTokenInfo = (
@@ -96,7 +106,15 @@ const splitTokenId = (tokenId: string): { policyId: string; assetName: string } 
   };
 };
 
-const TokenRow: React.FC<TokenRowProps> = ({ tokenId, amount, totalValue, onClick, metadataProvider, prefetchedTokenInfo }) => {
+const TokenRow: React.FC<TokenRowProps> = ({
+  tokenId,
+  amount,
+  totalValue,
+  onClick,
+  metadataProvider,
+  prefetchedTokenInfo,
+  usd,
+}) => {
   const { tokenInfo, loading } = useOverviewTokenInfo(tokenId, metadataProvider, prefetchedTokenInfo);
   const isAdaToken = tokenId === 'lovelace' || tokenId === 'ADA';
   
@@ -121,11 +139,9 @@ const TokenRow: React.FC<TokenRowProps> = ({ tokenId, amount, totalValue, onClic
     ? amount / Math.pow(10, tokenInfo.decimals)
     : amount;
   
-  // Calculate USD value if price is available
-  const usdValue = 0;
-  const rawUsdValue = 0;
-  const portfolioPercentage = (rawUsdValue && totalValue > 0) 
-    ? (rawUsdValue / totalValue) * 100 
+  const rawUsdValue = usd?.valueUsd ?? null;
+  const portfolioPercentage = rawUsdValue !== null && totalValue > 0
+    ? (rawUsdValue / totalValue) * 100
     : null;
 
   return (
@@ -154,10 +170,8 @@ const TokenRow: React.FC<TokenRowProps> = ({ tokenId, amount, totalValue, onClic
         {displayAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
       </div>
       <div className="overview-token-value">
-        {usdValue !== null 
-          ? `$${usdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-          : '—'
-        }
+        <span title={usd?.asOf ?? undefined}>{usd?.display ?? '—'}</span>
+        {usd?.status === 'stale' && <span className="overview-token-stale-badge">Stale</span>}
       </div>
       <div className="overview-token-portfolio">
         <span className="overview-portfolio-percentage">
@@ -250,7 +264,9 @@ export const Overview: React.FC<OverviewProps> = ({
   onSetDefaultAddress,
   onChangeAddressName,
   metadataProvider,
-  className = ''
+  className = '',
+  tokenUsdById,
+  portfolioTotalUsd,
 }) => {
   const metadataProviderFromContext = useMetadataProvider();
   const effectiveMetadataProvider = metadataProvider ?? metadataProviderFromContext;
@@ -402,7 +418,7 @@ export const Overview: React.FC<OverviewProps> = ({
   // Calculate total portfolio value
   // V1: totalValue is 0 since we have no prices
   // Future: Will calculate based on actual token prices
-  const totalValue = 0;
+  const totalValue = portfolioTotalUsd ?? 0;
 
   // Filter and sort tokens based on search
   const filteredTokens = Object.keys(balance)
@@ -554,6 +570,7 @@ export const Overview: React.FC<OverviewProps> = ({
                   onClick={() => handleTokenClick(tokenId)}
                   metadataProvider={effectiveMetadataProvider}
                   prefetchedTokenInfo={tokenMetadataMap[tokenId]}
+                  usd={tokenUsdById?.[tokenId]}
                 />
               ))
             )}
