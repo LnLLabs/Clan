@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient, UseMutationResult } from '@tanstack/react-query';
-import { WalletInterface } from '@clan/framework-core';
+import { WalletInterface, type TransactionDraft } from '@clan/framework-core';
 
 export interface UnregisterStakeResult {
   txHash: string;
@@ -11,7 +11,8 @@ export interface UseUnregisterStakeOptions {
 }
 
 type WalletWithUnregister = WalletInterface & {
-  createUnregisterStakeTransaction?: () => Promise<import('@clan/framework-core').TransactionDraft>;
+  createUnregisterStakeTransaction?: () => Promise<TransactionDraft>;
+  submitUnregisterStakeTransaction?: (draft: TransactionDraft) => Promise<string>;
 };
 
 /**
@@ -31,6 +32,10 @@ export const useUnregisterStake = (
         throw new Error('Unregister stake is not available for this wallet.');
       }
       const draft = await wallet.createUnregisterStakeTransaction();
+      if (typeof wallet.submitUnregisterStakeTransaction === 'function') {
+        const txHash = await wallet.submitUnregisterStakeTransaction(draft);
+        return { txHash };
+      }
       const signedTx = await wallet.signTransaction(draft);
       const txHash = await wallet.submitTransaction(signedTx);
       return { txHash };

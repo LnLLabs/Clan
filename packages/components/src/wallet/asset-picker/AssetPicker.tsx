@@ -145,41 +145,72 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
     return selected?.amount || 0n;
   };
 
+  const isAtCapacity =
+    maxItems !== undefined && maxItems > 1 && selectedAssets.length >= maxItems;
+
+  const canAddAsset = (assetId: string): boolean => {
+    if (maxItems === undefined) return true;
+    if (maxItems === 1) return true; // replace allowed
+    if (selectedAssets.some(s => s.assetId === assetId)) return true;
+    return selectedAssets.length < maxItems;
+  };
+
   const updateAssetAmount = (assetId: string, amount: bigint) => {
     if (amount === 0n) {
-      // Remove asset from selection
-      setSelectedAssets(selectedAssets.filter(s => s.assetId !== assetId));
-      setSelectionOrder(selectionOrder.filter(id => id !== assetId));
-    } else {
-      const existing = selectedAssets.find(s => s.assetId === assetId);
-      if (existing) {
-        // Update existing asset amount
-        setSelectedAssets(
-          selectedAssets.map(s => s.assetId === assetId ? { ...s, amount } : s)
-        );
-      } else {
-        // Adding a new asset
-        let newSelectedAssets = [...selectedAssets, { assetId, amount }];
-        let newSelectionOrder = [...selectionOrder, assetId];
-        
-        // Enforce maxItems limit with FIFO behavior
-        if (maxItems !== undefined && newSelectedAssets.length > maxItems) {
-          // Remove the oldest selected asset (first in selectionOrder)
-          const oldestAssetId = newSelectionOrder[0];
-          newSelectedAssets = newSelectedAssets.filter(s => s.assetId !== oldestAssetId);
-          newSelectionOrder = newSelectionOrder.filter(id => id !== oldestAssetId);
-        }
-        
-        setSelectedAssets(newSelectedAssets);
-        setSelectionOrder(newSelectionOrder);
-      }
+      setSelectedAssets(prev => prev.filter(s => s.assetId !== assetId));
+      setSelectionOrder(prev => prev.filter(id => id !== assetId));
+      setEditingAmounts(prev => {
+        const next = { ...prev };
+        delete next[assetId];
+        return next;
+      });
+      return;
     }
+
+    // Single-select: replace the entire selection with this asset
+    if (maxItems === 1) {
+      setSelectedAssets([{ assetId, amount }]);
+      setSelectionOrder([assetId]);
+      return;
+    }
+
+    const existing = selectedAssets.find(s => s.assetId === assetId);
+    if (existing) {
+      setSelectedAssets(
+        selectedAssets.map(s => (s.assetId === assetId ? { ...s, amount } : s))
+      );
+      return;
+    }
+
+    // At capacity: do not add new assets (UI disables unselected cards)
+    if (maxItems !== undefined && selectedAssets.length >= maxItems) {
+      return;
+    }
+
+    setSelectedAssets([...selectedAssets, { assetId, amount }]);
+    setSelectionOrder([...selectionOrder, assetId]);
   };
 
   const handleAmountChange = (assetId: string, value: string, asset: UIAsset) => {
+    if (!canAddAsset(assetId)) {
+      return;
+    }
+
     const normalized = normalizeNumberString(value);
-    setEditingAmounts({ ...editingAmounts, [assetId]: normalized });
-    
+
+    if (maxItems === 1) {
+      setEditingAmounts(normalized === '' ? {} : { [assetId]: normalized });
+    } else {
+      setEditingAmounts(prev => {
+        if (normalized === '') {
+          const next = { ...prev };
+          delete next[assetId];
+          return next;
+        }
+        return { ...prev, [assetId]: normalized };
+      });
+    }
+
     if (normalized === '') {
       updateAssetAmount(assetId, 0n);
       return;
@@ -194,11 +225,25 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
   };
 
   const setMaxAmount = (assetId: string, asset: UIAsset) => {
-    updateAssetAmount(assetId, asset.balance);
+    if (!canAddAsset(assetId)) {
+      return;
+    }
     const decimals = hasMetadataProvider ? getAssetDecimals(asset) : (asset.decimals ?? 0);
-    const displayAmount = Number(asset.balance) / Math.pow(10, decimals);
-    setEditingAmounts({ ...editingAmounts, [assetId]: displayAmount.toString() });
+    const displayAmount = (Number(asset.balance) / Math.pow(10, decimals)).toString();
+    if (maxItems === 1) {
+      setEditingAmounts({ [assetId]: displayAmount });
+    } else {
+      setEditingAmounts(prev => ({ ...prev, [assetId]: displayAmount }));
+    }
+    updateAssetAmount(assetId, asset.balance);
   };
+
+  const headerTitle =
+    maxItems === 1
+      ? 'Select Asset'
+      : maxItems !== undefined
+        ? `Add Assets (${selectedAssets.length}/${maxItems})`
+        : 'Add Assets';
 
   const handleReset = () => {
     setSelectedAssets([]);
@@ -249,7 +294,7 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
       <div className="asset-picker-container">
       {/* Header */}
       <div className="asset-picker-header">
-        <h2>Add Assets</h2>
+        <h2>{headerTitle}</h2>
         <button className="close-button" onClick={onClose}>✕</button>
       </div>
 
@@ -306,9 +351,13 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
 
             const isEditing = editingAmounts[asset.id] !== undefined;
             const showInput = !isSelected || isEditing;
+            const atCapacityDisabled = isAtCapacity && !isSelected;
 
             return (
-              <div key={asset.id} className={`asset-card ${isSelected ? 'selected' : ''}`}>
+              <div
+                key={asset.id}
+                className={`asset-card ${isSelected ? 'selected' : ''} ${atCapacityDisabled ? 'at-capacity-disabled' : ''}`}
+              >
                 {/* Asset Icon */}
                 <div className="asset-icon">
                   {asset.icon ? (
@@ -364,10 +413,12 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
                         value={displayAmount}
                         onChange={(e) => handleAmountChange(asset.id, e.target.value, asset)}
                         placeholder="0"
+                        disabled={atCapacityDisabled}
                       />
                       <button
                         className="max-button"
                         onClick={() => setMaxAmount(asset.id, asset)}
+                        disabled={atCapacityDisabled}
                       >
                         Max
                       </button>
@@ -382,7 +433,9 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
       {/* Footer Actions */}
       <div className="asset-picker-footer">
         <button className="reset-button" onClick={handleReset}>Reset</button>
-        <button className="add-all-button" onClick={handleAddAll}>Add All</button>
+        {maxItems !== 1 && (
+          <button className="add-all-button" onClick={handleAddAll}>Add All</button>
+        )}
         <button className="confirm-button" onClick={() => onConfirm(selectedAssets)}>Confirm</button>
       </div>
       </div>

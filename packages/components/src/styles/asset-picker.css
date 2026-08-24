@@ -299,6 +299,20 @@
   background: var( --theme-bg-secondary);
 }
 
+.asset-card.at-capacity-disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.asset-card.at-capacity-disabled:hover {
+  border-color: var(--color-border-dark-secondary);
+}
+
+.asset-card.at-capacity-disabled .max-button,
+.asset-card.at-capacity-disabled input {
+  cursor: not-allowed;
+}
+
 .asset-icon {
   width: 48px;
   height: 48px;

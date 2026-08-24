@@ -16,19 +16,6 @@ export interface WalletDelegationWithDataProps {
 /**
  * Smart wrapper around WalletDelegation that automatically manages delegation state
  * Uses React Query hooks for data fetching and mutations
- * 
- * @example
- * ```tsx
- * <WalletDelegationWithData 
- *   wallet={wallet}
- *   onSuccess={(action, data) => {
- *     console.log(`${action} successful:`, data);
- *   }}
- *   onError={(error) => {
- *     console.error('Delegation error:', error);
- *   }}
- * />
- * ```
  */
 export const WalletDelegationWithData: React.FC<WalletDelegationWithDataProps> = ({
   wallet,
@@ -36,37 +23,34 @@ export const WalletDelegationWithData: React.FC<WalletDelegationWithDataProps> =
   onError,
   className
 }) => {
-  // Fetch delegation info
   const { data: delegationInfo, isLoading: delegationLoading } = useWalletDelegation(wallet, {
     refetchInterval: 30000,
     enabled: true
   });
 
-  // Delegation mutation
   const { mutateAsync: delegateStake, isPending: isDelegating } = useDelegateStake(wallet, {
     onSuccess: (data: any) => {
-      console.log('Delegation successful:', data);
       onSuccess?.('delegate', data);
     },
     onError: (error: Error) => {
-      console.error('Delegation failed:', error);
       onError?.(error);
     }
   });
 
-  // Withdraw rewards mutation
   const { mutateAsync: withdrawRewards, isPending: isWithdrawing } = useWithdrawRewards(wallet, {
     onSuccess: (data: any) => {
-      console.log('Withdrawal successful:', data);
       onSuccess?.('withdraw', data);
     },
     onError: (error: Error) => {
-      console.error('Withdrawal failed:', error);
       onError?.(error);
     }
   });
 
-  // Convert DelegationInfo from core to component format
+  const { mutateAsync: unregisterStake, isPending: isDeregistering } = useUnregisterStake(wallet, {
+    onSuccess: (data) => onSuccess?.('undelegate', data),
+    onError,
+  });
+
   const componentDelegationInfo: ComponentDelegationInfo | undefined = delegationInfo
     ? {
         stakeAddress: delegationInfo.stakeAddress,
@@ -76,11 +60,6 @@ export const WalletDelegationWithData: React.FC<WalletDelegationWithDataProps> =
         nextRewardEpoch: delegationInfo.nextRewardEpoch,
       }
     : undefined;
-
-  const { mutateAsync: unregisterStake, isPending: isUndelegating } = useUnregisterStake(wallet, {
-    onSuccess: (data) => onSuccess?.('undelegate', data),
-    onError,
-  });
 
   const handleDelegate = async (poolId: string | null, drepId: string | null) => {
     if (!poolId && !drepId) {
@@ -92,11 +71,10 @@ export const WalletDelegationWithData: React.FC<WalletDelegationWithDataProps> =
     });
   };
 
-  const handleUndelegate = async () => {
+  const handleDeregisterStake = async () => {
     await unregisterStake();
   };
 
-  // Handle reward withdrawal
   const handleWithdrawRewards = async () => {
     await withdrawRewards();
   };
@@ -110,10 +88,10 @@ export const WalletDelegationWithData: React.FC<WalletDelegationWithDataProps> =
       wallet={wallet}
       delegationInfo={componentDelegationInfo}
       onDelegate={handleDelegate}
-      onUndelegate={handleUndelegate}
+      onDeregisterStake={handleDeregisterStake}
       onWithdrawRewards={handleWithdrawRewards}
       isDelegating={isDelegating}
-      isUndelegating={isUndelegating}
+      isDeregistering={isDeregistering}
       isWithdrawing={isWithdrawing}
       className={className}
     />
@@ -121,4 +99,3 @@ export const WalletDelegationWithData: React.FC<WalletDelegationWithDataProps> =
 };
 
 export default WalletDelegationWithData;
-

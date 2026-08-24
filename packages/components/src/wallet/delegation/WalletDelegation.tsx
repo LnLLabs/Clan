@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   searchPools, 
   getPoolInfoExtended, 
@@ -38,12 +38,10 @@ export interface WalletDelegationProps {
   delegationInfo?: WalletDelegationInfo;
   /** Delegate to both pool and dRep in a single action */
   onDelegate?: (poolId: string | null, drepId: string | null) => Promise<void>;
-  onUndelegate?: () => Promise<void>;
-  /** Full stake credential deregister (refunds registration deposit); distinct name for Status tab. */
+  /** Full stake credential deregister (refunds registration deposit). */
   onDeregisterStake?: () => Promise<void>;
   onWithdrawRewards?: () => Promise<void>;
   isDelegating?: boolean;
-  isUndelegating?: boolean;
   isDeregistering?: boolean;
   isWithdrawing?: boolean;
   className?: string;
@@ -86,11 +84,9 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
   wallet,
   delegationInfo,
   onDelegate,
-  onUndelegate,
   onDeregisterStake,
   onWithdrawRewards,
   isDelegating = false,
-  isUndelegating = false,
   isDeregistering = false,
   isWithdrawing = false,
   className = '',
@@ -166,7 +162,7 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
 
 
 
-  // Pre-select based on current delegation
+  // Pre-select based on current delegation (only while a credential is still registered).
   useEffect(() => {
     if (delegationInfo?.delegatedPool && !selectedPool) {
       setSelectedPool(delegationInfo.delegatedPool);
@@ -174,7 +170,7 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
     if (delegationInfo?.delegatedDRep && !selectedDRep) {
       setSelectedDRep(delegationInfo.delegatedDRep);
     }
-  }, [delegationInfo, selectedPool, selectedDRep]);
+  }, [delegationInfo?.delegatedPool, delegationInfo?.delegatedDRep, selectedPool, selectedDRep]);
 
   // Fetch current delegated pool info if not in pools list
   useEffect(() => {
@@ -385,28 +381,38 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
     }
   };
 
-  const handleUndelegate = async () => {
-    const handler = onDeregisterStake ?? onUndelegate;
-    if (isUndelegating || isDeregistering || !handler) return;
-
+  const handleDeregisterStake = async () => {
+    if (isDeregistering || isDelegating || !onDeregisterStake) return;
     try {
-      await handler();
+      await onDeregisterStake();
+      setSelectedPool(null);
+      setSelectedDRep(null);
+      setCurrentPoolInfo(null);
+      setCurrentDRepInfo(null);
       setActiveTab('status');
     } catch (error) {
       console.error('Error deregistering stake:', error);
     }
   };
 
-  const handleDeregisterStake = async () => {
-    const handler = onDeregisterStake ?? onUndelegate;
-    if (isDeregistering || isUndelegating || isDelegating || !handler) return;
-
-    try {
-      await handler();
-    } catch (error) {
-      console.error('Error deregistering stake:', error);
+  const wasStakeRegisteredRef = useRef(false);
+  useEffect(() => {
+    const registered =
+      (delegationInfo?.activeEpoch ?? 0) > 0 ||
+      Boolean(delegationInfo?.delegatedPool || delegationInfo?.delegatedDRep);
+    if (wasStakeRegisteredRef.current && !registered) {
+      setSelectedPool(null);
+      setSelectedDRep(null);
+      setCurrentPoolInfo(null);
+      setCurrentDRepInfo(null);
+      setActiveTab('status');
     }
-  };
+    wasStakeRegisteredRef.current = registered;
+  }, [
+    delegationInfo?.activeEpoch,
+    delegationInfo?.delegatedPool,
+    delegationInfo?.delegatedDRep,
+  ]);
 
   const formatRewards = (rewards: bigint): string => {
     return (Number(rewards) / 1000000).toFixed(3);
@@ -415,15 +421,13 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
   const isCurrentPool = (poolId: string) => delegationInfo?.delegatedPool === poolId;
   const isCurrentDRep = (drepId: string) => delegationInfo?.delegatedDRep === drepId;
 
-  const stakeCredentialRegistered = (delegationInfo?.activeEpoch ?? 0) > 0;
-  const deregisterBlockedReason = !stakeCredentialRegistered
-    ? undefined
-    : (delegationInfo?.rewards ?? 0n) > 0n
+  const stakeCredentialRegistered =
+    (delegationInfo?.activeEpoch ?? 0) > 0 ||
+    Boolean(delegationInfo?.delegatedPool || delegationInfo?.delegatedDRep);
+  const deregisterBlockedReason =
+    stakeCredentialRegistered && (delegationInfo?.rewards ?? 0n) > 0n
       ? 'Withdraw available rewards first.'
       : undefined;
-  const isDeregisterBusy = isDeregistering || isUndelegating;
-
-  const hasActiveDelegation = delegationInfo?.delegatedPool || delegationInfo?.delegatedDRep;
 
   const hasChanges = 
     (selectedPool !== delegationInfo?.delegatedPool) || 
@@ -559,26 +563,6 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
               )}
             </div>
           </div>
-
-          {stakeCredentialRegistered && (onDeregisterStake ?? onUndelegate) && (
-            <div className="delegation-deregister-section">
-              <p className="delegation-deregister-hint">
-                Deregister the vault stake credential to refund the ~2&nbsp;ADA registration deposit
-                and remove the current delegation.
-              </p>
-              <Button
-                variant="secondary"
-                onClick={handleDeregisterStake}
-                disabled={isDeregisterBusy || isDelegating || !!deregisterBlockedReason}
-                title={deregisterBlockedReason}
-              >
-                {isDeregisterBusy ? 'Deregistering...' : 'Undelegate and deregister'}
-              </Button>
-              {deregisterBlockedReason && (
-                <p className="delegation-deregister-blocked">{deregisterBlockedReason}</p>
-              )}
-            </div>
-          )}
 
           <div className="delegation-actions">
             <Button
@@ -797,19 +781,14 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
             >
               Cancel
             </Button>
-            {(hasActiveDelegation || stakeCredentialRegistered) &&
-              (onDeregisterStake ?? onUndelegate) && (
+            {stakeCredentialRegistered && onDeregisterStake && (
               <Button
                 variant="secondary"
-                onClick={handleUndelegate}
-                disabled={
-                  isDeregisterBusy || isDelegating || !!deregisterBlockedReason
-                }
+                onClick={handleDeregisterStake}
+                disabled={isDeregistering || isDelegating || !!deregisterBlockedReason}
                 title={deregisterBlockedReason}
               >
-                {isDeregisterBusy
-                  ? 'Deregistering...'
-                  : 'Undelegate and deregister'}
+                {isDeregistering ? 'Deregistering...' : 'Undelegate and deregister'}
               </Button>
             )}
             <Button
