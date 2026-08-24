@@ -220,6 +220,13 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
     if (!isNaN(numValue) && numValue >= 0) {
       const decimals = hasMetadataProvider ? getAssetDecimals(asset) : (asset.decimals ?? 0);
       const amount = BigInt(Math.floor(numValue * Math.pow(10, decimals)));
+      // In-progress decimals ("0.", "0.0") parse to 0n. Clearing selection via
+      // updateAssetAmount would also wipe editingAmounts and swallow the '.'.
+      if (amount === 0n) {
+        setSelectedAssets(prev => prev.filter(s => s.assetId !== assetId));
+        setSelectionOrder(prev => prev.filter(id => id !== assetId));
+        return;
+      }
       updateAssetAmount(assetId, amount);
     }
   };
@@ -284,6 +291,9 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
       return editingAmounts[assetId];
     }
     const amount = getSelectedAmount(assetId);
+    if (amount === 0n) {
+      return '';
+    }
     const decimals = hasMetadataProvider ? getAssetDecimals(asset) : (asset.decimals ?? 0);
     return (Number(amount) / Math.pow(10, decimals)).toString();
   };
