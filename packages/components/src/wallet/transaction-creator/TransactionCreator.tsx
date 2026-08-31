@@ -5,7 +5,6 @@ import {
   WalletInterface,
   TransactionBuildOptions,
   MetadataProvider,
-  meshUtxoLovelace,
   coinSelect,
   assetsMapToMeshAssets,
 } from '@clan/framework-core';
@@ -16,7 +15,7 @@ import { AssetPicker, UIAsset, SelectedAsset } from '../asset-picker/AssetPicker
 import { useMetadataProvider } from '@clan/framework-providers';
 import { getTokenInfo, TokenInfo, decodeAssetName as decodeAssetNameHelper } from '@clan/framework-helpers';
 import { TokenElement } from '../token/TokenElement';
-import { normalizeNumberString } from '../../utils/number';
+import { lovelaceToAdaString, normalizeNumberString } from '../../utils/number';
 
 export interface TransactionRecipient {
   address: string;
@@ -24,6 +23,19 @@ export interface TransactionRecipient {
   datum?: string;
   datumHash?: string;
 }
+
+export type ComputeMaxAdaContext = {
+  spendable: Assets;
+  sending: Assets;
+  recipientIndex: number;
+  recipientCount: number;
+  recipientAddress: string;
+  recipientAssets: Assets;
+};
+
+export type RefineMaxAdaContext = ComputeMaxAdaContext & {
+  currentMaxLovelace: bigint;
+};
 
 export interface TransactionCreatorProps {
   wallet: WalletInterface;
@@ -40,6 +52,25 @@ export interface TransactionCreatorProps {
    */
   availableAssets?: UIAsset[];
   title?: string;
+  /**
+   * Lovelace subtracted from spendable ADA when the user clicks Max.
+   * Defaults to the in-form fee estimate. Ignored when `computeMaxAda` is set.
+   */
+  adaFeeReserveLovelace?: bigint;
+  /**
+   * Synchronous Max ADA for the current recipient (spendable − fee − leftover change min-UTxO).
+   */
+  computeMaxAda?: (ctx: ComputeMaxAdaContext) => bigint;
+  /**
+   * Optional one-shot refine after Max fill. Applied only while the ADA field still equals the
+   * fast Max. Must not open a confirm modal or sign.
+   */
+  refineMaxAda?: (ctx: RefineMaxAdaContext) => Promise<bigint>;
+  /**
+   * Purse plus CIP-33 ADA/tokens and executor reserve for Send all preview.
+   * Falls back to `getBalance()` when omitted.
+   */
+  sweepableBalance?: Assets;
   /**
    * Optional initial recipients to prefill the transaction form.
    * If provided, these will be used to initialize the recipients state on first render.
@@ -142,6 +173,10 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
   availableAssets = [],
   title = 'Create Transaction',
   initialRecipients = [],
+  adaFeeReserveLovelace,
+  computeMaxAda,
+  refineMaxAda,
+  sweepableBalance,
 }) => {
   const metadataProviderFromContext = useMetadataProvider();
   const effectiveMetadataProvider = metadataProvider ?? metadataProviderFromContext;
@@ -172,6 +207,7 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
   const [assetsLoading, setAssetsLoading] = useState(false);
   const [assetsError, setAssetsError] = useState<string | null>(null);
   const [hasMetadataForPicker, setHasMetadataForPicker] = useState(false);
+  const [sendAllMode, setSendAllMode] = useState(false);
 
   const {
     balance: walletBalance,
@@ -382,8 +418,24 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
     return assets;
   };
 
+  const clearSendAllMode = () => {
+    if (sendAllMode) {
+      setSendAllMode(false);
+    }
+  };
+
+  const applySendAll = () => {
+    const first = recipients[0] ?? { address: '', assets: { lovelace: 0n } };
+    const assets: Assets = { ...(sweepableBalance ?? walletBalance ?? { lovelace: 0n }) };
+    const ada = assets['lovelace'] ?? 0n;
+    setRecipients([{ address: first.address, assets }]);
+    setAdaInputValues({ 0: (Number(ada) / 1_000_000).toString() });
+    setSendAllMode(true);
+  };
+
   // Update recipient assets from asset picker (preserve lovelace)
   const handleAssetsConfirmed = (index: number, selectedAssets: SelectedAsset[]) => {
+    clearSendAllMode();
     const newRecipients = [...recipients];
     const currentLovelace = newRecipients[index].assets['lovelace'] || 0n;
     newRecipients[index] = {
@@ -399,6 +451,7 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
 
   // Remove a specific asset from recipient
   const removeAssetFromRecipient = (index: number, assetId: string) => {
+    clearSendAllMode();
     const newRecipients = [...recipients];
     const newAssets = { ...newRecipients[index].assets };
     delete newAssets[assetId];
@@ -408,6 +461,7 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
 
   // Remove all assets from recipient (except lovelace which has its own input)
   const removeAllAssetsFromRecipient = (index: number) => {
+    clearSendAllMode();
     const newRecipients = [...recipients];
     const currentLovelace = newRecipients[index].assets['lovelace'] || 0n;
     newRecipients[index] = { 
@@ -449,6 +503,12 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
 
   // Calculate required UTXOs for the transaction
   const calculateRequiredUtxos = async () => {
+    if (sendAllMode) {
+      setSelectedUtxos([]);
+      setEstimatedFee(0n);
+      setIsCalculating(false);
+      return;
+    }
     if (isCalculating) return;
     if (resolvedUtxos.length === 0) {
       setSelectedUtxos([]);
@@ -482,6 +542,7 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
 
   // Add a new recipient
   const addRecipient = () => {
+    clearSendAllMode();
     setRecipients([...recipients, { address: '', assets: { 'lovelace': 0n } }]);
     setAdaInputValues((prev) => ({ ...prev, [recipients.length]: '' }));
   };
@@ -489,6 +550,7 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
   // Remove a recipient
   const removeRecipient = (index: number) => {
     if (recipients.length > 1) {
+      clearSendAllMode();
       const newRecipients = recipients.filter((_, i) => i !== index);
       setRecipients(newRecipients);
       setAdaInputValues((prev) => {
@@ -505,6 +567,9 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
 
   // Update recipient data
   const updateRecipient = (index: number, field: keyof TransactionRecipient, value: string | Assets) => {
+    if (field === 'assets') {
+      clearSendAllMode();
+    }
     const newRecipients = [...recipients];
     newRecipients[index] = { ...newRecipients[index], [field]: value };
     setRecipients(newRecipients);
@@ -533,12 +598,23 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
 
     setIsCreating(true);
     try {
-      const options: TransactionBuildOptions = {
-        outputs: recipients.map((r) => ({
-          address: r.address,
-          amount: assetsMapToMeshAssets(r.assets),
-        })),
-      };
+      const first = recipients[0];
+      const options: TransactionBuildOptions = sendAllMode && first
+        ? {
+            outputs: [
+              {
+                address: first.address,
+                amount: assetsMapToMeshAssets(first.assets),
+              },
+            ],
+            options: { sweepAll: true },
+          }
+        : {
+            outputs: recipients.map((r) => ({
+              address: r.address,
+              amount: assetsMapToMeshAssets(r.assets),
+            })),
+          };
 
       onTransactionCreated?.(options);
     } catch (error) {
@@ -554,7 +630,20 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
       return;
     }
     calculateRequiredUtxos();
-  }, [recipients, walletUtxos, availableUtxos, utxosLoading, usingDeprecatedUtxos]);
+  }, [recipients, walletUtxos, availableUtxos, utxosLoading, usingDeprecatedUtxos, sendAllMode]);
+
+  useEffect(() => {
+    if (!sendAllMode || !sweepableBalance) {
+      return;
+    }
+    const assets: Assets = { ...sweepableBalance };
+    const ada = assets['lovelace'] ?? 0n;
+    setRecipients((prev) => {
+      const first = prev[0] ?? { address: '', assets: { lovelace: 0n } };
+      return [{ address: first.address, assets }];
+    });
+    setAdaInputValues({ 0: (Number(ada) / 1_000_000).toString() });
+  }, [sendAllMode, sweepableBalance]);
 
   const balanceReady = usingDeprecatedAssets || !balanceLoading;
   const utxosReady = usingDeprecatedUtxos || !utxosLoading;
@@ -652,8 +741,9 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
                       inputMode="decimal"
                       pattern="[0-9]*[.]?[0-9]*"
                       className="ada-amount-input"
-                      value={adaInputValues[index] ?? (Number(recipient.assets['lovelace'] || 0n) / 1000000).toString()}
+                      value={adaInputValues[index] ?? lovelaceToAdaString(recipient.assets['lovelace'] || 0n)}
                       onChange={(e) => {
+                        clearSendAllMode();
                         const normalized = normalizeNumberString(e.target.value);
                         setAdaInputValues((prev) => ({ ...prev, [index]: normalized }));
 
@@ -689,24 +779,82 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
                       type="button"
                       className="max-ada-button"
                       onClick={() => {
-                        // Get total available ADA from wallet
-                        const totalLovelace = resolvedUtxos.reduce(
-                          (sum, utxo) => sum + meshUtxoLovelace(utxo),
-                          0n
-                        );
+                        clearSendAllMode();
+                        const purseAda = walletBalance?.['lovelace'] ?? 0n;
+                        const sweepAda = sweepableBalance?.['lovelace'] ?? purseAda;
+                        const maxBase = purseAda < sweepAda ? purseAda : sweepAda;
+                        const sending: Assets = {};
+                        recipients.forEach((entry, entryIndex) => {
+                          Object.entries(entry.assets).forEach(([unit, qty]) => {
+                            if (!qty || qty <= 0n) {
+                              return;
+                            }
+                            if (unit === 'lovelace' && entryIndex === index) {
+                              return;
+                            }
+                            sending[unit] = (sending[unit] ?? 0n) + qty;
+                          });
+                        });
+                        const maxCtx: ComputeMaxAdaContext = {
+                          spendable: walletBalance ?? { lovelace: maxBase },
+                          sending,
+                          recipientIndex: index,
+                          recipientCount: recipients.length,
+                          recipientAddress: recipient.address,
+                          recipientAssets: recipient.assets,
+                        };
+                        const computed = computeMaxAda?.(maxCtx);
+                        const reserve = adaFeeReserveLovelace ?? estimatedFee;
+                        const fallback = maxBase > reserve ? maxBase - reserve : 0n;
+                        const maxLovelace = computed ?? fallback;
+                        const filledAda = lovelaceToAdaString(maxLovelace);
                         const newRecipients = [...recipients];
                         newRecipients[index] = {
                           ...newRecipients[index],
                           assets: {
                             ...newRecipients[index].assets,
-                            'lovelace': totalLovelace
+                            'lovelace': maxLovelace
                           }
                         };
                         setRecipients(newRecipients);
                         setAdaInputValues((prev) => ({
                           ...prev,
-                          [index]: (Number(totalLovelace) / 1000000).toString()
+                          [index]: filledAda
                         }));
+                        if (!refineMaxAda) {
+                          return;
+                        }
+                        const filled = maxLovelace;
+                        void refineMaxAda({ ...maxCtx, currentMaxLovelace: filled })
+                          .then((refined) => {
+                            if (refined === filled) {
+                              return;
+                            }
+                            setRecipients((current) => {
+                              if (current[index]?.assets?.lovelace !== filled) {
+                                return current;
+                              }
+                              const next = [...current];
+                              next[index] = {
+                                ...next[index],
+                                assets: {
+                                  ...next[index].assets,
+                                  lovelace: refined,
+                                },
+                              };
+                              return next;
+                            });
+                            setAdaInputValues((prev) => {
+                              if (prev[index] !== undefined && prev[index] !== filledAda) {
+                                return prev;
+                              }
+                              return {
+                                ...prev,
+                                [index]: lovelaceToAdaString(refined),
+                              };
+                            });
+                          })
+                          .catch(() => undefined);
                       }}
                       title="Send maximum ADA"
                     >
@@ -846,15 +994,32 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
 
       {/* Action Buttons */}
       <div className="creator-actions">
-
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={applySendAll}
+          disabled={isCreating || !walletBalance}
+        >
+          {sendAllMode ? 'Send all (ready)' : 'Send all'}
+        </Button>
         <Button
           variant="primary"
           onClick={createTransaction}
-          disabled={isCreating || isCalculating || recipients.some(r => !r.address)}
+          disabled={
+            isCreating ||
+            (!sendAllMode && isCalculating) ||
+            recipients.some((r) => !r.address)
+          }
         >
           {isCreating ? 'Creating...' : 'Create Transaction'}
         </Button>
       </div>
+      {sendAllMode ? (
+        <p className="send-all-mode-hint">
+          Send all empties spendable ADA, tokens, and executor reserve. Use Max to send most ADA
+          and keep a fee buffer on the vault.
+        </p>
+      ) : null}
 
 
       {/* Contact Picker Modal */}

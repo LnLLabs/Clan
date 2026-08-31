@@ -36,6 +36,20 @@ export function normalizeNumberString(
   return digitsOnly.replace(/^0+(?=\d)/, '') || (digitsOnly ? '0' : '');
 }
 
+const LOVELACE_PER_ADA = 1_000_000n;
+
+/** ADA display from lovelace without `Number` rounding. */
+export function lovelaceToAdaString(lovelace: bigint): string {
+  const sign = lovelace < 0n ? '-' : '';
+  const abs = lovelace < 0n ? -lovelace : lovelace;
+  const whole = abs / LOVELACE_PER_ADA;
+  const frac = abs % LOVELACE_PER_ADA;
+  if (frac === 0n) {
+    return `${sign}${whole.toString()}`;
+  }
+  return `${sign}${whole.toString()}.${frac.toString().padStart(6, '0').replace(/0+$/, '')}`;
+}
+
 
 
 

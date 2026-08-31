@@ -81,6 +81,8 @@ export interface TransactionOptions {
   metadata?: any;
   collateral?: UTxO[];
   scriptInputs?: UTxO[];
+  /** Sweep spendable purse + CIP-33 carrier to the first recipient (vault send-all). */
+  sweepAll?: boolean;
 }
 
 // Transaction build options

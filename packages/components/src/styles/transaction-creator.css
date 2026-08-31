@@ -541,6 +541,14 @@
   transform: none;
 }
 
+.send-all-mode-hint {
+  margin: var(--space-md) auto 0;
+  max-width: 36rem;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
 /* ===== TRANSACTION PREVIEW ===== */
 .transaction-preview {
   padding: var(--space-lg);
