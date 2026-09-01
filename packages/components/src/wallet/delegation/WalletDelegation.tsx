@@ -637,7 +637,11 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
                   <div className="delegation-no-results">
                     <div className="delegation-no-results-content">
                       <div className="delegation-no-results-text">
-                        {poolSearch ? 'No pools found' : 'No pools available'}
+                        {!poolSearch.trim()
+                          ? 'Search by name or ticker to find a stake pool'
+                          : poolSearch.trim().length < 3
+                            ? 'Type at least 3 characters to search'
+                            : 'No pools found'}
                       </div>
                     </div>
                   </div>
