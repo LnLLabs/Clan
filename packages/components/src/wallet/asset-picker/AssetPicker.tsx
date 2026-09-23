@@ -219,7 +219,17 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
     const numValue = parseFloat(normalized);
     if (!isNaN(numValue) && numValue >= 0) {
       const decimals = hasMetadataProvider ? getAssetDecimals(asset) : (asset.decimals ?? 0);
-      const amount = BigInt(Math.floor(numValue * Math.pow(10, decimals)));
+      let amount = BigInt(Math.floor(numValue * Math.pow(10, decimals)));
+      // Cap at wallet balance so typed amounts cannot exceed inventory.
+      if (amount > asset.balance) {
+        amount = asset.balance;
+        const cappedDisplay = (Number(asset.balance) / Math.pow(10, decimals)).toString();
+        if (maxItems === 1) {
+          setEditingAmounts({ [assetId]: cappedDisplay });
+        } else {
+          setEditingAmounts(prev => ({ ...prev, [assetId]: cappedDisplay }));
+        }
+      }
       // In-progress decimals ("0.", "0.0") parse to 0n. Clearing selection via
       // updateAssetAmount would also wipe editingAmounts and swallow the '.'.
       if (amount === 0n) {
