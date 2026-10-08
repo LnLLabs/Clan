@@ -388,6 +388,30 @@ export async function getPoolsInfo(
   }
 }
 
+/** True when Koios `pool_status` is actively registered (safe to offer for delegation). */
+export function isRegisteredPoolStatus(status: unknown): boolean {
+  return String(status ?? '').toLowerCase() === 'registered';
+}
+
+/**
+ * Keep unique bech32 pool ids whose Koios status is `registered`.
+ * Retired / retiring pools must not be offered for delegation.
+ */
+export function filterRegisteredPoolIds(
+  pools: ReadonlyArray<{ pool_id_bech32?: unknown; pool_status?: unknown }>
+): string[] {
+  const seen = new Set<string>();
+  const ids: string[] = [];
+  for (const pool of pools) {
+    if (!pool || !isRegisteredPoolStatus(pool.pool_status)) continue;
+    const id = typeof pool.pool_id_bech32 === 'string' ? pool.pool_id_bech32.trim() : '';
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    ids.push(id);
+  }
+  return ids;
+}
+
 /**
  * Search for staking pools by ticker or pool ID using Koios
  */
@@ -441,14 +465,7 @@ export async function searchPools(
       }
     }
 
-    // Combine results and return unique pool IDs
-    const uniquePoolIds = [...new Set(
-      results
-        .filter((pool: any) => pool && pool.pool_id_bech32)
-        .map((pool: any) => pool.pool_id_bech32)
-    )].slice(0, 20); // Limit to 20 results
-
-    return uniquePoolIds;
+    return filterRegisteredPoolIds(results).slice(0, 20);
   } catch (error) {
     console.warn('Failed to search pools:', error);
     return [];

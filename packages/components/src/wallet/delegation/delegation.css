@@ -337,6 +337,12 @@
   gap: 12px;
   justify-content: flex-end;
   padding-top: 16px;
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  background: var(--color-bg-secondary);
+  margin-top: 16px;
+  padding-bottom: 8px;
 }
 
 

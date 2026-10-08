@@ -23,46 +23,12 @@ export interface ContactsMenuProps {
   enableLocalStorage?: boolean;
 }
 
-const defaultContacts: Contact[] = [
-  {
-    id: '1',
-    name: 'John',
-    address: 'addr1q8ejx7t9v...',
-    email: ''
-  },
-  {
-    id: '2',
-    name: 'Mary',
-    address: 'addr1q8ejx7t9v...',
-    email: 'mary@gmail.com'
-  },
-  {
-    id: '3',
-    name: 'Alice',
-    address: 'addr1q8ejx7t9v...',
-    email: 'alice@hotmail.com'
-  },
-  {
-    id: '4',
-    name: 'Mom',
-    address: 'addr1q8ejx7t9v...',
-    email: 'smoms@gmail.com'
-  },
-  {
-    id: '5',
-    name: 'Wife',
-    address: 'addr1q8ejx7t9v...',
-    email: 'teresa@gmail.com'
-  },
-  {
-    id: '6',
-    name: 'Son',
-    address: 'addr1q8ejx7t9v...',
-    email: 'artistmania@gmail.com'
-  }
-];
+/** Empty default — demo truncated addresses must never seed storage/export. */
+const defaultContacts: Contact[] = [];
 
 const defaultActions: ContactAction[] = [];
+
+const isTruncatedAddress = (address: string): boolean => address.includes('...');
 
 export const ContactsMenu = ({ 
   initialContacts = defaultContacts,
@@ -73,10 +39,10 @@ export const ContactsMenu = ({
 }: ContactsMenuProps) => {
   // Initialize contacts from localStorage or fallback to initial contacts
   const [contacts, setContacts] = useState<Contact[]>(() => {
-    if (enableLocalStorage) {
-      return loadContactsFromStorage(storageKey, initialContacts);
-    }
-    return initialContacts;
+    const loaded = enableLocalStorage
+      ? loadContactsFromStorage(storageKey, initialContacts)
+      : initialContacts;
+    return loaded.filter((c) => c.address && !isTruncatedAddress(c.address));
   });
   
   const [isAddingContact, setIsAddingContact] = useState(false);

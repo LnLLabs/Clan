@@ -119,6 +119,7 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
   const [transactions, setTransactions] = useState<TransactionHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>(undefined);
+  const [expandedHash, setExpandedHash] = useState<string | null>(null);
   const walletAddress = wallet.getAddress();
   const metadataProviderFromContext = useMetadataProvider();
   const effectiveMetadataProvider = metadataProvider ?? metadataProviderFromContext;
@@ -344,7 +345,42 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
   };
 
   const handleTransactionLinkClick = (transaction: TransactionHistoryItem) => {
-    window.open(transaction.transactionLink, '_blank');
+    if (onTransactionLinkClick) {
+      onTransactionLinkClick(transaction);
+      return;
+    }
+    const key = transaction.hash ?? transaction.transactionLink;
+    setExpandedHash((current) => (current === key ? null : key));
+  };
+
+  const handleExportHistory = () => {
+    const rows = visibleTransactions.map((tx) => {
+      const label = resolveTransactionTypeLabel(tx.transactionType ?? tx.type);
+      const assets = Object.entries(tx.assets)
+        .map(([assetId, amount]) => {
+          if (assetId === 'lovelace') {
+            return `${formatSignedAmount(amount, 6)} ADA`;
+          }
+          return `${formatSignedAmount(amount)} ${assetId}`;
+        })
+        .join('; ');
+      return {
+        date: tx.date,
+        type: label,
+        hash: tx.hash ?? '',
+        assets,
+        explorer: tx.transactionLink,
+      };
+    });
+    const blob = new Blob([JSON.stringify(rows, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `vault-history-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   if (loading) {
@@ -387,6 +423,15 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
     <div className={`transaction-history ${className}`}>
       <div className="transaction-history-header">
         <h2>Transaction History</h2>
+        {visibleTransactions.length > 0 && (
+          <button
+            type="button"
+            className="transaction-history-export"
+            onClick={handleExportHistory}
+          >
+            Export
+          </button>
+        )}
       </div>
 
       <div className="transaction-history-table-container">
@@ -403,9 +448,12 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
             {visibleTransactions.map((transaction, index) => {
               const { lovelaceEntry, otherAssets } = formatAssets(transaction.assets);
               const transactionClass = getTransactionClass(transaction.type);
+              const rowKey = transaction.hash ?? transaction.transactionLink;
+              const isExpanded = expandedHash === rowKey;
 
               return (
-                <tr key={index} className={`transaction-row ${transactionClass}`}>
+                <React.Fragment key={index}>
+                <tr className={`transaction-row ${transactionClass}`}>
                   <td className={`transaction-date ${transactionClass}-date`}>
                     <div className="transaction-date-content">
                       {transaction.date}
@@ -471,12 +519,43 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
                         className="link-action-button"
                         onClick={() => handleTransactionLinkClick(transaction)}
                         aria-label="View transaction details"
+                        aria-expanded={isExpanded}
                       >
-                        <span className="plus-icon">+</span>
+                        <span className="plus-icon">{isExpanded ? '−' : '+'}</span>
                       </button>
                     </div>
                   </td>
                 </tr>
+                {isExpanded && (
+                  <tr className="transaction-row-details">
+                    <td colSpan={4}>
+                      <div className="transaction-details-panel">
+                        <div>
+                          <strong>Type:</strong>{' '}
+                          {resolveTransactionTypeLabel(
+                            transaction.transactionType ?? transaction.type
+                          )}
+                        </div>
+                        {transaction.hash && (
+                          <div className="transaction-details-hash">
+                            <strong>Hash:</strong> <code>{transaction.hash}</code>
+                          </div>
+                        )}
+                        <div>
+                          <strong>Assets:</strong>{' '}
+                          {Object.entries(transaction.assets)
+                            .map(([assetId, amount]) =>
+                              assetId === 'lovelace'
+                                ? `${formatSignedAmount(amount, 6)} ADA`
+                                : `${formatSignedAmount(amount)} ${assetId}`
+                            )
+                            .join(', ') || '—'}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+                </React.Fragment>
               );
             })}
           </tbody>

@@ -6,6 +6,9 @@ import { Contact } from './ContactMenu';
  * @param fallback - Fallback contacts if nothing is stored
  * @returns Array of contacts
  */
+const isUsableContactAddress = (address: unknown): address is string =>
+  typeof address === 'string' && address.trim() !== '' && !address.includes('...');
+
 export const loadContactsFromStorage = (key: string, fallback: Contact[] = []): Contact[] => {
   if (typeof window === 'undefined') return fallback;
   
@@ -15,13 +18,19 @@ export const loadContactsFromStorage = (key: string, fallback: Contact[] = []): 
       const parsed = JSON.parse(stored);
       // Validate that it's an array
       if (Array.isArray(parsed)) {
-        return parsed;
+        return parsed.filter(
+          (c): c is Contact =>
+            !!c &&
+            typeof c === 'object' &&
+            typeof (c as Contact).name === 'string' &&
+            isUsableContactAddress((c as Contact).address)
+        );
       }
     }
   } catch (error) {
     console.error('Error loading contacts from localStorage:', error);
   }
-  return fallback;
+  return fallback.filter((c) => isUsableContactAddress(c.address));
 };
 
 /**
@@ -77,7 +86,8 @@ export const exportContactsToFile = (contacts: Contact[], filename?: string): vo
   if (typeof window === 'undefined') return;
   
   try {
-    const dataStr = JSON.stringify(contacts, null, 2);
+    const exportable = contacts.filter((c) => isUsableContactAddress(c.address));
+    const dataStr = JSON.stringify(exportable, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     
     const url = URL.createObjectURL(dataBlob);

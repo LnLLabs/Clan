@@ -8,6 +8,10 @@
 
 .transaction-history-header {
   padding: var(--space-lg) 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
 }
 
 .transaction-history-header h2 {
@@ -15,6 +19,39 @@
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   margin: 0;
+}
+
+.transaction-history-export {
+  border: 1px solid var(--color-border-primary);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.transaction-history-export:hover {
+  background: var(--color-bg-primary);
+}
+
+.transaction-row-details td {
+  padding-top: 0;
+  background: var(--color-bg-secondary);
+}
+
+.transaction-details-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  padding: var(--space-sm) 0;
+}
+
+.transaction-details-hash code {
+  word-break: break-all;
+  font-size: var(--font-size-xs);
 }
 
 /* ===== TABLE CONTAINER ===== */
