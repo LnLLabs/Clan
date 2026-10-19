@@ -30,6 +30,29 @@ const defaultActions: ContactAction[] = [];
 
 const isTruncatedAddress = (address: string): boolean => address.includes('...');
 
+const addressKey = (address: string): string => address.trim().toLowerCase();
+
+/** One address keeps one contact. A later row updates the earlier email and name. */
+const collapseContactsByAddress = (list: Contact[]): Contact[] => {
+  const seen = new Map<string, Contact>();
+  for (const contact of list) {
+    const key = addressKey(contact.address);
+    if (!key) continue;
+    const prev = seen.get(key);
+    if (!prev) {
+      seen.set(key, { ...contact, address: contact.address.trim() });
+      continue;
+    }
+    seen.set(key, {
+      ...prev,
+      name: contact.name.trim() || prev.name,
+      address: contact.address.trim() || prev.address,
+      email: contact.email?.trim() || prev.email || '',
+    });
+  }
+  return [...seen.values()];
+};
+
 export const ContactsMenu = ({ 
   initialContacts = defaultContacts,
   onContactsChange,
@@ -42,7 +65,9 @@ export const ContactsMenu = ({
     const loaded = enableLocalStorage
       ? loadContactsFromStorage(storageKey, initialContacts)
       : initialContacts;
-    return loaded.filter((c) => c.address && !isTruncatedAddress(c.address));
+    return collapseContactsByAddress(
+      loaded.filter((c) => c.address && !isTruncatedAddress(c.address))
+    );
   });
   
   const [isAddingContact, setIsAddingContact] = useState(false);
@@ -81,14 +106,31 @@ export const ContactsMenu = ({
   const handleAddContact = () => {
     if (!formData.name || !formData.address) return;
 
-    const newContact: Contact = {
-      id: Date.now().toString(),
-      name: formData.name,
-      address: formData.address,
-      email: formData.email || ''
-    };
-
-    setContacts([...contacts, newContact]);
+    const address = formData.address.trim();
+    const existing = contacts.find((contact) => addressKey(contact.address) === addressKey(address));
+    if (existing) {
+      setContacts(contacts.map((contact) =>
+        contact.id === existing.id
+          ? {
+              ...contact,
+              name: formData.name!,
+              address,
+              email: formData.email || contact.email || '',
+            }
+          : contact
+      ));
+      setMessage({ type: 'success', text: 'Updated the existing contact for this address.' });
+    } else {
+      setContacts([
+        ...contacts,
+        {
+          id: Date.now().toString(),
+          name: formData.name,
+          address,
+          email: formData.email || '',
+        },
+      ]);
+    }
     setFormData({ name: '', address: '', email: '' });
     setIsAddingContact(false);
   };

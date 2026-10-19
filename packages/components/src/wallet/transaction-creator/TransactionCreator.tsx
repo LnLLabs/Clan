@@ -616,7 +616,7 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
             })),
           };
 
-      onTransactionCreated?.(options);
+      await onTransactionCreated?.(options);
     } catch (error) {
       console.error('Error creating transaction:', error);
     } finally {
@@ -1014,6 +1014,11 @@ export const TransactionCreator: React.FC<TransactionCreatorProps> = ({
           {isCreating ? 'Creating...' : 'Create Transaction'}
         </Button>
       </div>
+      {recipients.some((recipient) => !recipient.address) ? (
+        <p className="send-all-mode-hint">
+          Enter an address for every recipient before creating the transaction.
+        </p>
+      ) : null}
       {sendAllMode ? (
         <p className="send-all-mode-hint">
           Send all empties spendable ADA, tokens, and executor reserve. Use Max to send most ADA

@@ -89,6 +89,9 @@ export interface TransactionHistoryItem {
   assets: Assets;
   transactionLink: string;
   hash?: string;
+  fee?: bigint;
+  /** Extra expand text supplied by the wallet metadata provider. */
+  detail?: string;
 }
 
 export interface TransactionHistoryProps {
@@ -261,7 +264,10 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
             transactionType,
             assets,
             transactionLink,
-            hash: tx.hash
+            hash: tx.hash,
+            // Network fee is separate from the net asset delta shown in the row.
+            fee: typeof tx.fee === 'bigint' ? tx.fee : undefined,
+            detail: (tx as Transaction & { historyDetail?: string }).historyDetail,
           };
         });
 
@@ -543,14 +549,34 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
                         )}
                         <div>
                           <strong>Assets:</strong>{' '}
-                          {Object.entries(transaction.assets)
-                            .map(([assetId, amount]) =>
-                              assetId === 'lovelace'
-                                ? `${formatSignedAmount(amount, 6)} ADA`
-                                : `${formatSignedAmount(amount)} ${assetId}`
+                          {Object.entries(transaction.assets).length === 0
+                            ? '—'
+                            : null}
+                          {Object.entries(transaction.assets).map(([assetId, amount]) =>
+                            assetId === 'lovelace' ? (
+                              <span key={assetId}>
+                                {formatSignedAmount(amount, 6)} ADA{' '}
+                              </span>
+                            ) : (
+                              <TokenElement
+                                key={assetId}
+                                tokenId={assetId}
+                                amount={amount}
+                                metadataProvider={effectiveMetadataProvider}
+                              />
                             )
-                            .join(', ') || '—'}
+                          )}
                         </div>
+                        {transaction.fee !== undefined && transaction.fee > 0n && (
+                          <div>
+                            <strong>Fee:</strong> {formatAbsoluteAmount(transaction.fee, 6)} ADA
+                          </div>
+                        )}
+                        {transaction.detail && (
+                          <div>
+                            {transaction.detail}
+                          </div>
+                        )}
                       </div>
                     </td>
                   </tr>

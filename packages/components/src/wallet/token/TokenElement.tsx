@@ -312,7 +312,9 @@ export const TokenElement: React.FC<TokenElementProps> = ({
   const placeholderInitial = displayInfo.ticker.charAt(0).toUpperCase();
   
   // Format amount with sign for display
-  const formattedAmount = formatSignedAmount(amount, tokenInfo?.decimals ?? 0);
+  const isAda = tokenId === 'lovelace' || tokenId === 'ADA';
+  const amountDecimals = isAda ? (tokenInfo?.decimals || 6) : (tokenInfo?.decimals ?? 0);
+  const formattedAmount = formatSignedAmount(amount, amountDecimals);
 
   const handleImageError = () => {
     setImageError(true);

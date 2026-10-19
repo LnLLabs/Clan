@@ -135,8 +135,9 @@ const TokenRow: React.FC<TokenRowProps> = ({
     );
   }
 
-  const displayAmount = tokenInfo?.decimals
-    ? amount / Math.pow(10, tokenInfo.decimals)
+  const decimals = isAdaToken ? (tokenInfo?.decimals || 6) : tokenInfo?.decimals;
+  const displayAmount = decimals
+    ? amount / Math.pow(10, decimals)
     : amount;
   
   const rawUsdValue = usd?.valueUsd ?? null;
