@@ -100,6 +100,7 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
     : initialSelected;
   const [selectedAssets, setSelectedAssets] = useState<SelectedAsset[]>(initialAssets);
   const [editingAmounts, setEditingAmounts] = useState<{ [key: string]: string }>({});
+  const [amountError, setAmountError] = useState<string | null>(null);
   // Track selection order for FIFO behavior when maxItems is enforced
   const [selectionOrder, setSelectionOrder] = useState<string[]>(
     initialAssets.map(s => s.assetId)
@@ -155,6 +156,26 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
     return selectedAssets.length < maxItems;
   };
 
+  const rememberAmount = (assetId: string, text: string) => {
+    if (maxItems === 1) {
+      setEditingAmounts(text === '' ? {} : { [assetId]: text });
+      return;
+    }
+    setEditingAmounts((prev) => {
+      if (text === '') {
+        const next = { ...prev };
+        delete next[assetId];
+        return next;
+      }
+      return { ...prev, [assetId]: text };
+    });
+  };
+
+  const clearAssetSelection = (assetId: string) => {
+    setSelectedAssets((prev) => prev.filter((asset) => asset.assetId !== assetId));
+    setSelectionOrder((prev) => prev.filter((id) => id !== assetId));
+  };
+
   const updateAssetAmount = (assetId: string, amount: bigint) => {
     if (amount === 0n) {
       setSelectedAssets(prev => prev.filter(s => s.assetId !== assetId));
@@ -196,20 +217,16 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
       return;
     }
 
-    const normalized = normalizeNumberString(value);
-
-    if (maxItems === 1) {
-      setEditingAmounts(normalized === '' ? {} : { [assetId]: normalized });
-    } else {
-      setEditingAmounts(prev => {
-        if (normalized === '') {
-          const next = { ...prev };
-          delete next[assetId];
-          return next;
-        }
-        return { ...prev, [assetId]: normalized };
-      });
+    if (value.trim().startsWith('-')) {
+      setAmountError('Amount cannot be negative.');
+      rememberAmount(assetId, value);
+      clearAssetSelection(assetId);
+      return;
     }
+
+    setAmountError(null);
+    const normalized = normalizeNumberString(value);
+    rememberAmount(assetId, normalized);
 
     if (normalized === '') {
       updateAssetAmount(assetId, 0n);
@@ -243,6 +260,19 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
       setEditingAmounts(prev => ({ ...prev, [assetId]: displayAmount }));
     }
     updateAssetAmount(assetId, asset.balance);
+    setAmountError(null);
+  };
+
+  const handleConfirm = () => {
+    if (Object.values(editingAmounts).some((value) => value.trim().startsWith('-'))) {
+      setAmountError('Amount cannot be negative.');
+      return;
+    }
+    if (!selectedAssets.some((asset) => asset.amount > 0n)) {
+      setAmountError('Enter an amount.');
+      return;
+    }
+    onConfirm(selectedAssets.filter((asset) => asset.amount > 0n));
   };
 
   const headerTitle =
@@ -256,6 +286,7 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
     setSelectedAssets([]);
     setEditingAmounts({});
     setSelectionOrder([]);
+    setAmountError(null);
   };
 
   const handleAddAll = () => {
@@ -432,6 +463,9 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
                       >
                         Max
                       </button>
+                      {editingAmounts[asset.id]?.trim().startsWith('-') && (
+                        <p className="error-message">Amount cannot be negative.</p>
+                      )}
                       {selectedAmount > asset.balance && (
                         <p className="error-message">
                           You do not have enough funds for this amount.
@@ -451,7 +485,8 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
         {maxItems !== 1 && (
           <button className="add-all-button" onClick={handleAddAll}>Add All</button>
         )}
-        <button className="confirm-button" onClick={() => onConfirm(selectedAssets)}>Confirm</button>
+        {amountError && <p className="error-message">{amountError}</p>}
+        <button className="confirm-button" onClick={handleConfirm}>Confirm</button>
       </div>
       </div>
     </div>
