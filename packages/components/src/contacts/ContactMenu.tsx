@@ -15,6 +15,55 @@ export interface ContactAction {
   onClick: (contact: Contact) => void;
 }
 
+const BECH32_CHARSET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+const BECH32_GENERATOR = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3];
+
+const bech32Polymod = (values: number[]): number => {
+  let chk = 1;
+  for (const value of values) {
+    const top = chk >> 25;
+    chk = ((chk & 0x1ffffff) << 5) ^ value;
+    for (let index = 0; index < 5; index += 1) {
+      if ((top >> index) & 1) {
+        chk ^= BECH32_GENERATOR[index] ?? 0;
+      }
+    }
+  }
+  return chk;
+};
+
+const cardanoAddressError = (value: string): string | null => {
+  const address = value.trim().toLowerCase();
+  const separator = address.lastIndexOf('1');
+  if (separator < 1) {
+    return 'Enter a valid Cardano address.';
+  }
+  const hrp = address.slice(0, separator);
+  if (hrp !== 'addr' && hrp !== 'addr_test') {
+    return 'Enter a valid Cardano address.';
+  }
+  const data = address.slice(separator + 1);
+  if (data.length < 6) {
+    return 'Enter a valid Cardano address.';
+  }
+  const values: number[] = [];
+  for (let index = 0; index < hrp.length; index += 1) {
+    values.push(hrp.charCodeAt(index) >> 5);
+  }
+  values.push(0);
+  for (let index = 0; index < hrp.length; index += 1) {
+    values.push(hrp.charCodeAt(index) & 31);
+  }
+  for (const character of data) {
+    const decoded = BECH32_CHARSET.indexOf(character);
+    if (decoded < 0) {
+      return 'Enter a valid Cardano address.';
+    }
+    values.push(decoded);
+  }
+  return bech32Polymod(values) === 1 ? null : 'Enter a valid Cardano address.';
+};
+
 export interface ContactsMenuProps {
   initialContacts?: Contact[];
   onContactsChange?: (contacts: Contact[]) => void;
@@ -102,11 +151,18 @@ export const ContactsMenu = ({
     address: '',
     email: ''
   });
+  const [addressError, setAddressError] = useState<string | null>(null);
 
   const handleAddContact = () => {
     if (!formData.name || !formData.address) return;
 
     const address = formData.address.trim();
+    const invalid = cardanoAddressError(address);
+    if (invalid) {
+      setAddressError(invalid);
+      return;
+    }
+    setAddressError(null);
     const existing = contacts.find((contact) => addressKey(contact.address) === addressKey(address));
     if (existing) {
       setContacts(contacts.map((contact) =>
@@ -138,9 +194,16 @@ export const ContactsMenu = ({
   const handleEditContact = () => {
     if (!editingContactId || !formData.name || !formData.address) return;
 
+    const address = formData.address.trim();
+    const invalid = cardanoAddressError(address);
+    if (invalid) {
+      setAddressError(invalid);
+      return;
+    }
+    setAddressError(null);
     setContacts(contacts.map(contact =>
       contact.id === editingContactId
-        ? { ...contact, name: formData.name!, address: formData.address!, email: formData.email || '' }
+        ? { ...contact, name: formData.name!, address, email: formData.email || '' }
         : contact
     ));
     setFormData({ name: '', address: '', email: '' });
@@ -207,6 +270,7 @@ export const ContactsMenu = ({
   const cancelEditing = () => {
     setEditingContactId(null);
     setIsAddingContact(false);
+    setAddressError(null);
     setFormData({ name: '', address: '', email: '' });
   };
 
@@ -423,8 +487,12 @@ export const ContactsMenu = ({
                     type="text"
                     placeholder="Address"
                     value={formData.address || ''}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    onChange={(e) => {
+                      setAddressError(null);
+                      setFormData({ ...formData, address: e.target.value });
+                    }}
                   />
+                  {addressError ? <p className="contacts-message contacts-message-error">{addressError}</p> : null}
                   <input
                     type="email"
                     placeholder="Email (optional)"
@@ -467,8 +535,12 @@ export const ContactsMenu = ({
               type="text"
               placeholder="Address"
               value={formData.address || ''}
-              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              onChange={(e) => {
+                setAddressError(null);
+                setFormData({ ...formData, address: e.target.value });
+              }}
             />
+            {addressError ? <p className="contacts-message contacts-message-error">{addressError}</p> : null}
             <input
               type="email"
               placeholder="Email (optional)"

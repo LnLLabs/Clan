@@ -292,37 +292,66 @@ export const WalletDelegation: React.FC<WalletDelegationProps> = ({
     setFilteredDreps(filtered);
   }, [drepSearch, dreps]);
 
-  // Search pools when query is long enough
+  // Search pools when query is long enough. Show id matches before extended info.
   useEffect(() => {
-    const searchTimer = setTimeout(async () => {
-      if (poolSearch.trim().length >= 3) {
+    const query = poolSearch.trim();
+    if (query.length < 3) {
+      setFilteredPools([]);
+      setIsLoadingPools(false);
+      return;
+    }
+    let cancelled = false;
+    const searchTimer = setTimeout(() => {
+      void (async () => {
         setIsLoadingPools(true);
         try {
           const network = getNetworkName();
-          const poolIds = await searchPools(poolSearch, network, koiosConfig);
-          
+          const poolIds = await searchPools(query, network, koiosConfig);
+          if (cancelled) return;
+          const ids = poolIds.slice(0, 10);
+          const stubs: PoolDisplayInfo[] = ids.map((poolId) => ({
+            type: 'pool',
+            id: poolId,
+            name: `${poolId.slice(0, 12)}...`,
+            ticker: '…',
+            pledge: 0,
+            margin: 0,
+            cost: 0,
+            lifetimeROI: 0,
+            saturation: 0,
+          }));
+          setFilteredPools(stubs);
+          setIsLoadingPools(false);
           const poolsData = await Promise.all(
-            poolIds.slice(0, 10).map(async (poolId: string) => {
+            ids.map(async (poolId: string) => {
               try {
                 const poolInfo = await getPoolInfoExtended(poolId, network, koiosConfig);
                 return poolInfo ? convertPoolToDisplayInfo(poolInfo) : null;
-              } catch (error) {
+              } catch {
                 return null;
               }
             })
           );
-
+          if (cancelled) return;
           const validPools = poolsData.filter((pool): pool is PoolDisplayInfo => pool !== null);
-          setFilteredPools(validPools);
+          if (validPools.length > 0) {
+            setFilteredPools(validPools);
+          }
         } catch (error) {
-          console.error('Error searching pools:', error);
+          if (!cancelled) {
+            console.error('Error searching pools:', error);
+            setFilteredPools([]);
+          }
         } finally {
-          setIsLoadingPools(false);
+          if (!cancelled) setIsLoadingPools(false);
         }
-      }
-    }, 300);
+      })();
+    }, 400);
 
-    return () => clearTimeout(searchTimer);
+    return () => {
+      cancelled = true;
+      clearTimeout(searchTimer);
+    };
   }, [poolSearch, getNetworkName, koiosConfig]);
 
   // Search dReps when query is long enough
