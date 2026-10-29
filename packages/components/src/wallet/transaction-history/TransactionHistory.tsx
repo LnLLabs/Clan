@@ -14,6 +14,7 @@ import { useMetadataProvider } from '@clan/framework-providers';
 import { TokenElement } from '../token/TokenElement';
 import { createDefaultExplorer } from './default-explorer';
 import { CardanoLogo } from '../../assets';
+import { HISTORY_FEE_ONLY_NOTE, historyFeeOnlyLovelace } from './historyAmount';
 
 export type TransactionType = 'sent' | 'received' | 'withdrawal';
 
@@ -90,6 +91,8 @@ export interface TransactionHistoryItem {
   transactionLink: string;
   hash?: string;
   fee?: bigint;
+  /** Set when the amount cell is the network fee, not a vault balance change. */
+  feeOnlyLovelace?: bigint;
   /** Extra expand text supplied by the wallet metadata provider. */
   detail?: string;
 }
@@ -241,6 +244,18 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
             typeof tx.transactionType === 'string' && tx.transactionType.trim()
               ? tx.transactionType.trim()
               : undefined;
+          const fee = typeof tx.fee === 'bigint' ? tx.fee : undefined;
+          const feeOnlyLovelace = historyFeeOnlyLovelace({
+            transactionType,
+            netAssetCount: Object.keys(assets).length,
+            inputCount: tx.inputs?.length ?? 0,
+            outputCount: tx.outputs?.length ?? 0,
+            fee,
+          });
+          const suppliedDetail = (tx as Transaction & { historyDetail?: string }).historyDetail;
+          const detail = [suppliedDetail, feeOnlyLovelace !== undefined ? HISTORY_FEE_ONLY_NOTE : undefined]
+            .filter((part): part is string => Boolean(part))
+            .join(' · ') || undefined;
 
           // Format date
           const date = tx.timestamp 
@@ -266,8 +281,9 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
             transactionLink,
             hash: tx.hash,
             // Network fee is separate from the net asset delta shown in the row.
-            fee: typeof tx.fee === 'bigint' ? tx.fee : undefined,
-            detail: (tx as Transaction & { historyDetail?: string }).historyDetail,
+            fee,
+            ...(feeOnlyLovelace !== undefined ? { feeOnlyLovelace } : {}),
+            detail,
           };
         });
 
@@ -488,6 +504,13 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
                           </div>
                           <span className="asset-amount">
                             {formatSignedAmount(lovelaceEntry[1], 6)}
+                          </span>
+                        </div>
+                      )}
+                      {!lovelaceEntry && transaction.feeOnlyLovelace !== undefined && (
+                        <div className="asset-item">
+                          <span className="asset-amount" title={HISTORY_FEE_ONLY_NOTE}>
+                            {formatAbsoluteAmount(transaction.feeOnlyLovelace, 6)} fee
                           </span>
                         </div>
                       )}
